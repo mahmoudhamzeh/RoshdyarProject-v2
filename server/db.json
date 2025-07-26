@@ -1,0 +1,176 @@
+{
+  "users": {},
+  "children": [
+    {
+      "id": 1,
+      "name": "محمود تستeee",
+      "gender": "boy",
+      "birthDate": "2022/07/25",
+      "avatar": "/uploads/1753306106318.webp",
+      "height": "44",
+      "weight": "2.8",
+      "bloodType": "A+",
+      "allergies": "",
+      "special_illnesses": ""
+    },
+    {
+      "id": 2,
+      "name": "تست 11 پسر",
+      "gender": "boy",
+      "birthDate": "2020/07/24",
+      "avatar": "/uploads/1753306508519.webp",
+      "height": "55",
+      "weight": "3",
+      "bloodType": "A+",
+      "allergies": "",
+      "special_illnesses": ""
+    },
+    {
+      "id": 3,
+      "name": "تست یییی",
+      "gender": "girl",
+      "birthDate": "2022/07/24",
+      "avatar": "/uploads/1753460723113.webp",
+      "height": "22",
+      "weight": "1.8",
+      "bloodType": "A+",
+      "allergies": {
+        "types": {
+          "غذایی": true,
+          "دارویی": false,
+          "محیطی": false,
+          "سایر": false
+        },
+        "description": "تست "
+      },
+      "special_illnesses": {
+        "types": {
+          "مزمن": false,
+          "ژنتیکی": true,
+          "تکاملی": false,
+          "سایر": false
+        },
+        "description": "تست"
+      }
+    },
+    {
+      "id": 5,
+      "name": "تست تست",
+      "gender": "boy",
+      "birthDate": "2023/07/26",
+      "avatar": "https://i.pravatar.cc/100",
+      "height": "44",
+      "weight": "33",
+      "bloodType": "A+",
+      "allergies": {
+        "types": {
+          "غذایی": true,
+          "دارویی": false,
+          "محیطی": true,
+          "سایر": true
+        },
+        "description": ""
+      },
+      "special_illnesses": {
+        "types": {
+          "مزمن": true,
+          "ژنتیکی": true,
+          "تکاملی": true,
+          "سایر": true
+        },
+        "description": ""
+      }
+    },
+    {
+      "id": 6,
+      "name": "محمود دختر",
+      "gender": "girl",
+      "birthDate": "2021/07/19",
+      "avatar": "/uploads/1753518801789.webp",
+      "height": "44",
+      "weight": "3",
+      "bloodType": "A+",
+      "allergies": {
+        "types": {
+          "غذایی": false,
+          "دارویی": false,
+          "محیطی": true,
+          "سایر": false
+        },
+        "description": ""
+      },
+      "special_illnesses": {
+        "types": {
+          "مزمن": false,
+          "ژنتیکی": true,
+          "تکاملی": true,
+          "سایر": false
+        },
+        "description": "تست"
+      }
+    }
+  ],
+  "growthData": {
+    "1": [
+      {
+        "date": "2022/07/25",
+        "height": 44,
+        "weight": 2.8
+      },
+      {
+        "date": "2024/07/24",
+        "height": 66,
+        "weight": 12
+      },
+      {
+        "date": "2025/07/25",
+        "height": 155,
+        "weight": 95
+      }
+    ],
+    "2": [
+      {
+        "date": "2020/07/24",
+        "height": 55,
+        "weight": 3
+      }
+    ],
+    "3": [
+      {
+        "date": "2022/07/24",
+        "height": 22,
+        "weight": 1.8
+      }
+    ],
+    "5": [
+      {
+        "date": "2023/07/26",
+        "height": 44,
+        "weight": 33
+      }
+    ],
+    "6": [
+      {
+        "date": "2021/07/19",
+        "height": 44,
+        "weight": 3
+      }
+    ]
+  },
+  "medicalVisits": {
+    "1": [],
+    "2": [],
+    "3": [],
+    "5": [],
+    "6": []
+  },
+  "medicalDocuments": {
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": [],
+    "5": [],
+    "6": []
+  },
+  "childIdCounter": 7
+}

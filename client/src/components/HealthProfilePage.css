@@ -1,0 +1,15 @@
+.health-profile-page { background-color: #f0f2f5; min-height: 100vh; }
+.back-btn { display: flex; align-items: center; gap: 0.5rem; background: none; border: none; font-size: 1rem; cursor: pointer; color: #4a90e2; }
+.profile-header { background: linear-gradient(135deg, #4a90e2 0%, #50e3c2 100%); color: white; padding: 1.5rem; text-align: center; }
+.profile-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #fff; margin-bottom: 0.5rem; }
+.profile-header-info h2 { margin: 0; font-size: 1.8rem; }
+.profile-header-info p { margin: 0.25rem 0 0; font-size: 1rem; opacity: 0.9; }
+.profile-content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 1rem; align-items: stretch; }
+.grid-col-left, .grid-col-right { display: flex; flex-direction: column; gap: 1.5rem; }
+.main-info-card, .summary-card { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.actions-grid { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.action-card { background: #fff; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; cursor: pointer; transition: all 0.3s ease; }
+.action-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+.action-card h4 { margin-top: 0; font-size: 1.1rem; }
+.chart-preview { width: 100%; margin-bottom: 1rem; }
+.view-full-chart-btn { display: block; width: 100%; background-color: #4a90e2; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer; text-align: center; }

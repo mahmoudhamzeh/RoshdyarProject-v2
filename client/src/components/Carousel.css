@@ -1,0 +1,21 @@
+.carousel {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    overflow: hidden;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.carousel-inner {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-inner img {
+    width: 100%;
+    height: 400px; /* <--- این خط ارتفاع بنر را تنظیم می‌کند */
+    object-fit: cover; /* <--- این خط باعث می‌شود تصویر به زیبایی در کادر جای بگیرد */
+    flex-shrink: 0;
+}

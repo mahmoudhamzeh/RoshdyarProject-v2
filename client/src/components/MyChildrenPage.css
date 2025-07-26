@@ -1,0 +1,103 @@
+children-page-final { background-color: #f8f9fa; min-height: 100vh; }
+.page-nav-final { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0.8rem 1.5rem; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.page-nav-final h1 { grid-column: 2; text-align: center; margin: 0; font-size: 1.4rem; color: #343a40; }
+.nav-placeholder { grid-column: 3; }
+
+.home-btn-final {
+    grid-column: 1;
+    justify-self: start;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.2rem;
+    color: #007bff;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.home-btn-final:hover {
+    color: #0056b3;
+}
+
+.home-btn-final span {
+    font-size: 0.9rem;
+}
+
+.children-content-final { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+.add-child-btn-final {
+    width: 100%;
+    padding: 0.9rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    transition: background-color 0.2s;
+}
+
+.add-child-btn-final:hover {
+    background-color: #218838;
+}
+
+.children-list-final { display: grid; gap: 1rem; }
+.child-card-final { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1.5rem; background-color: #fff; padding: 1.2rem; border-radius: 12px; box-shadow: 0 3px 15px rgba(0,0,0,0.06); }
+.child-avatar-final { width: 65px; height: 65px; border-radius: 50%; }
+.child-info-final { text-align: right; }
+.child-info-final h3 { margin: 0 0 0.3rem 0; }
+.child-info-final p { margin: 0; color: #6c757d; }
+
+.child-card-actions {
+    display: flex;
+    align-items: stretch; /* Make buttons same height */
+    gap: 0.5rem;
+}
+
+.view-profile-btn-final, .delete-btn-final, .edit-btn-final {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.view-profile-btn-final:hover, .delete-btn-final:hover, .edit-btn-final:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.view-profile-btn-final { background-color: #007bff; color: white; }
+.edit-btn-final { background-color: #ffc107; color: #212529; }
+.delete-btn-final { background-color: #dc3545; color: white; }
+
+.no-children-message { text-align: center; padding: 3rem; background-color: #fff; border-radius: 12px; color: #6c757d; }
+
+.sort-options {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.sort-options button {
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    border: 1px solid #007bff;
+    background-color: #fff;
+    color: #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.sort-options button:hover {
+    background-color: #007bff;
+    color: #fff;
+}

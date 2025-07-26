@@ -1,0 +1,6 @@
+.navbar { display: flex; justify-content: space-between; align-items: center; background-color: #1565c0; padding: 1rem 2rem; color: white; }
+.navbar-brand a { color: white; text-decoration: none; font-weight: bold; font-size: 1.5rem; }
+.navbar-links a { color: white; text-decoration: none; margin: 0 1rem; font-weight: 500; }
+.navbar-profile { display: flex; align-items: center; }
+.navbar-profile span { font-size: 1.5rem; margin-right: 1rem; cursor: pointer; }
+.navbar-profile a { color: white; text-decoration: none; font-weight: 500; }

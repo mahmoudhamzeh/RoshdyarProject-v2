@@ -1,0 +1,51 @@
+/* 
+  این فایل می‌تواند برای استایل‌های عمومی کل برنامه استفاده شود.
+  در حال حاضر خالی بودن آن مشکلی ایجاد نمی‌کند، مهم این است که فایل وجود داشته باشد.
+*/
+
+.App {
+  text-align: center;
+}
+
+.backup-restore-section {
+    padding: 20px;
+    text-align: center;
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.backup-restore-section button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.backup-restore-section button:hover {
+    background-color: #45a049;
+}
+
+.stats-section {
+    padding: 20px;
+    text-align: center;
+    background-color: #e3f2fd;
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-section h3 {
+    color: #1e88e5;
+    margin-top: 0;
+}
+
+.stats-section p {
+    color: #333;
+    font-size: 16px;
+}
