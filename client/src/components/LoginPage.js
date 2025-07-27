@@ -24,7 +24,7 @@ const LoginPage = () => {
 
             // **تغییر اصلی اینجاست**
             if (response.status === 200) {
-                localStorage.setItem('loggedInUser', data.user);
+                localStorage.setItem('loggedInUser', JSON.stringify(data.user));
                 history.push('/dashboard');
             } else {
                 setLoginMessage(data.message || 'اطلاعات ورود نادرست است.');

@@ -170,4 +170,14 @@ app.put('/api/users/:id/password', (req, res) => {
     res.status(200).json({ message: 'رمز عبور با موفقیت تغییر کرد' });
 });
 
+app.post('/api/login', (req, res) => {
+    const { login, password } = req.body;
+    const user = Object.values(users).find(u => (u.username === login || u.email === login) && u.password === password);
+    if (user) {
+        res.json({ message: 'Login successful!', user: { id: user.id, username: user.username, email: user.email } });
+    } else {
+        res.status(401).json({ message: 'اطلاعات ورود نادرست است' });
+    }
+});
+
 app.listen(port, () => console.log(`Roshdyar server is listening on port ${port}`));
