@@ -6,28 +6,66 @@
 }
 
 .profile-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
     padding: 20px;
-    max-width: 800px;
+    max-width: 900px;
     margin: 20px auto;
+}
+
+.card {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
 }
 
-.profile-info, .change-password {
-    margin-bottom: 30px;
-}
-
-.profile-info h2, .change-password h2 {
-    color: #333;
-    border-bottom: 2px solid #4CAF50;
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
     padding-bottom: 10px;
     margin-bottom: 20px;
 }
 
-.profile-info p {
-    font-size: 16px;
-    line-height: 1.6;
+.card-header h2 {
+    color: #333;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.edit-btn {
+    background-color: #1565c0;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.info-value {
+    color: #333;
+}
+
+.info-input {
+    width: 60%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .form-group {
@@ -41,7 +79,7 @@
     color: #555;
 }
 
-.form-group input {
+.form-group input, .form-group select {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
