@@ -9,10 +9,15 @@ const Navbar = () => {
         history.push('/profile');
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('loggedInUser');
+        history.push('/login');
+    };
+
     return (
         <nav className="navbar">
             <div className="navbar-brand">
-                <Link to="/dashboard">👶 رشدیار</Link>
+                <Link to="/dashboard">👶 رشدیar</Link>
             </div>
             <div className="navbar-links">
                 <Link to="/dashboard">خانه</Link>
@@ -23,6 +28,7 @@ const Navbar = () => {
             <div className="navbar-profile">
                 <span>🔔</span>
                 <button onClick={handleProfileClick} className="profile-btn">پروفایل من</button>
+                <button onClick={handleLogout} className="logout-btn">خروج</button>
             </div>
         </nav>
     );
