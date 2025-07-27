@@ -1,8 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
+    const history = useHistory();
+
+    const handleProfileClick = () => {
+        history.push('/profile');
+    };
+
     return (
         <nav className="navbar">
             <div className="navbar-brand">
@@ -16,7 +22,7 @@ const Navbar = () => {
             </div>
             <div className="navbar-profile">
                 <span>🔔</span>
-                <Link to="/profile">پروفایل من</Link>
+                <button onClick={handleProfileClick} className="profile-btn">پروفایل من</button>
             </div>
         </nav>
     );
