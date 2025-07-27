@@ -183,4 +183,25 @@ app.post('/api/login', (req, res) => {
     }
 });
 
+app.post('/api/signup', (req, res) => {
+    const { login, password } = req.body;
+    if (!login || !password) {
+        return res.status(400).json({ message: 'نام کاربری و رمز عبور الزامی است' });
+    }
+    const existingUser = Object.values(users).find(u => u.username === login || u.email === login);
+    if (existingUser) {
+        return res.status(409).json({ message: 'این نام کاربری یا ایمیل قبلاً ثبت شده است' });
+    }
+    const newId = Math.max(0, ...Object.keys(users).map(Number)) + 1;
+    const newUser = {
+        id: newId,
+        username: login,
+        email: login.includes('@') ? login : '',
+        password: password
+    };
+    users[newId] = newUser;
+    saveData();
+    res.status(201).json({ message: 'ثبت‌نام با موفقیت انجام شد', user: { id: newUser.id, username: newUser.username, email: newUser.email } });
+});
+
 app.listen(port, () => console.log(`Roshdyar server is listening on port ${port}`));
