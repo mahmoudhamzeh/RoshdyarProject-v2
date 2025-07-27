@@ -48,6 +48,7 @@ const UserInfo = () => {
                 throw new Error(result.message || 'خطا در ذخیره اطلاعات');
             }
             setSuccess('اطلاعات با موفقیت ذخیره شد.');
+            setUser(result.user);
             setIsEditing(false);
         } catch (err) {
             setError(err.message);
