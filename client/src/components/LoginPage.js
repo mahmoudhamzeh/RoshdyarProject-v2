@@ -35,18 +35,25 @@ const LoginPage = () => {
     };
 
     const handleSignup = async () => {
-        // ... (کد ثبت‌نام بدون تغییر باقی می‌ماند)
         if (!loginInput || !passwordInput) {
             setLoginMessage('لطفاً فیلدها را پر کنید.');
             return;
         }
-        const response = await fetch('http://localhost:5000/api/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ login: loginInput, password: passwordInput }),
-        });
-        const data = await response.json();
-        setLoginMessage(data.message);
+        try {
+            const response = await fetch('http://localhost:5000/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login: loginInput, password: passwordInput }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setLoginMessage(data.message);
+            } else {
+                setLoginMessage(data.message || 'خطا در ثبت‌نام');
+            }
+        } catch (error) {
+            setLoginMessage('خطا در ارتباط با سرور.');
+        }
     };
 
     // The rest of the component remains the same...
