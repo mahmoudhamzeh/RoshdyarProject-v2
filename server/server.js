@@ -172,10 +172,13 @@ app.put('/api/users/:id/password', (req, res) => {
 
 app.post('/api/login', (req, res) => {
     const { login, password } = req.body;
+    console.log(`[Login Attempt] User: ${login}`);
     const user = Object.values(users).find(u => (u.username === login || u.email === login) && u.password === password);
     if (user) {
+        console.log(`[Login Success] User found:`, user);
         res.json({ message: 'Login successful!', user: { id: user.id, username: user.username, email: user.email } });
     } else {
+        console.log(`[Login Failure] User not found or password incorrect.`);
         res.status(401).json({ message: 'اطلاعات ورود نادرست است' });
     }
 });

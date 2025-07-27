@@ -12,9 +12,15 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-                if (!loggedInUser || !loggedInUser.id) {
+                const loggedInUserString = localStorage.getItem('loggedInUser');
+                console.log("Retrieved from localStorage:", loggedInUserString);
+                if (!loggedInUserString) {
                     history.push('/login');
+                    return;
+                }
+                const loggedInUser = JSON.parse(loggedInUserString);
+                if (!loggedInUser || !loggedInUser.id) {
+                    setError("اطلاعات کاربری نامعتبر است.");
                     return;
                 }
                 const response = await fetch(`http://localhost:5000/api/users/${loggedInUser.id}`);
@@ -25,6 +31,7 @@ const ProfilePage = () => {
                 const userData = await response.json();
                 setUser(userData);
             } catch (err) {
+                console.error("Error in fetchUser:", err);
                 setError(err.message);
             }
         };
