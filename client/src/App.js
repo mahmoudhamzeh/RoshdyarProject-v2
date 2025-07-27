@@ -7,6 +7,7 @@ import AddChildPage from './components/AddChildPage';
 import EditChildPage from './components/EditChildPage';
 import GrowthChartPage from './components/GrowthChartPage';
 import HealthProfilePage from './components/HealthProfilePage';
+import ProfilePage from './components/ProfilePage';
 import './App.css';
 
 const App = () => {
@@ -22,6 +23,7 @@ const App = () => {
                 <Route path="/edit-child/:id" component={EditChildPage} />
                 <Route path="/growth-chart/:childId" component={GrowthChartPage} />
                 <Route path="/health-profile/:childId" component={HealthProfilePage} />
+                <Route path="/profile" component={ProfilePage} />
 
                 <Route path="/">
                     <Redirect to={isLoggedIn() ? "/dashboard" : "/login"} />

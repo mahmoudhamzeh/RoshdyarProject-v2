@@ -146,4 +146,27 @@ app.post('/api/restore', (req, res) => {
     res.status(200).json({ message: 'Data restored successfully' });
 });
 
+app.get('/api/users/:id', (req, res) => {
+    const user = users[req.params.id];
+    if (user) {
+        res.json({ id: user.id, username: user.username, email: user.email });
+    } else {
+        res.status(404).json({ message: 'User not found' });
+    }
+});
+
+app.put('/api/users/:id/password', (req, res) => {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+    const user = users[id];
+
+    if (!user || user.password !== currentPassword) {
+        return res.status(401).json({ message: 'رمز عبور فعلی اشتباه است' });
+    }
+
+    users[id].password = newPassword;
+    saveData();
+    res.status(200).json({ message: 'رمز عبور با موفقیت تغییر کرد' });
+});
+
 app.listen(port, () => console.log(`Roshdyar server is listening on port ${port}`));
