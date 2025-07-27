@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import Modal from 'react-modal';
-import { format } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import "react-datepicker/dist/react-datepicker.css";
 import './HealthProfilePage.css';

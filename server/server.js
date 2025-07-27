@@ -149,9 +149,10 @@ app.post('/api/restore', (req, res) => {
 app.get('/api/users/:id', (req, res) => {
     const user = users[req.params.id];
     if (user) {
+        // Ensure we don't send the password back
         res.json({ id: user.id, username: user.username, email: user.email });
     } else {
-        res.status(404).json({ message: 'User not found' });
+        res.status(404).json({ message: 'کاربر یافت نشد' });
     }
 });
 
