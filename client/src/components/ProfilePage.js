@@ -13,13 +13,14 @@ const ProfilePage = () => {
         const fetchUser = async () => {
             try {
                 const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-                if (!loggedInUser) {
+                if (!loggedInUser || !loggedInUser.id) {
                     history.push('/login');
                     return;
                 }
                 const response = await fetch(`http://localhost:5000/api/users/${loggedInUser.id}`);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch user data');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch user data');
                 }
                 const userData = await response.json();
                 setUser(userData);
@@ -60,6 +61,7 @@ const ProfilePage = () => {
         }
     };
 
+    if (error) return <div className="error-message">{error}</div>;
     if (!user) return <div>در حال بارگذاری...</div>;
 
     return (
