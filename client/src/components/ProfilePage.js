@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import CitySelector from './CitySelector';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -68,6 +69,30 @@ const ProfilePage = () => {
         }
     };
 
+    const handleUserChange = (e) => {
+        const { name, value } = e.target;
+        setUser(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleUserSubmit = async () => {
+        setError('');
+        setSuccess('');
+        try {
+            const response = await fetch(`http://localhost:5000/api/users/${user.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || 'خطا در ذخیره اطلاعات');
+            }
+            setSuccess('اطلاعات با موفقیت ذخیره شد.');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     if (error) return <div className="error-message">{`خطا: ${error}`}</div>;
     if (!user) return <div>در حال بارگذاری...</div>;
 
@@ -81,8 +106,25 @@ const ProfilePage = () => {
             <div className="profile-content">
                 <div className="profile-info">
                     <h2>اطلاعات کاربر</h2>
-                    <p><strong>نام کاربری:</strong> {user.username}</p>
-                    <p><strong>ایمیل:</strong> {user.email}</p>
+                    <div className="form-group">
+                        <label>نام</label>
+                        <input type="text" name="firstName" value={user.firstName || ''} onChange={handleUserChange} />
+                    </div>
+                    <div className="form-group">
+                        <label>نام خانوادگی</label>
+                        <input type="text" name="lastName" value={user.lastName || ''} onChange={handleUserChange} />
+                    </div>
+                    <div className="form-group">
+                        <label>تاریخ تولد</label>
+                        <input type="date" name="birthDate" value={user.birthDate || ''} onChange={handleUserChange} />
+                    </div>
+                    <CitySelector
+                        selectedProvince={user.province}
+                        selectedCity={user.city}
+                        onProvinceChange={handleUserChange}
+                        onCityChange={handleUserChange}
+                    />
+                    <button onClick={handleUserSubmit} className="btn-save">ذخیره اطلاعات</button>
                 </div>
                 <div className="change-password">
                     <h2>تغییر رمز عبور</h2>

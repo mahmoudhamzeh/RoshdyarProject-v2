@@ -170,6 +170,18 @@ app.put('/api/users/:id/password', (req, res) => {
     res.status(200).json({ message: 'رمز عبور با موفقیت تغییر کرد' });
 });
 
+app.put('/api/users/:id', (req, res) => {
+    const { id } = req.params;
+    const { firstName, lastName, birthDate, province, city } = req.body;
+    if (users[id]) {
+        users[id] = { ...users[id], firstName, lastName, birthDate, province, city };
+        saveData();
+        res.json({ message: 'اطلاعات با موفقیت به‌روز شد', user: users[id] });
+    } else {
+        res.status(404).json({ message: 'کاربر یافت نشد' });
+    }
+});
+
 app.post('/api/login', (req, res) => {
     const { login, password } = req.body;
     console.log(`[Login Attempt] User: ${login}`);
