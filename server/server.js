@@ -172,9 +172,9 @@ app.put('/api/users/:id/password', (req, res) => {
 
 app.put('/api/users/:id', (req, res) => {
     const { id } = req.params;
-    const { firstName, lastName, birthDate, province, city } = req.body;
+    const { firstName, lastName, birthDate, province, city, mobile, email } = req.body;
     if (users[id]) {
-        users[id] = { ...users[id], firstName, lastName, birthDate, province, city };
+        users[id] = { ...users[id], firstName, lastName, birthDate, province, city, mobile, email };
         saveData();
         res.json({ message: 'اطلاعات با موفقیت به‌روز شد', user: users[id] });
     } else {

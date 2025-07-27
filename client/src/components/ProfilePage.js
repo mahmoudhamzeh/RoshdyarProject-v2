@@ -9,12 +9,12 @@ const ProfilePage = () => {
     const [password, setPassword] = useState({ current: '', new: '', confirm: '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
                 const loggedInUserString = localStorage.getItem('loggedInUser');
-                console.log("Retrieved from localStorage:", loggedInUserString);
                 if (!loggedInUserString) {
                     history.push('/login');
                     return;
@@ -32,7 +32,6 @@ const ProfilePage = () => {
                 const userData = await response.json();
                 setUser(userData);
             } catch (err) {
-                console.error("Error in fetchUser:", err);
                 setError(err.message);
             }
         };
@@ -88,6 +87,7 @@ const ProfilePage = () => {
                 throw new Error(result.message || 'خطا در ذخیره اطلاعات');
             }
             setSuccess('اطلاعات با موفقیت ذخیره شد.');
+            setIsEditing(false);
         } catch (err) {
             setError(err.message);
         }
@@ -95,6 +95,23 @@ const ProfilePage = () => {
 
     if (error) return <div className="error-message">{`خطا: ${error}`}</div>;
     if (!user) return <div>در حال بارگذاری...</div>;
+
+    const renderInfoRow = (label, value, name, type = 'text') => (
+        <div className="info-row">
+            <span className="info-label">{label}</span>
+            {isEditing ? (
+                <input
+                    type={type}
+                    name={name}
+                    value={value || ''}
+                    onChange={handleUserChange}
+                    className="info-input"
+                />
+            ) : (
+                <span className="info-value">{value}</span>
+            )}
+        </div>
+    );
 
     return (
         <div className="profile-page">
@@ -104,32 +121,43 @@ const ProfilePage = () => {
                 <div className="nav-placeholder"></div>
             </nav>
             <div className="profile-content">
-                <div className="profile-info">
-                    <h2>اطلاعات کاربر</h2>
-                    <div className="form-group">
-                        <label>نام</label>
-                        <input type="text" name="firstName" value={user.firstName || ''} onChange={handleUserChange} />
+                <div className="profile-info card">
+                    <div className="card-header">
+                        <h2>اطلاعات کاربر</h2>
+                        <button onClick={() => setIsEditing(!isEditing)} className="edit-btn">
+                            {isEditing ? 'لغو' : 'ویرایش'}
+                        </button>
                     </div>
-                    <div className="form-group">
-                        <label>نام خانوادگی</label>
-                        <input type="text" name="lastName" value={user.lastName || ''} onChange={handleUserChange} />
-                    </div>
-                    <div className="form-group">
-                        <label>تاریخ تولد</label>
-                        <input type="date" name="birthDate" value={user.birthDate || ''} onChange={handleUserChange} />
-                    </div>
-                    <CitySelector
-                        selectedProvince={user.province}
-                        selectedCity={user.city}
-                        onProvinceChange={handleUserChange}
-                        onCityChange={handleUserChange}
-                    />
-                    <button onClick={handleUserSubmit} className="btn-save">ذخیره اطلاعات</button>
+                    {renderInfoRow('نام کاربری', user.username, 'username')}
+                    {renderInfoRow('نام', user.firstName, 'firstName')}
+                    {renderInfoRow('نام خانوادگی', user.lastName, 'lastName')}
+                    {renderInfoRow('ایمیل', user.email, 'email', 'email')}
+                    {renderInfoRow('شماره موبایل', user.mobile, 'mobile', 'tel')}
+                    {renderInfoRow('تاریخ تولد', user.birthDate, 'birthDate', 'date')}
+                    {isEditing ? (
+                        <CitySelector
+                            selectedProvince={user.province}
+                            selectedCity={user.city}
+                            onProvinceChange={handleUserChange}
+                            onCityChange={handleUserChange}
+                        />
+                    ) : (
+                        <>
+                            {renderInfoRow('استان', user.province, 'province')}
+                            {renderInfoRow('شهر', user.city, 'city')}
+                        </>
+                    )}
+                    {isEditing && (
+                        <button onClick={handleUserSubmit} className="btn-save">ذخیره اطلاعات</button>
+                    )}
                 </div>
-                <div className="change-password">
-                    <h2>تغییر رمز عبور</h2>
-                    {error && <p className="error-message">{error}</p>}
+
+                <div className="change-password card">
+                    <div className="card-header">
+                        <h2>تغییر رمز عبور</h2>
+                    </div>
                     {success && <p className="success-message">{success}</p>}
+                    {error && <p className="error-message">{error}</p>}
                     <form onSubmit={handlePasswordSubmit}>
                         <div className="form-group">
                             <label>رمز عبور فعلی</label>
