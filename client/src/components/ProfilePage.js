@@ -29,7 +29,9 @@ const ProfilePage = () => {
     return (
         <div className="profile-page">
             <nav className="page-nav-final">
-                <button onClick={() => history.push('/dashboard')} className="back-btn-add-child">&rarr;</button>
+                <button onClick={() => history.push('/dashboard')} className="back-btn">
+                    &rarr; <span>صفحه اصلی</span>
+                </button>
                 <h1>پروفایل کاربری</h1>
                 <div className="nav-placeholder"></div>
             </nav>
