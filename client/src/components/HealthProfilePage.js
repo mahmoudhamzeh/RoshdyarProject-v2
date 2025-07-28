@@ -15,11 +15,9 @@ const HealthProfilePage = () => {
     const [documents, setDocuments] = useState([]);
     const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
     const [isDocModalOpen, setIsDocModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
 
     const fetchAllData = useCallback(async () => {
         try {
-            setIsLoading(true);
             const childRes = await fetch(`http://localhost:5000/api/children/${childId}`);
             const childData = await childRes.json();
             setChild(childData);
@@ -31,25 +29,12 @@ const HealthProfilePage = () => {
             const docsRes = await fetch(`http://localhost:5000/api/documents/${childId}`);
             const docsData = await docsRes.json();
             setDocuments(docsData);
-        } catch (error) {
-            history.push('/my-children');
-        } finally {
-            setIsLoading(false);
-        }
+        } catch (error) { history.push('/my-children'); }
     }, [childId, history]);
 
-    useEffect(() => {
-        fetchAllData();
-    }, [fetchAllData]);
+    useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
-    if (isLoading) {
-        return <p>در حال بارگذاری...</p>;
-    }
-
-    if (!child) {
-        return <p>کودک یافت نشد.</p>;
-    }
-
+    if (!child) return <p>در حال بارگذاری...</p>;
     const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
 
     const calculateAge = (birthDate) => {
@@ -111,7 +96,7 @@ const HealthProfilePage = () => {
                     <div className="action-card">
                         <h4>نمودار رشد</h4>
                         <div className="chart-preview">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={200}>
                                 <LineChart data={(child.growthData && child.growthData.length > 0) ? child.growthData : [{date: 'شروع', height: 50, weight: 3}]}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="date" />
@@ -123,7 +108,7 @@ const HealthProfilePage = () => {
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
-                        <button onClick={() => history.push(`/growth-chart/${childId}`)} className="secondary-action-btn">نمایش کامل نمودار</button>
+                        <button onClick={() => history.push(`/growth-chart/${childId}`)} className="view-full-chart-btn">نمایش کامل نمودار</button>
                     </div>
                     <div className="actions-grid">
                         <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
