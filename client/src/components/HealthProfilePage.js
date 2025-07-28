@@ -93,7 +93,7 @@ const HealthProfilePage = () => {
                     </div>
                 </div>
                 <div className="grid-col-right">
-                    <div className="chart-card">
+                    <div className="action-card">
                         <h4>نمودار رشد</h4>
                         <div className="chart-preview">
                             <ResponsiveContainer width="100%" height={200}>
@@ -108,8 +108,8 @@ const HealthProfilePage = () => {
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
-                        <button onClick={() => history.push(`/growth-chart/${childId}`)} className="view-full-chart-btn">نمایش کامل نمودار</button>
                     </div>
+                    <button onClick={() => history.push(`/growth-chart/${childId}`)} className="view-full-chart-btn">نمایش کامل نمودار</button>
                     <div className="actions-grid">
                         <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
                             <h4>مراجعات پزشکی</h4>

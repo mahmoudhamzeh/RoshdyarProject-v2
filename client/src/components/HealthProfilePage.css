@@ -11,8 +11,5 @@
 .action-card { background: #fff; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; cursor: pointer; transition: all 0.3s ease; }
 .action-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
 .action-card h4 { margin-top: 0; font-size: 1.1rem; }
-.chart-card { background: #fff; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; transition: all 0.3s ease; }
-.chart-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-.chart-card h4 { margin-top: 0; font-size: 1.1rem; }
 .chart-preview { width: 100%; margin-bottom: 1rem; }
-.view-full-chart-btn { display: block; width: 100%; background-color: #4a90e2; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer; text-align: center; z-index: 10; position: relative; }
+.view-full-chart-btn { display: block; width: 100%; background-color: #4a90e2; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer; text-align: center; }
