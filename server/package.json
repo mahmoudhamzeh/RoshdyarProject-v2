@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon"
+    "dev": "nodemon --config ../nodemon.json"
   },
   "dependencies": {
     "express": "^4.17.1",
