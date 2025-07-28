@@ -51,8 +51,8 @@ const UserInfo = () => {
                 throw new Error(result.message || 'خطا در ذخیره اطلاعات');
             }
             setSuccess('اطلاعات با موفقیت ذخیره شد.');
+            setUser(result.user);
             setIsEditing(false);
-            fetchUser(); // Refetch user data to show the latest info
         } catch (err) {
             console.error('[User Submit] Error:', err);
             setError(err.message);
