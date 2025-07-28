@@ -93,9 +93,22 @@ const HealthProfilePage = () => {
                     </div>
                 </div>
                 <div className="grid-col-right">
-                    <div className="action-card" onClick={() => history.push(`/growth-chart/${childId}`)}>
+                    <div className="action-card">
                         <h4>نمودار رشد</h4>
-                        <p>نمایش کامل نمودار</p>
+                        <div className="chart-preview">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={(child.growthData && child.growthData.length > 0) ? child.growthData : [{date: 'شروع', height: 50, weight: 3}]}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="height" stroke="#8884d8" activeDot={{ r: 8 }} />
+                                    <Line type="monotone" dataKey="weight" stroke="#82ca9d" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <button onClick={() => history.push(`/growth-chart/${childId}`)} className="secondary-action-btn">نمایش کامل نمودار</button>
                     </div>
                     <div className="actions-grid">
                         <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
