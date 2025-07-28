@@ -15,9 +15,11 @@ const HealthProfilePage = () => {
     const [documents, setDocuments] = useState([]);
     const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
     const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchAllData = useCallback(async () => {
         try {
+            setIsLoading(true);
             const childRes = await fetch(`http://localhost:5000/api/children/${childId}`);
             const childData = await childRes.json();
             setChild(childData);
@@ -29,12 +31,25 @@ const HealthProfilePage = () => {
             const docsRes = await fetch(`http://localhost:5000/api/documents/${childId}`);
             const docsData = await docsRes.json();
             setDocuments(docsData);
-        } catch (error) { history.push('/my-children'); }
+        } catch (error) {
+            history.push('/my-children');
+        } finally {
+            setIsLoading(false);
+        }
     }, [childId, history]);
 
-    useEffect(() => { fetchAllData(); }, [fetchAllData]);
+    useEffect(() => {
+        fetchAllData();
+    }, [fetchAllData]);
 
-    if (!child) return <p>در حال بارگذاری...</p>;
+    if (isLoading) {
+        return <p>در حال بارگذاری...</p>;
+    }
+
+    if (!child) {
+        return <p>کودک یافت نشد.</p>;
+    }
+
     const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
 
     const calculateAge = (birthDate) => {
