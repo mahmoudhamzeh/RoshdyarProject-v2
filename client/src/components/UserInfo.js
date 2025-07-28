@@ -7,25 +7,26 @@ const UserInfo = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-                if (!loggedInUser || !loggedInUser.id) {
-                    setError("اطلاعات کاربری نامعتبر است.");
-                    return;
-                }
-                const response = await fetch(`http://localhost:5000/api/users/${loggedInUser.id}`);
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to fetch user data');
-                }
-                const userData = await response.json();
-                setUser(userData);
-            } catch (err) {
-                setError(err.message);
+    const fetchUser = async () => {
+        try {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (!loggedInUser || !loggedInUser.id) {
+                setError("اطلاعات کاربری نامعتبر است.");
+                return;
             }
-        };
+            const response = await fetch(`http://localhost:5000/api/users/${loggedInUser.id}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch user data');
+            }
+            const userData = await response.json();
+            setUser(userData);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    useEffect(() => {
         fetchUser();
     }, []);
 
@@ -48,8 +49,8 @@ const UserInfo = () => {
                 throw new Error(result.message || 'خطا در ذخیره اطلاعات');
             }
             setSuccess('اطلاعات با موفقیت ذخیره شد.');
-            setUser(result.user);
             setIsEditing(false);
+            fetchUser(); // Refetch user data to show the latest info
         } catch (err) {
             setError(err.message);
         }
