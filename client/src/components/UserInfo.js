@@ -38,6 +38,7 @@ const UserInfo = () => {
     const handleUserSubmit = async () => {
         setError('');
         setSuccess('');
+        console.log('[User Submit] Sending user data:', user);
         try {
             const response = await fetch(`http://localhost:5000/api/users/${user.id}`, {
                 method: 'PUT',
@@ -45,6 +46,7 @@ const UserInfo = () => {
                 body: JSON.stringify(user),
             });
             const result = await response.json();
+            console.log('[User Submit] Received response:', result);
             if (!response.ok) {
                 throw new Error(result.message || 'خطا در ذخیره اطلاعات');
             }
@@ -52,6 +54,7 @@ const UserInfo = () => {
             setIsEditing(false);
             fetchUser(); // Refetch user data to show the latest info
         } catch (err) {
+            console.error('[User Submit] Error:', err);
             setError(err.message);
         }
     };
