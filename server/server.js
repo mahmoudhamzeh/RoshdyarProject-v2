@@ -179,6 +179,9 @@ app.put('/api/users/:id', (req, res) => {
         users[id] = { ...users[id], firstName, lastName, birthDate, province, city, mobile, email };
         saveData();
         console.log(`[Update Profile] User ${id} updated. New data:`, users[id]);
+        // Log the content of db.json after saving
+        const dbContent = fs.readFileSync(dbPath, 'utf8');
+        console.log('[Update Profile] db.json content after save:', dbContent);
         res.json({ message: 'اطلاعات با موفقیت به‌روز شد', user: users[id] });
     } else {
         console.log(`[Update Profile] User with ID ${id} not found.`);
