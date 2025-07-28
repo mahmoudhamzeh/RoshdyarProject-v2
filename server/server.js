@@ -172,12 +172,16 @@ app.put('/api/users/:id/password', (req, res) => {
 
 app.put('/api/users/:id', (req, res) => {
     const { id } = req.params;
+    console.log(`[Update Profile] Received request for user ID: ${id}`);
+    console.log('[Update Profile] Request body:', req.body);
     const { firstName, lastName, birthDate, province, city, mobile, email } = req.body;
     if (users[id]) {
         users[id] = { ...users[id], firstName, lastName, birthDate, province, city, mobile, email };
         saveData();
+        console.log(`[Update Profile] User ${id} updated. New data:`, users[id]);
         res.json({ message: 'اطلاعات با موفقیت به‌روز شد', user: users[id] });
     } else {
+        console.log(`[Update Profile] User with ID ${id} not found.`);
         res.status(404).json({ message: 'کاربر یافت نشد' });
     }
 });
