@@ -93,7 +93,7 @@ const HealthProfilePage = () => {
                     </div>
                 </div>
                 <div className="grid-col-right">
-                    <div className="action-card">
+                    <div className="chart-card">
                         <h4>نمودار رشد</h4>
                         <div className="chart-preview">
                             <ResponsiveContainer width="100%" height={200}>
