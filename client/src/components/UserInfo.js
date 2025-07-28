@@ -16,8 +16,8 @@ const UserInfo = () => {
             }
             const response = await fetch(`http://localhost:5000/api/users/${loggedInUser.id}`);
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to fetch user data');
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to fetch user data');
             }
             const userData = await response.json();
             setUser(userData);
