@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import Modal from 'react-modal';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import "react-datepicker/dist/react-datepicker.css";
@@ -8,6 +8,7 @@ import './HealthProfilePage.css';
 Modal.setAppElement('#root');
 
 const HealthProfilePage = () => {
+    const routerHistory = useHistory();
     const { childId } = useParams();
     const [child, setChild] = useState(null);
     const [visits, setVisits] = useState([]);
@@ -28,8 +29,8 @@ const HealthProfilePage = () => {
             const docsRes = await fetch(`http://localhost:5000/api/documents/${childId}`);
             const docsData = await docsRes.json();
             setDocuments(docsData);
-        } catch (error) { history.push('/my-children'); }
-    }, [childId]);
+        } catch (error) { routerHistory.push('/my-children'); }
+    }, [childId, routerHistory]);
 
     useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
@@ -51,7 +52,7 @@ const HealthProfilePage = () => {
     return (
         <div className="health-profile-page">
             <nav className="page-nav-final">
-                <button onClick={() => history.push('/my-children')} className="back-btn">
+                <button onClick={() => routerHistory.push('/my-children')} className="back-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     <span>لیست کودکان</span>
                 </button>
@@ -88,7 +89,7 @@ const HealthProfilePage = () => {
                             </div>
                             <p>{child.special_illnesses && child.special_illnesses.description}</p>
                         </div>
-                        <Link to={`/health-analysis/${child.id}`} className="edit-main-info-btn">مشاهده تحلیل پرونده</Link>
+                        <button onClick={() => routerHistory.push(`/health-analysis/${child.id}`)} className="edit-main-info-btn">مشاهده تحلیل پرونده</button>
                     </div>
                 </div>
                 <div className="grid-col-right">
@@ -107,7 +108,7 @@ const HealthProfilePage = () => {
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
-                        <Link to={`/growth-chart/${childId}`} className="view-full-chart-btn">نمایش کامل نمودار</Link>
+                        <button onClick={() => routerHistory.push(`/growth-chart/${childId}`)} className="view-full-chart-btn">نمایش کامل نمودار</button>
                     </div>
                     <div className="actions-grid">
                         <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
