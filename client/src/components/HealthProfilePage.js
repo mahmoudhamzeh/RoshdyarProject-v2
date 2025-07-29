@@ -30,7 +30,7 @@ const HealthProfilePage = () => {
             const docsData = await docsRes.json();
             setDocuments(docsData);
         } catch (error) { history.push('/my-children'); }
-    }, [childId, history]);
+    }, [childId]);
 
     useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
