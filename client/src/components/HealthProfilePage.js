@@ -8,17 +8,19 @@ import './HealthProfilePage.css';
 Modal.setAppElement('#root');
 
 const HealthProfilePage = () => {
-    const routerHistory = useHistory();
+    const history = useHistory();
     const { childId } = useParams();
     const [child, setChild] = useState(null);
     const [visits, setVisits] = useState([]);
     const [documents, setDocuments] = useState([]);
     const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
     const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchAllData = useCallback(async () => {
         try {
             const childRes = await fetch(`http://localhost:5000/api/children/${childId}`);
+            if (!childRes.ok) throw new Error('Child not found');
             const childData = await childRes.json();
             setChild(childData);
 
@@ -29,12 +31,29 @@ const HealthProfilePage = () => {
             const docsRes = await fetch(`http://localhost:5000/api/documents/${childId}`);
             const docsData = await docsRes.json();
             setDocuments(docsData);
-        } catch (error) { routerHistory.push('/my-children'); }
-    }, [childId, routerHistory]);
+        } catch (error) {
+            history.push('/my-children');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [childId, history]);
 
-    useEffect(() => { fetchAllData(); }, [fetchAllData]);
+    useEffect(() => {
+        fetchAllData();
+    }, [fetchAllData]);
 
-    if (!child) return <p>در حال بارگذاری...</p>;
+    const handleNavigateToGrowthChart = () => {
+        history.push(`/growth-chart/${childId}`);
+    };
+
+    if (isLoading) {
+        return <p>در حال بارگذاری...</p>;
+    }
+
+    if (!child) {
+        return <p>کودک یافت نشد.</p>;
+    }
+
     const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
 
     const calculateAge = (birthDate) => {
@@ -52,7 +71,7 @@ const HealthProfilePage = () => {
     return (
         <div className="health-profile-page">
             <nav className="page-nav-final">
-                <button onClick={() => routerHistory.push('/my-children')} className="back-btn">
+                <button onClick={() => history.push('/my-children')} className="back-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     <span>لیست کودکان</span>
                 </button>
@@ -89,11 +108,11 @@ const HealthProfilePage = () => {
                             </div>
                             <p>{child.special_illnesses && child.special_illnesses.description}</p>
                         </div>
-                        <button onClick={() => routerHistory.push(`/health-analysis/${child.id}`)} className="edit-main-info-btn">مشاهده تحلیل پرونده</button>
+                        <button onClick={() => history.push(`/health-analysis/${child.id}`)} className="edit-main-info-btn">مشاهده تحلیل پرونده</button>
                     </div>
                 </div>
                 <div className="grid-col-right">
-                    <div className="action-card">
+                    <div className="action-card" onClick={handleNavigateToGrowthChart}>
                         <h4>نمودار رشد</h4>
                         <div className="chart-preview">
                             <ResponsiveContainer width="100%" height={200}>
@@ -108,7 +127,7 @@ const HealthProfilePage = () => {
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
-                        <button onClick={() => routerHistory.push(`/growth-chart/${childId}`)} className="view-full-chart-btn">نمایش کامل نمودار</button>
+                        <p className="view-full-chart-text">مشاهده کامل نمودار</p>
                     </div>
                     <div className="actions-grid">
                         <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
@@ -123,9 +142,12 @@ const HealthProfilePage = () => {
                 </div>
             </main>
 
-            {/* Modals will be updated later */}
-            <Modal isOpen={isVisitModalOpen} onRequestClose={() => setIsVisitModalOpen(false)}>{/* ... Visit Modal ... */}</Modal>
-            <Modal isOpen={isDocModalOpen} onRequestClose={() => setIsDocModalOpen(false)}>{/* ... Document Modal ... */}</Modal>
+            <Modal isOpen={isVisitModalOpen} onRequestClose={() => setIsVisitModalOpen(false)}>
+                <h2>مراجعات پزشکی</h2>
+            </Modal>
+            <Modal isOpen={isDocModalOpen} onRequestClose={() => setIsDocModalOpen(false)}>
+                <h2>مدارک پزشکی</h2>
+            </Modal>
         </div>
     );
 };
