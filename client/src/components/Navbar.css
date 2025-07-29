@@ -10,7 +10,7 @@
     padding: 0.5rem 1rem;
     border-radius: 5px;
     cursor: pointer;
-    font-family: 'Vazirmatn', sans-serif;
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
     white-space: nowrap;
 }
 .logout-btn {
