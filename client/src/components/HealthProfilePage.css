@@ -12,4 +12,5 @@
 .action-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
 .action-card h4 { margin-top: 0; font-size: 1.1rem; }
 .chart-preview { width: 100%; margin-bottom: 1rem; }
-.view-full-chart-btn { display: block; width: 100%; background-color: #4a90e2; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer; text-align: center; }
+.view-full-chart-btn, .edit-main-info-btn { display: block; width: 100%; background-color: #4a90e2; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; margin-top: 1rem; }
+.edit-main-info-btn { background-color: #50e3c2; }
