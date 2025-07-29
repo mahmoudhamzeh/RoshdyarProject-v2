@@ -15,12 +15,10 @@ const HealthProfilePage = () => {
     const [documents, setDocuments] = useState([]);
     const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
     const [isDocModalOpen, setIsDocModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
 
     const fetchAllData = useCallback(async () => {
         try {
             const childRes = await fetch(`http://localhost:5000/api/children/${childId}`);
-            if (!childRes.ok) throw new Error('Child not found');
             const childData = await childRes.json();
             setChild(childData);
 
@@ -31,29 +29,12 @@ const HealthProfilePage = () => {
             const docsRes = await fetch(`http://localhost:5000/api/documents/${childId}`);
             const docsData = await docsRes.json();
             setDocuments(docsData);
-        } catch (error) {
-            history.push('/my-children');
-        } finally {
-            setIsLoading(false);
-        }
+        } catch (error) { history.push('/my-children'); }
     }, [childId, history]);
 
-    useEffect(() => {
-        fetchAllData();
-    }, [fetchAllData]);
+    useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
-    const handleNavigateToGrowthChart = () => {
-        history.push(`/growth-chart/${childId}`);
-    };
-
-    if (isLoading) {
-        return <p>در حال بارگذاری...</p>;
-    }
-
-    if (!child) {
-        return <p>کودک یافت نشد.</p>;
-    }
-
+    if (!child) return <p>در حال بارگذاری...</p>;
     const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
 
     const calculateAge = (birthDate) => {
@@ -112,7 +93,7 @@ const HealthProfilePage = () => {
                     </div>
                 </div>
                 <div className="grid-col-right">
-                    <div className="action-card" onClick={handleNavigateToGrowthChart}>
+                    <div className="action-card">
                         <h4>نمودار رشد</h4>
                         <div className="chart-preview">
                             <ResponsiveContainer width="100%" height={200}>
@@ -127,7 +108,7 @@ const HealthProfilePage = () => {
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
-                        <p className="view-full-chart-text">مشاهده کامل نمودار</p>
+                        <button onClick={() => history.push(`/growth-chart/${childId}`)} className="view-full-chart-btn">مشاهده کامل نمودار</button>
                     </div>
                     <div className="actions-grid">
                         <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
@@ -142,12 +123,9 @@ const HealthProfilePage = () => {
                 </div>
             </main>
 
-            <Modal isOpen={isVisitModalOpen} onRequestClose={() => setIsVisitModalOpen(false)}>
-                <h2>مراجعات پزشکی</h2>
-            </Modal>
-            <Modal isOpen={isDocModalOpen} onRequestClose={() => setIsDocModalOpen(false)}>
-                <h2>مدارک پزشکی</h2>
-            </Modal>
+            {/* Modals will be updated later */}
+            <Modal isOpen={isVisitModalOpen} onRequestClose={() => setIsVisitModalOpen(false)}>{/* ... Visit Modal ... */}</Modal>
+            <Modal isOpen={isDocModalOpen} onRequestClose={() => setIsDocModalOpen(false)}>{/* ... Document Modal ... */}</Modal>
         </div>
     );
 };
