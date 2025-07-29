@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Modal from 'react-modal';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import "react-datepicker/dist/react-datepicker.css";
@@ -8,7 +8,6 @@ import './HealthProfilePage.css';
 Modal.setAppElement('#root');
 
 const HealthProfilePage = () => {
-    const history = useHistory();
     const { childId } = useParams();
     const [child, setChild] = useState(null);
     const [visits, setVisits] = useState([]);
@@ -89,7 +88,7 @@ const HealthProfilePage = () => {
                             </div>
                             <p>{child.special_illnesses && child.special_illnesses.description}</p>
                         </div>
-                        <button onClick={() => history.push(`/health-analysis/${child.id}`)} className="edit-main-info-btn">مشاهده تحلیل پرونده</button>
+                        <Link to={`/health-analysis/${child.id}`} className="edit-main-info-btn">مشاهده تحلیل پرونده</Link>
                     </div>
                 </div>
                 <div className="grid-col-right">
@@ -108,7 +107,7 @@ const HealthProfilePage = () => {
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
-                        <button onClick={() => history.push(`/growth-chart/${childId}`)} className="view-full-chart-btn">نمایش کامل نمودار</button>
+                        <Link to={`/growth-chart/${childId}`} className="view-full-chart-btn">نمایش کامل نمودار</Link>
                     </div>
                     <div className="actions-grid">
                         <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
