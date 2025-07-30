@@ -2,7 +2,7 @@
 // Data represents Length/Height for Age (cm) and Weight for Age (kg)
 // P3, P50, P97 represent the 3rd, 50th (median), and 97th percentiles.
 
-export const heightForAgeBoys = [
+const heightForAgeBoys = [
     { month: 0, P3: 46.1, P50: 49.9, P97: 53.7 },
     { month: 2, P3: 54.7, P50: 58.4, P97: 62.2 },
     { month: 4, P3: 59.9, P50: 63.9, P97: 67.8 },
@@ -14,7 +14,7 @@ export const heightForAgeBoys = [
     { month: 60, P3: 98.7, P50: 105.3, P97: 112.0 }
 ];
 
-export const weightForAgeBoys = [
+const weightForAgeBoys = [
     { month: 0, P3: 2.5, P50: 3.3, P97: 4.4 },
     { month: 2, P3: 4.4, P50: 5.6, P97: 7.1 },
     { month: 4, P3: 5.7, P50: 7.0, P97: 8.7 },
@@ -26,7 +26,7 @@ export const weightForAgeBoys = [
     { month: 60, P3: 15.1, P50: 18.0, P97: 21.2 }
 ];
 
-export const heightForAgeGirls = [
+const heightForAgeGirls = [
     { month: 0, P3: 45.4, P50: 49.1, P97: 52.9 },
     { month: 2, P3: 53.0, P50: 57.1, P97: 61.1 },
     { month: 4, P3: 58.0, P50: 62.1, P97: 66.2 },
@@ -38,7 +38,7 @@ export const heightForAgeGirls = [
     { month: 60, P3: 96.4, P50: 104.7, P97: 112.9 }
 ];
 
-export const weightForAgeGirls = [
+const weightForAgeGirls = [
     { month: 0, P3: 2.4, P50: 3.2, P97: 4.2 },
     { month: 2, P3: 4.0, P50: 5.1, P97: 6.5 },
     { month: 4, P3: 5.4, P50: 6.4, P97: 8.2 },
@@ -49,3 +49,10 @@ export const weightForAgeGirls = [
     { month: 48, P3: 12.8, P50: 15.5, P97: 18.6 },
     { month: 60, P3: 14.1, P50: 17.0, P97: 20.2 }
 ];
+
+export const whoStats = {
+    heightForAgeBoys,
+    weightForAgeBoys,
+    heightForAgeGirls,
+    weightForAgeGirls,
+};
