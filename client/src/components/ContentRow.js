@@ -1,21 +1,28 @@
-import React from 'react';
-import './ContentRow.css';
+import React, { useState, useEffect } from 'react';
+import './Carousel.css';
 
-const ContentRow = ({ title, items }) => (
-    <div className="content-row-container">
-        <div className="content-row-header">
-            <h3>{title}</h3>
-            <a href="#view-all">نمایش همه</a>
-        </div>
-        <div className="content-row">
-            {items.map(item => (
-                <div key={item.id} className="content-card">
-                    <img src={item.image} alt={item.title} />
-                    <p>{item.title}</p>
-                </div>
-            ))}
-        </div>
-    </div>
-);
+const images = [
+    'https://placehold.co/1200x400/1565c0/ffffff?text=بنر+۱',
+    'https://placehold.co/1200x400/4CAF50/ffffff?text=بنر+۲',
+    'https://placehold.co/1200x400/f44336/ffffff?text=بنر+۳',
+];
 
-export default ContentRow;
+const Carousel = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentIndex(prev => (prev + 1) % images.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="carousel">
+            <div className="carousel-inner" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
+                {images.map((src, i) => <img key={i} src={src} alt={`b${i}`} />)}
+            </div>
+        </div>
+    );
+};
+
+export default Carousel;
