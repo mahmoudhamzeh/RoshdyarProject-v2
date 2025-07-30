@@ -1,150 +1,155 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import DatePicker from 'react-datepicker';
-import { whoStats } from '../who-stats';
-import './GrowthChartPage.css';
+import Modal from 'react-modal';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import "react-datepicker/dist/react-datepicker.css";
+import './HealthProfilePage.css';
 
-const GrowthChartPage = () => {
+Modal.setAppElement('#root');
+
+const HealthProfilePage = () => {
     const history = useHistory();
     const { childId } = useParams();
     const [child, setChild] = useState(null);
-    const [chartType, setChartType] = useState('height');
-    const [isAddingData, setIsAddingData] = useState(false);
-    const [newRecord, setNewRecord] = useState({ date: new Date(), value: '' });
+    const [visits, setVisits] = useState([]);
+    const [documents, setDocuments] = useState([]);
+    const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
+    const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const fetchChildData = useCallback(async () => {
+    const fetchAllData = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/children/${childId}`);
-            if (!response.ok) throw new Error('Child not found');
-            const data = await response.json();
-            setChild(data);
+            const childRes = await fetch(`http://localhost:5000/api/children/${childId}`);
+            if (!childRes.ok) throw new Error('Child not found');
+            const childData = await childRes.json();
+            setChild(childData);
+
+            const visitsRes = await fetch(`http://localhost:5000/api/visits/${childId}`);
+            const visitsData = await visitsRes.json();
+            setVisits(visitsData);
+
+            const docsRes = await fetch(`http://localhost:5000/api/documents/${childId}`);
+            const docsData = await docsRes.json();
+            setDocuments(docsData);
         } catch (error) {
             history.push('/my-children');
+        } finally {
+            setIsLoading(false);
         }
     }, [childId, history]);
 
     useEffect(() => {
-        fetchChildData();
-    }, [fetchChildData]);
+        fetchAllData();
+    }, [fetchAllData]);
 
-    const handleAddData = async () => {
-        if (!newRecord.value) {
-            alert('لطفا مقدار را وارد کنید.');
-            return;
-        }
-
-        const updatedGrowthData = [
-            ...(child.growthData || []),
-            {
-                date: newRecord.date.toISOString().split('T')[0],
-                [chartType]: parseFloat(newRecord.value)
-            }
-        ];
-
-        try {
-            const response = await fetch(`http://localhost:5000/api/children/${childId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...child, growthData: updatedGrowthData }),
-            });
-            if (!response.ok) throw new Error('Failed to update data');
-            fetchChildData(); // Refresh data
-            setIsAddingData(false);
-            setNewRecord({ date: new Date(), value: '' });
-        } catch (error) {
-            alert(error.message);
-        }
+    const handleNavigateToGrowthChart = () => {
+        history.push(`/growth-chart/${childId}`);
     };
 
-    if (!child) return <p>در حال بارگذاری...</p>;
+    if (isLoading) {
+        return <p>در حال بارگذاری...</p>;
+    }
 
-    const getStandardData = () => {
-        if (chartType === 'height') {
-            return child.gender === 'boy' ? whoStats.heightForAgeBoys : whoStats.heightForAgeGirls;
+    if (!child) {
+        return <p>کودک یافت نشد.</p>;
+    }
+
+    const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
+
+    const calculateAge = (birthDate) => {
+        if (!birthDate) return '';
+        const today = new Date();
+        const birthDateObj = new Date(birthDate);
+        let age = today.getFullYear() - birthDateObj.getFullYear();
+        const m = today.getMonth() - birthDateObj.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
+            age--;
         }
-        return child.gender === 'boy' ? whoStats.weightForAgeBoys : whoStats.weightForAgeGirls;
+        return age;
     };
-
-    const standardData = getStandardData();
-    const childAgeInMonths = (new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375);
-
-    const formattedChildData = (child.growthData || []).map(d => ({
-        month: (new Date(d.date) - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375),
-        value: d[chartType],
-        date: d.date,
-    })).filter(d => d.value !== undefined).sort((a, b) => a.month - b.month);
-
 
     return (
-        <div className="growth-chart-page">
+        <div className="health-profile-page">
             <nav className="page-nav-final">
-                <button onClick={() => history.goBack()} className="back-btn">
-                    &larr; بازگشت
+                <button onClick={() => history.push('/my-children')} className="back-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    <span>لیست کودکان</span>
                 </button>
-                <h1>نمودار رشد {child.name}</h1>
+                <h1>پرونده سلامت</h1>
                 <div className="nav-placeholder"></div>
             </nav>
-
-            <div className="chart-controls">
-                <button onClick={() => setChartType('height')} className={chartType === 'height' ? 'active' : ''}>قد</button>
-                <button onClick={() => setChartType('weight')} className={chartType === 'weight' ? 'active' : ''}>وزن</button>
-            </div>
-
-            <div className="chart-container">
-                <ResponsiveContainer width="100%" height={400}>
-                    <LineChart margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis
-                            type="number"
-                            dataKey="month"
-                            domain={[0, 60]}
-                            ticks={[0, 6, 12, 18, 24, 36, 48, 60]}
-                            label={{ value: "سن (ماه)", position: "insideBottom", offset: -15 }}
-                        />
-                        <YAxis label={{ value: chartType === 'height' ? 'قد (cm)' : 'وزن (kg)', angle: -90, position: 'insideLeft' }} />
-                        <Tooltip
-                            formatter={(value, name, props) => {
-                                if (name === 'value') return [value, child.name];
-                                return [value, name];
-                            }}
-                        />
-                        <Legend />
-
-                        <Line type="monotone" dataKey="P3" data={standardData} stroke="#ff7300" name="صدک ۳" dot={false} />
-                        <Line type="monotone" dataKey="P50" data={standardData} stroke="#387908" name="صدک ۵۰ (میانه)" dot={false} />
-                        <Line type="monotone" dataKey="P97" data={standardData} stroke="#0095ff" name="صدک ۹۷" dot={false} />
-
-                        <Line type="monotone" dataKey="value" data={formattedChildData} stroke="#e60000" name={child.name} strokeWidth={2} />
-
-                        <ReferenceLine x={childAgeInMonths} stroke="red" label={{ value: "سن فعلی", position: "insideTopRight" }} />
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
-
-            <div className="data-entry-section">
-                <button onClick={() => setIsAddingData(!isAddingData)} className="add-data-toggle">
-                    {isAddingData ? 'لغو' : '+ افزودن داده جدید'}
-                </button>
-                {isAddingData && (
-                    <div className="add-data-form">
-                        <DatePicker
-                            selected={newRecord.date}
-                            onChange={(date) => setNewRecord(prev => ({ ...prev, date }))}
-                            dateFormat="yyyy/MM/dd"
-                        />
-                        <input
-                            type="number"
-                            value={newRecord.value}
-                            onChange={(e) => setNewRecord(prev => ({ ...prev, value: e.target.value }))}
-                            placeholder={`مقدار ${chartType === 'height' ? 'قد' : 'وزن'}`}
-                        />
-                        <button onClick={handleAddData}>ذخیره</button>
+            <header className="profile-header">
+                <img src={avatarUrl} alt={child.name} className="profile-avatar" />
+                <div className="profile-header-info">
+                    <h2>{child.name}</h2>
+                    <p>سن: {calculateAge(child.birthDate)}</p>
+                </div>
+            </header>
+            <main className="profile-content-grid">
+                <div className="grid-col-left">
+                    <div className="main-info-card">
+                        <h3>اطلاعات جامع سلامت</h3>
+                        <div className="info-section">
+                            <strong>اطلاعات پایه</strong>
+                            <p>جنسیت: {child.gender === 'boy' ? 'پسر' : 'دختر'}</p>
+                            <p>گروه خونی: {child.bloodType}</p>
+                        </div>
+                        <div className="info-section">
+                            <strong>آلرژی‌ها</strong>
+                            <div className="tags-container">
+                                {child.allergies && child.allergies.types && Object.entries(child.allergies.types).filter(([_, v]) => v).map(([k]) => <span key={k} className="tag">{k}</span>)}
+                            </div>
+                            <p>{child.allergies && child.allergies.description}</p>
+                        </div>
+                        <div className="info-section">
+                            <strong>بیماری‌های خاص</strong>
+                            <div className="tags-container">
+                                {child.special_illnesses && child.special_illnesses.types && Object.entries(child.special_illnesses.types).filter(([_, v]) => v).map(([k]) => <span key={k} className="tag">{k}</span>)}
+                            </div>
+                            <p>{child.special_illnesses && child.special_illnesses.description}</p>
+                        </div>
+                        <button onClick={() => history.push(`/health-analysis/${child.id}`)} className="edit-main-info-btn">مشاهده تحلیل پرونده</button>
                     </div>
-                )}
-            </div>
+                </div>
+                <div className="grid-col-right">
+                    <div className="action-card" onClick={handleNavigateToGrowthChart}>
+                        <h4>نمودار رشد</h4>
+                        <div className="chart-preview">
+                            <ResponsiveContainer width="100%" height={200}>
+                                <LineChart data={(child.growthData && child.growthData.length > 0) ? child.growthData : [{date: 'شروع', height: 50, weight: 3}]}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="height" stroke="#8884d8" activeDot={{ r: 8 }} />
+                                    <Line type="monotone" dataKey="weight" stroke="#82ca9d" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <p className="view-full-chart-text">مشاهده کامل نمودار</p>
+                    </div>
+                    <div className="actions-grid">
+                        <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
+                            <h4>مراجعات پزشکی</h4>
+                            <p>تعداد: {visits.length}</p>
+                        </div>
+                        <div className="action-card" onClick={() => setIsDocModalOpen(true)}>
+                            <h4>مدارک پزشکی</h4>
+                            <p>تعداد: {documents.length}</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <Modal isOpen={isVisitModalOpen} onRequestClose={() => setIsVisitModalOpen(false)}>
+                <h2>مراجعات پزشکی</h2>
+            </Modal>
+            <Modal isOpen={isDocModalOpen} onRequestClose={() => setIsDocModalOpen(false)}>
+                <h2>مدارک پزشکی</h2>
+            </Modal>
         </div>
     );
 };
 
-export default GrowthChartPage;
+export default HealthProfilePage;
