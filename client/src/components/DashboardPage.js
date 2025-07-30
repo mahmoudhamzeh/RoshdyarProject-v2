@@ -7,12 +7,12 @@ import ContentRow from './ContentRow';
 
 const mockVideos = Array.from({ length: 8 }, (_, i) => ({
     id: i, title: `ویدیو آموزشی ${i + 1}`,
-    image: `https://placehold.co/220x140/4CAF50/FFFFFF?text=Video+${i+1}`
+    image: `https://placehold.co/220x140/4CAF50/FFFFFF?text=ویدیو+${i+1}`
 }));
 
 const mockArticles = Array.from({ length: 8 }, (_, i) => ({
     id: i, title: `مقاله شماره ${i + 1}`,
-    image: `https://placehold.co/220x140/f44336/FFFFFF?text=Article+${i+1}`
+    image: `https://placehold.co/220x140/f44336/FFFFFF?text=مقاله+${i+1}`
 }));
 
 const DashboardPage = () => {

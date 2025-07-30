@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './Carousel.css';
 
 const images = [
-    'https://placehold.co/1200x400/1565c0/ffffff?text=Banner+1',
-    'https://placehold.co/1200x400/4CAF50/ffffff?text=Banner+2',
-    'https://placehold.co/1200x400/f44336/ffffff?text=Banner+3',
+    'https://placehold.co/1200x400/1565c0/ffffff?text=بنر+۱',
+    'https://placehold.co/1200x400/4CAF50/ffffff?text=بنر+۲',
+    'https://placehold.co/1200x400/f44336/ffffff?text=بنر+۳',
 ];
 
 const Carousel = () => {
