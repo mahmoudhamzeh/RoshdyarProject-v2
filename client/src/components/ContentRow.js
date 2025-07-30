@@ -1,28 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import './Carousel.css';
+.content-row-container {
+  max-width: 1200px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+}
 
-const images = [
-    'https://placehold.co/1200x400/1565c0/ffffff?text=بنر+۱',
-    'https://placehold.co/1200x400/4CAF50/ffffff?text=بنر+۲',
-    'https://placehold.co/1200x400/f44336/ffffff?text=بنر+۳',
-];
+.content-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
 
-const Carousel = () => {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentIndex(prev => (prev + 1) % images.length);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, []);
+.content-row-header h3 {
+  color: #0d47a1;
+}
 
-    return (
-        <div className="carousel">
-            <div className="carousel-inner" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
-                {images.map((src, i) => <img key={i} src={src} alt={`b${i}`} />)}
-            </div>
-        </div>
-    );
-};
+.content-row-header a {
+  color: #1565c0;
+  text-decoration: none;
+  font-weight: bold;
+}
 
-export default Carousel;
+.content-row {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  gap: 1rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+.content-row::-webkit-scrollbar { /* WebKit */
+  display: none;
+}
+
+.content-card {
+  flex: 0 0 220px;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.content-card:hover {
+  transform: scale(1.05);
+}
+
+.content-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+.content-card p {
+  padding: 0.8rem;
+  margin: 0;
+  font-weight: 500;
+  text-align: center;
+  color: #333;
+}
