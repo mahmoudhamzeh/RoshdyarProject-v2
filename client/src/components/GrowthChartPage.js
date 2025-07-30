@@ -2,15 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import DatePicker from 'react-datepicker';
+import Modal from 'react-modal';
 import { whoStats } from '../who-stats';
 import './GrowthChartPage.css';
+
+Modal.setAppElement('#root');
 
 const GrowthChartPage = () => {
     const history = useHistory();
     const { childId } = useParams();
     const [child, setChild] = useState(null);
     const [chartType, setChartType] = useState('height');
-    const [isAddingData, setIsAddingData] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
     const [newRecord, setNewRecord] = useState({ date: new Date(), value: '' });
 
     const fetchChildData = useCallback(async () => {
@@ -50,11 +53,19 @@ const GrowthChartPage = () => {
             });
             if (!response.ok) throw new Error('Failed to update data');
             fetchChildData(); // Refresh data
-            setIsAddingData(false);
+            setModalIsOpen(false);
             setNewRecord({ date: new Date(), value: '' });
         } catch (error) {
             alert(error.message);
         }
+    };
+
+    const getGrowthStatus = (value, standardData) => {
+        if (!value || !standardData || standardData.length === 0) return 'نامشخص';
+        const lastStandard = standardData[standardData.length - 1];
+        if (value < lastStandard.P3) return 'پایین‌تر از نرمال';
+        if (value > lastStandard.P97) return 'بالاتر از نرمال';
+        return 'نرمال';
     };
 
     if (!child) return <p>در حال بارگذاری...</p>;
@@ -76,6 +87,8 @@ const GrowthChartPage = () => {
         date: d.date,
     })).filter(d => d.value !== undefined).sort((a, b) => a.month - b.month) : [];
 
+    const lastRecord = formattedChildData.length > 0 ? formattedChildData[formattedChildData.length - 1] : null;
+    const status = lastRecord ? getGrowthStatus(lastRecord.value, standardData) : 'داده‌ای ثبت نشده';
 
     return (
         <div className="growth-chart-page">
@@ -86,6 +99,19 @@ const GrowthChartPage = () => {
                 <h1>نمودار رشد {child.name}</h1>
                 <div className="nav-placeholder"></div>
             </nav>
+
+            <div className="chart-info-boxes">
+                <div className="info-box">
+                    <h4>آخرین قد ثبت شده</h4>
+                    <p>{child.height || 'N/A'} cm</p>
+                    <span>وضعیت: {getGrowthStatus(child.height, whoStats.heightForAgeBoys)}</span>
+                </div>
+                <div className="info-box">
+                    <h4>آخرین وزن ثبت شده</h4>
+                    <p>{child.weight || 'N/A'} kg</p>
+                    <span>وضعیت: {getGrowthStatus(child.weight, whoStats.weightForAgeBoys)}</span>
+                </div>
+            </div>
 
             <div className="chart-controls">
                 <button onClick={() => setChartType('height')} className={chartType === 'height' ? 'active' : ''}>قد</button>
@@ -124,10 +150,17 @@ const GrowthChartPage = () => {
             </div>
 
             <div className="data-entry-section">
-                <button onClick={() => setIsAddingData(!isAddingData)} className="add-data-toggle">
-                    {isAddingData ? 'لغو' : '+ افزودن داده جدید'}
+                <button onClick={() => setModalIsOpen(true)} className="add-data-toggle">
+                    + افزودن داده جدید
                 </button>
-                {isAddingData && (
+                <Modal
+                    isOpen={modalIsOpen}
+                    onRequestClose={() => setModalIsOpen(false)}
+                    contentLabel="Add Data Modal"
+                    className="add-data-modal"
+                    overlayClassName="modal-overlay"
+                >
+                    <h2>افزودن داده جدید برای {chartType === 'height' ? 'قد' : 'وزن'}</h2>
                     <div className="add-data-form">
                         <DatePicker
                             selected={newRecord.date}
@@ -138,11 +171,14 @@ const GrowthChartPage = () => {
                             type="number"
                             value={newRecord.value}
                             onChange={(e) => setNewRecord(prev => ({ ...prev, value: e.target.value }))}
-                            placeholder={`مقدار ${chartType === 'height' ? 'قد' : 'وزن'}`}
+                            placeholder={`مقدار`}
                         />
-                        <button onClick={handleAddData}>ذخیره</button>
                     </div>
-                )}
+                    <div className="modal-actions">
+                        <button onClick={handleAddData}>ذخیره</button>
+                        <button onClick={() => setModalIsOpen(false)}>انصراف</button>
+                    </div>
+                </Modal>
             </div>
         </div>
     );
