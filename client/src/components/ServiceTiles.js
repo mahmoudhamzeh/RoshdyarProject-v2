@@ -56,12 +56,15 @@ const ServiceTiles = () => {
                     const requiresChild = service.id === 'growth-chart' || service.id === 'vaccination';
                     if (requiresChild) {
                         return (
-                            <div key={service.id} className="tile-link" onClick={() => handleServiceClick(service.id)}>
+                            <Link to="#" key={service.id} className="tile-link" onClick={(e) => {
+                                e.preventDefault();
+                                handleServiceClick(service.id);
+                            }}>
                                 <div className="tile">
                                     <div className="tile-icon">{service.icon}</div>
                                     <div className="tile-name">{service.name}</div>
                                 </div>
-                            </div>
+                            </Link>
                         );
                     }
                     return (
