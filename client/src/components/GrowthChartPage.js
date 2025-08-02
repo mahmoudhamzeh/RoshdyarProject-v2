@@ -56,7 +56,7 @@ const GrowthChart = ({ data, standardData, childName, yAxisLabel, childAgeInMont
                     return [value, name];
                 }}
             />
-            <Legend content={<CustomLegend childName={childName} />} />
+            <Legend content={<CustomLegend childName={childName} />} wrapperStyle={{ paddingTop: '20px' }} />
             <Line type="monotone" dataKey="P3" data={standardData} stroke="#ff7300" name="صدک ۳" dot={false} />
             <Line type="monotone" dataKey="P50" data={standardData} stroke="#387908" name="صدک ۵۰ (میانه)" dot={false} />
             <Line type="monotone" dataKey="P97" data={standardData} stroke="#0095ff" name="صدک ۹۷" dot={false} />
@@ -158,9 +158,15 @@ const GrowthChartPage = () => {
                 <button onClick={() => history.goBack()} className="back-btn">
                     &larr; بازگشت به پرونده
                 </button>
-                <h1>نمودار رشد {child.name}</h1>
+                <h1 className="page-title">نمودار رشد {child.name}</h1>
                 <div className="nav-placeholder"></div>
             </nav>
+
+            <div className="page-actions">
+                <button onClick={() => setModalIsOpen(true)} className="add-data-btn">
+                    + افزودن داده جدید
+                </button>
+            </div>
 
             <div className="chart-info-boxes">
                 <div className={`info-box ${heightStatus.className}`}>
@@ -195,12 +201,6 @@ const GrowthChartPage = () => {
                     yAxisLabel="وزن (kg)"
                     childAgeInMonths={childAgeInMonths}
                 />
-            </div>
-
-            <div className="data-entry-section">
-                <button onClick={() => setModalIsOpen(true)} className="add-data-btn">
-                    + افزودن داده جدید
-                </button>
             </div>
 
             <Modal
