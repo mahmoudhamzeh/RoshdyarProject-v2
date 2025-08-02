@@ -24,15 +24,22 @@ const ServiceTiles = () => {
     const [selectedService, setSelectedService] = useState('');
 
     const handleServiceClick = async (serviceId) => {
+        console.log(`handleServiceClick triggered for service: ${serviceId}`);
         try {
             const response = await fetch('http://localhost:5000/api/children');
             const data = await response.json();
+            console.log(`Found ${data.length} children.`);
+
             if (data.length === 0) {
+                console.log('Navigating to /add-child');
                 alert('ابتدا باید حداقل یک کودک اضافه کنید.');
                 history.push('/add-child');
             } else if (data.length === 1) {
-                history.push(`/${serviceId}/${data[0].id}`);
+                const url = `/${serviceId}/${data[0].id}`;
+                console.log(`Navigating to: ${url}`);
+                history.push(url);
             } else {
+                console.log('Opening child selection modal.');
                 setChildren(data);
                 setSelectedService(serviceId);
                 setModalIsOpen(true);
@@ -45,7 +52,11 @@ const ServiceTiles = () => {
 
     const handleModalSubmit = () => {
         if (selectedChild && selectedService) {
-            history.push(`/${selectedService}/${selectedChild}`);
+            const url = `/${selectedService}/${selectedChild}`;
+            console.log(`Modal submit: Navigating to: ${url}`);
+            history.push(url);
+        } else {
+            console.log('Modal submit failed: selectedChild or selectedService is missing.');
         }
     };
 
