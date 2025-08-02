@@ -14,6 +14,8 @@
 }
 
 .back-btn {
+  flex: 1;
+  text-align: left;
   background: none;
   border: none;
   font-size: 1rem;
@@ -22,15 +24,33 @@
   font-weight: bold;
 }
 
-.page-nav-final h1 {
+.page-title {
+    flex: 2;
+    text-align: center;
     margin: 0;
     font-size: 1.5rem;
     color: #0d47a1;
 }
 
 .nav-placeholder {
-    width: 80px; /* Balance the back button */
+    flex: 1;
 }
+
+.page-actions {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.add-data-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
 
 .chart-info-boxes {
   display: flex;
@@ -94,16 +114,6 @@
 .data-entry-section {
   margin-top: 1.5rem;
   text-align: center;
-}
-
-.add-data-btn {
-  background-color: #4CAF50;
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
 }
 
 .add-data-modal {
