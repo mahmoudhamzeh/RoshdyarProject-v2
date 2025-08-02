@@ -8,37 +8,39 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: #fff;
+  background-color: #e3f2fd; /* Light blue background */
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 1.5rem;
+  margin: -1rem -1rem 1.5rem -1rem; /* Extend to page edges */
 }
 
 .back-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1rem;
   cursor: pointer;
-  color: #4a90e2;
+  color: #1565c0;
+  font-weight: bold;
 }
 
-.add-data-btn {
-  background-color: #4CAF50;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
+.page-nav-final h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #0d47a1;
+}
+
+.nav-placeholder {
+    width: 80px; /* Balance the back button */
 }
 
 .chart-info-boxes {
   display: flex;
+  justify-content: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .info-box {
-  flex: 1;
+  flex: 0 1 300px; /* Make boxes narrower */
   background-color: #fff;
   padding: 1rem;
   border-radius: 8px;
@@ -87,6 +89,21 @@
     text-align: center;
     margin-top: 0;
     margin-bottom: 1.5rem;
+}
+
+.data-entry-section {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.add-data-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
 }
 
 .add-data-modal {
@@ -142,4 +159,20 @@
 .modal-actions button:last-child {
   background-color: #f1f1f1;
   color: #333;
+}
+
+.custom-legend {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.custom-legend li {
+    cursor: help;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
