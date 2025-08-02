@@ -8,6 +8,36 @@ import './GrowthChartPage.css';
 
 Modal.setAppElement('#root');
 
+const legendTooltips = {
+    'صدک ۳': '۳٪ از کودکان هم‌سن و هم‌جنس، مقداری کمتر از این خط دارند.',
+    'صدک ۵۰ (میانه)': 'نقطه میانی رشد؛ ۵۰٪ از کودکان مقداری کمتر و ۵۰٪ مقداری بیشتر از این خط دارند.',
+    'صدک ۹۷': '۹۷٪ از کودکان هم‌سن و هم‌جنس، مقداری کمتر از این خط دارند.'
+};
+
+const CustomLegend = (props) => {
+    const { payload } = props;
+    return (
+        <ul className="custom-legend">
+            {payload.map((entry, index) => {
+                const childNameEntry = entry.value === props.childName;
+                if (childNameEntry) {
+                    return (
+                        <li key={`item-${index}`} style={{ color: entry.color }}>
+                           {entry.value} (داده‌های شما)
+                        </li>
+                    );
+                }
+                return (
+                    <li key={`item-${index}`} style={{ color: entry.color }} title={legendTooltips[entry.value] || ''}>
+                        {entry.value}
+                    </li>
+                );
+            })}
+        </ul>
+    );
+};
+
+
 const GrowthChart = ({ data, standardData, childName, yAxisLabel, childAgeInMonths }) => (
     <ResponsiveContainer width="100%" height={300}>
         <LineChart margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
@@ -26,7 +56,7 @@ const GrowthChart = ({ data, standardData, childName, yAxisLabel, childAgeInMont
                     return [value, name];
                 }}
             />
-            <Legend />
+            <Legend content={<CustomLegend childName={childName} />} />
             <Line type="monotone" dataKey="P3" data={standardData} stroke="#ff7300" name="صدک ۳" dot={false} />
             <Line type="monotone" dataKey="P50" data={standardData} stroke="#387908" name="صدک ۵۰ (میانه)" dot={false} />
             <Line type="monotone" dataKey="P97" data={standardData} stroke="#0095ff" name="صدک ۹۷" dot={false} />
@@ -126,12 +156,10 @@ const GrowthChartPage = () => {
         <div className="growth-chart-page">
             <nav className="page-nav-final">
                 <button onClick={() => history.goBack()} className="back-btn">
-                    &larr;
+                    &larr; بازگشت به پرونده
                 </button>
                 <h1>نمودار رشد {child.name}</h1>
-                <button onClick={() => setModalIsOpen(true)} className="add-data-btn">
-                    + افزودن داده
-                </button>
+                <div className="nav-placeholder"></div>
             </nav>
 
             <div className="chart-info-boxes">
@@ -167,6 +195,12 @@ const GrowthChartPage = () => {
                     yAxisLabel="وزن (kg)"
                     childAgeInMonths={childAgeInMonths}
                 />
+            </div>
+
+            <div className="data-entry-section">
+                <button onClick={() => setModalIsOpen(true)} className="add-data-btn">
+                    + افزودن داده جدید
+                </button>
             </div>
 
             <Modal
