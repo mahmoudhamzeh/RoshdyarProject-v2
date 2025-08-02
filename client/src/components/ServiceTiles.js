@@ -24,7 +24,6 @@ const ServiceTiles = () => {
     const [selectedService, setSelectedService] = useState('');
 
     const handleServiceClick = async (serviceId) => {
-        const serviceUrl = serviceId.replace('-', '/'); // e.g., 'growth-chart' -> 'growth/chart' - adjust if needed
         try {
             const response = await fetch('http://localhost:5000/api/children');
             const data = await response.json();
