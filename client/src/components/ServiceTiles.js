@@ -21,8 +21,10 @@ const ServiceTiles = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [children, setChildren] = useState([]);
     const [selectedChild, setSelectedChild] = useState('');
+    const [selectedService, setSelectedService] = useState('');
 
-    const handleGrowthChartClick = async () => {
+    const handleServiceClick = async (serviceId) => {
+        const serviceUrl = serviceId.replace('-', '/'); // e.g., 'growth-chart' -> 'growth/chart' - adjust if needed
         try {
             const response = await fetch('http://localhost:5000/api/children');
             const data = await response.json();
@@ -30,9 +32,10 @@ const ServiceTiles = () => {
                 alert('ابتدا باید حداقل یک کودک اضافه کنید.');
                 history.push('/add-child');
             } else if (data.length === 1) {
-                history.push(`/growth-chart/${data[0].id}`);
+                history.push(`/${serviceId}/${data[0].id}`);
             } else {
                 setChildren(data);
+                setSelectedService(serviceId);
                 setModalIsOpen(true);
             }
         } catch (error) {
@@ -41,13 +44,20 @@ const ServiceTiles = () => {
         }
     };
 
+    const handleModalSubmit = () => {
+        if (selectedChild && selectedService) {
+            history.push(`/${selectedService}/${selectedChild}`);
+        }
+    };
+
     return (
         <>
             <div className="tiles-container">
                 {services.map(service => {
-                    if (service.id === 'growth-chart') {
+                    const requiresChild = service.id === 'growth-chart' || service.id === 'vaccination';
+                    if (requiresChild) {
                         return (
-                            <div key={service.id} className="tile-link" onClick={handleGrowthChartClick}>
+                            <div key={service.id} className="tile-link" onClick={() => handleServiceClick(service.id)}>
                                 <div className="tile">
                                     <div className="tile-icon">{service.icon}</div>
                                     <div className="tile-name">{service.name}</div>
@@ -86,7 +96,7 @@ const ServiceTiles = () => {
                     ))}
                 </div>
                 <div className="modal-actions">
-                    <button onClick={() => { if (selectedChild) history.push(`/growth-chart/${selectedChild}`); }} disabled={!selectedChild}>
+                    <button onClick={handleModalSubmit} disabled={!selectedChild}>
                         تایید و ادامه
                     </button>
                     <button onClick={() => setModalIsOpen(false)}>انصراف</button>
