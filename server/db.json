@@ -3,7 +3,8 @@
   "children": [
     {
       "id": 1,
-      "name": "محمود تستeee",
+      "firstName": "محمود",
+      "lastName": "تست",
       "gender": "boy",
       "birthDate": "2022/07/25",
       "avatar": "/uploads/1753306106318.webp",
@@ -11,7 +12,17 @@
       "weight": "2.8",
       "bloodType": "A+",
       "allergies": "",
-      "special_illnesses": ""
+      "special_illnesses": "",
+      "nationalId": "0011223344",
+      "fatherName": "علی",
+      "birthWeight": 3100,
+      "birthHeight": 51,
+      "birthHeadCircumference": 36,
+      "birthType": "طبیعی",
+      "gestationalAge": 40,
+      "birthPlace": "بیمارستان آرش",
+      "apgar1": 9,
+      "apgar5": 10
     },
     {
       "id": 2,
