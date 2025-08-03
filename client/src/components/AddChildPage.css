@@ -40,14 +40,46 @@
     margin-bottom: 1.5rem;
 }
 
-.form-section h3.section-title {
+.form-section .section-title {
     font-size: 1.2rem;
     color: #007bff;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid #eef;
+    padding: 1rem;
+    margin: -1rem -1rem 1rem -1rem; /* Extend to edges of the section padding */
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
 }
 
+.form-section .section-title:hover {
+    background-color: #f8f9fa;
+}
+
+.form-section .section-title .chevron-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+.form-section .section-title.open .chevron-icon {
+    transform: rotate(180deg);
+}
+
+.section-content {
+    overflow: hidden;
+    max-height: 2000px; /* Large enough to not clip content */
+    transition: max-height 0.5s ease-in-out, visibility 0.5s ease-in-out;
+    visibility: visible;
+}
+
+/* This is a bit of a trick for animating height */
+.form-section:not(:has(.section-title.open)) .section-content {
+    max-height: 0;
+    visibility: hidden;
+    margin-top: -1rem; /* To collapse margin */
+}
+
+/* Original .section-title for allergies/illnesses - now needs cursor */
 .section-title {
     font-size: 1.1rem;
     font-weight: bold;
