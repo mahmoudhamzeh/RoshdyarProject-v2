@@ -43,9 +43,16 @@ const AddChildPage = () => {
     const [preview, setPreview] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [openSection, setOpenSection] = useState('identity');
+    const [documentFiles, setDocumentFiles] = useState([]);
 
     const handleSectionToggle = (section) => {
         setOpenSection(openSection === section ? null : section);
+    };
+
+    const handleDocumentChange = (e) => {
+        if (e.target.files) {
+            setDocumentFiles(Array.from(e.target.files));
+        }
     };
 
     const handleChange = (e) => {
@@ -78,21 +85,42 @@ const AddChildPage = () => {
         e.preventDefault();
         setIsSubmitting(true);
         let avatarPath = '';
+        let documentPaths = [];
 
+        // Upload avatar
         if (avatarFile) {
             const uploadData = new FormData();
-            uploadData.append('avatar', avatarFile);
+            uploadData.append('file', avatarFile); // Use 'file' as the key to match server
             try {
                 const uploadRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: uploadData });
-                if (!uploadRes.ok) throw new Error('Failed to upload image');
+                if (!uploadRes.ok) throw new Error('Failed to upload avatar image');
                 const result = await uploadRes.json();
                 avatarPath = result.filePath.replace(/\\/g, "/");
             } catch (error) { alert(error.message); setIsSubmitting(false); return; }
         }
 
+        // Upload documents
+        if (documentFiles.length > 0) {
+            for (const file of documentFiles) {
+                const uploadData = new FormData();
+                uploadData.append('file', file); // Use 'file' as the key
+                try {
+                    const uploadRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: uploadData });
+                    if (!uploadRes.ok) throw new Error(`Failed to upload document: ${file.name}`);
+                    const result = await uploadRes.json();
+                    documentPaths.push(result.filePath.replace(/\\/g, "/"));
+                } catch (error) { alert(error.message); setIsSubmitting(false); return; }
+            }
+        }
+
         try {
             const formattedBirthDate = format(birthDate, 'yyyy/MM/dd');
-            const finalData = { ...formData, birthDate: formattedBirthDate, avatar: avatarPath };
+            const finalData = {
+                ...formData,
+                birthDate: formattedBirthDate,
+                avatar: avatarPath,
+                documents: documentPaths
+            };
             const response = await fetch('http://localhost:5000/api/children', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalData) });
             if (!response.ok) throw new Error('Failed to add child');
             alert('کودک با موفقیت اضافه شد!');
@@ -103,10 +131,16 @@ const AddChildPage = () => {
 
     return (
         <div className="add-child-page-v2">
-            <nav className="page-nav-final"><button onClick={() => history.push('/my-children')} className="back-btn-add-child">&rarr;</button><h1>افزودن کودک جدید</h1><div className="nav-placeholder"></div></nav>
+            <nav className="page-nav-final">
+                <button onClick={() => history.push('/my-children')} className="back-btn-add-child">
+                    <span>&rarr;</span>
+                    <span>بازگشت</span>
+                </button>
+                <h1>افزودن کودک جدید</h1>
+                <div className="nav-placeholder"></div>
+            </nav>
             <div className="add-child-form-container-v2">
                 <form onSubmit={handleSubmit} className="add-child-form">
-                    <div className="form-group-full avatar-upload-area"><label htmlFor="avatar">عکس پروفایل</label><img src={preview || 'https://i.pravatar.cc/150?u=default'} alt="پیش‌نمایش" className="avatar-preview" /><input type="file" id="avatar" name="avatar" onChange={handleChange} accept="image/*" capture="user" /></div>
 
                     {/* Identity Information Section */}
                     <div className="form-section">
@@ -115,18 +149,48 @@ const AddChildPage = () => {
                             <FontAwesomeIcon icon={faChevronDown} className="chevron-icon" />
                         </h3>
                         {openSection === 'identity' && (
+                            <div className="section-content identity-section-content">
+                                <div className="avatar-upload-area-v2">
+                                    <label htmlFor="avatar">عکس پروفایل</label>
+                                    <img src={preview || 'https://i.pravatar.cc/150?u=default'} alt="پیش‌نمایش" className="avatar-preview" />
+                                    <input type="file" id="avatar" name="avatar" onChange={handleChange} accept="image/*" capture="user" />
+                                </div>
+                                <div className="identity-fields">
+                                    <div className="form-row">
+                                        <div className="form-group"><label>نام</label><input name="firstName" value={formData.firstName} onChange={handleChange} required /></div>
+                                        <div className="form-group"><label>نام خانوادگی</label><input name="lastName" value={formData.lastName} onChange={handleChange} required /></div>
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-group"><label>کد ملی</label><input name="nationalId" value={formData.nationalId} onChange={handleChange} /></div>
+                                        <div className="form-group"><label>نام پدر</label><input name="fatherName" value={formData.fatherName} onChange={handleChange} /></div>
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-group"><label>جنسیت</label><select name="gender" value={formData.gender} onChange={handleChange}><option value="boy">پسر</option><option value="girl">دختر</option></select></div>
+                                        <div className="form-group"><label>تاریخ تولد</label><DatePicker selected={birthDate} onChange={(date) => setBirthDate(date)} dateFormat="yyyy/MM/dd" showYearDropdown scrollableYearDropdown yearDropdownItemNumber={40} /></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Document Upload Section */}
+                    <div className="form-section">
+                        <h3 className={`section-title ${openSection === 'documents' ? 'open' : ''}`} onClick={() => handleSectionToggle('documents')}>
+                            <span>بارگذاری مدارک</span>
+                            <FontAwesomeIcon icon={faChevronDown} className="chevron-icon" />
+                        </h3>
+                        {openSection === 'documents' && (
                             <div className="section-content">
-                                <div className="form-row">
-                                    <div className="form-group"><label>نام</label><input name="firstName" value={formData.firstName} onChange={handleChange} required /></div>
-                                    <div className="form-group"><label>نام خانوادگی</label><input name="lastName" value={formData.lastName} onChange={handleChange} required /></div>
-                                </div>
-                                <div className="form-row">
-                                    <div className="form-group"><label>کد ملی</label><input name="nationalId" value={formData.nationalId} onChange={handleChange} /></div>
-                                    <div className="form-group"><label>نام پدر</label><input name="fatherName" value={formData.fatherName} onChange={handleChange} /></div>
-                                </div>
-                                <div className="form-row">
-                                    <div className="form-group"><label>جنسیت</label><select name="gender" value={formData.gender} onChange={handleChange}><option value="boy">پسر</option><option value="girl">دختر</option></select></div>
-                                    <div className="form-group"><label>تاریخ تولد</label><DatePicker selected={birthDate} onChange={(date) => setBirthDate(date)} dateFormat="yyyy/MM/dd" showYearDropdown scrollableYearDropdown yearDropdownItemNumber={40} /></div>
+                                <div className="form-group-full">
+                                    <label htmlFor="documents">مدارک پزشکی (مانند برگه بیمارستان)</label>
+                                    <input type="file" id="documents" name="documents" onChange={handleDocumentChange} multiple accept="image/*,.pdf" />
+                                    {documentFiles.length > 0 && (
+                                        <ul className="file-list">
+                                            {documentFiles.map((file, index) => (
+                                                <li key={index}>{file.name}</li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
                             </div>
                         )}
