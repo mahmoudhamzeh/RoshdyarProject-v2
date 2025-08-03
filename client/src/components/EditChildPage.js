@@ -46,38 +46,6 @@ const EditChildPage = () => {
         };
         fetchChildData();
     }, [id, history]);
-        lastName: '',
-        nationalId: '',
-        gender: 'boy',
-        fatherName: '',
-        // Birth Info
-        birthWeight: '',
-        birthHeight: '',
-        birthHeadCircumference: '',
-        birthType: 'natural',
-        gestationalAge: '',
-        birthPlace: '',
-        apgar1: '',
-        apgar5: '',
-        // Other Info from previous form
-        height: '',
-        weight: '',
-        bloodType: 'A+',
-        allergies: {
-            types: { 'غذایی': false, 'دارویی': false, 'محیطی': false, 'سایر': false },
-            description: ''
-        },
-        special_illnesses: {
-            types: { 'مزمن': false, 'ژنتیکی': false, 'تکاملی': false, 'سایر': false },
-            description: ''
-        }
-    });
-    const [birthDate, setBirthDate] = useState(new Date());
-    const [avatarFile, setAvatarFile] = useState(null);
-    const [preview, setPreview] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [openSection, setOpenSection] = useState('identity');
-    const [documentFiles, setDocumentFiles] = useState([]);
 
     const handleSectionToggle = (section) => {
         setOpenSection(openSection === section ? null : section);
