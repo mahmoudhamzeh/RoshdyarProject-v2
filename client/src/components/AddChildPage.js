@@ -84,49 +84,68 @@ const AddChildPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        let avatarPath = '';
-        let documentPaths = [];
-
-        // Upload avatar
-        if (avatarFile) {
-            const uploadData = new FormData();
-            uploadData.append('file', avatarFile); // Use 'file' as the key to match server
-            try {
-                const uploadRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: uploadData });
-                if (!uploadRes.ok) throw new Error('Failed to upload avatar image');
-                const result = await uploadRes.json();
-                avatarPath = result.filePath.replace(/\\/g, "/");
-            } catch (error) { alert(error.message); setIsSubmitting(false); return; }
-        }
-
-        // Upload documents
-        if (documentFiles.length > 0) {
-            for (const file of documentFiles) {
-                const uploadData = new FormData();
-                uploadData.append('file', file); // Use 'file' as the key
-                try {
-                    const uploadRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: uploadData });
-                    if (!uploadRes.ok) throw new Error(`Failed to upload document: ${file.name}`);
-                    const result = await uploadRes.json();
-                    documentPaths.push(result.filePath.replace(/\\/g, "/"));
-                } catch (error) { alert(error.message); setIsSubmitting(false); return; }
-            }
-        }
 
         try {
+            // Step 1: Upload avatar
+            let avatarPath = '';
+            if (avatarFile) {
+                const avatarUploadData = new FormData();
+                avatarUploadData.append('avatar', avatarFile);
+                const avatarRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: avatarUploadData });
+                if (!avatarRes.ok) throw new Error('Failed to upload avatar image');
+                const avatarResult = await avatarRes.json();
+                avatarPath = avatarResult.filePath.replace(/\\/g, "/");
+            }
+
+            // Step 2: Create the child with all data except documents
             const formattedBirthDate = format(birthDate, 'yyyy/MM/dd');
-            const finalData = {
+            const childData = {
                 ...formData,
                 birthDate: formattedBirthDate,
                 avatar: avatarPath,
-                documents: documentPaths
+                documents: [] // Initialize with empty array
             };
-            const response = await fetch('http://localhost:5000/api/children', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalData) });
-            if (!response.ok) throw new Error('Failed to add child');
-            alert('کودک با موفقیت اضافه شد!');
+
+            const createChildRes = await fetch('http://localhost:5000/api/children', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(childData)
+            });
+
+            if (!createChildRes.ok) throw new Error('Failed to add child');
+            const newChild = await createChildRes.json();
+            const newChildId = newChild.id;
+
+            // Step 3: Upload documents for the newly created child
+            if (documentFiles.length > 0) {
+                // This part is tricky because the server endpoint for documents is one-by-one.
+                // A better server API would accept multiple files.
+                // For now, we upload them sequentially.
+                for (const file of documentFiles) {
+                    const docUploadData = new FormData();
+                    docUploadData.append('document', file);
+                    // We don't have a title, so server will use filename.
+                    const docRes = await fetch(`http://localhost:5000/api/documents/${newChildId}`, {
+                        method: 'POST',
+                        body: docUploadData
+                    });
+                    if (!docRes.ok) {
+                        // If a document fails, the child is already created. This is a flaw in the current API design.
+                        // We'll alert the user and proceed.
+                        alert(`موفق به آپلود فایل ${file.name} نشدیم، اما کودک با موفقیت ساخته شد. می‌توانید بعداً مدرک را اضافه کنید.`);
+                    }
+                }
+            }
+
+            // Step 4: Final success message and navigation
+            alert('کودک و مدارک با موفقیت اضافه شدند!');
             history.push('/my-children');
-        } catch (error) { alert(error.message); }
-        finally { setIsSubmitting(false); }
+
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
