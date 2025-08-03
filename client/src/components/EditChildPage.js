@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import { format } from 'date-fns';
@@ -334,4 +334,4 @@ const EditChildPage = () => {
     );
 };
 
-export default AddChildPage;
+export default EditChildPage;
