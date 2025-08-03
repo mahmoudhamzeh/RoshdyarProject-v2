@@ -89,7 +89,26 @@ app.put('/api/children/:id', (req, res) => {
 app.delete('/api/children/:id', (req, res) => { const childId = parseInt(req.params.id); const initialLength = children.length; children = children.filter(c => c.id !== childId); if (growthData[childId]) delete growthData[childId]; if (medicalVisits[childId]) delete medicalVisits[childId]; if (children.length < initialLength) { saveData(); res.status(200).json({ message: 'Deleted' }); } else res.status(404).json({ message: 'Not found' }); });
 
 app.get('/api/growth/:childId', (req, res) => res.json(growthData[req.params.childId] || []));
-app.post('/api/growth/:childId', (req, res) => { const { childId } = req.params; const { date, height, weight } = req.body; if (!date || !height || !weight) return res.status(400).json({ message: 'All fields required.' }); if (!growthData[childId]) growthData[childId] = []; const newRecord = { date, height: parseFloat(height), weight: parseFloat(weight) }; growthData[childId].push(newRecord); growthData[childId].sort((a, b) => new Date(a.date.replace(/\//g, '-')) - new Date(b.date.replace(/\//g, '-'))); saveData(); res.status(201).json(newRecord); });
+app.post('/api/growth/:childId', (req, res) => {
+    const { childId } = req.params;
+    const { date, height, weight, headCircumference } = req.body;
+    if (!date || (!height && !weight && !headCircumference)) {
+        return res.status(400).json({ message: 'Date and at least one measurement are required.' });
+    }
+    if (!growthData[childId]) {
+        growthData[childId] = [];
+    }
+    const newRecord = {
+        date,
+        height: height ? parseFloat(height) : undefined,
+        weight: weight ? parseFloat(weight) : undefined,
+        headCircumference: headCircumference ? parseFloat(headCircumference) : undefined
+    };
+    growthData[childId].push(newRecord);
+    growthData[childId].sort((a, b) => new Date(a.date.replace(/\//g, '-')) - new Date(b.date.replace(/\//g, '-')));
+    saveData();
+    res.status(201).json(newRecord);
+});
 app.delete('/api/growth/:childId/:date', (req, res) => { const { childId, date } = req.params; if (growthData[childId]) { const initialLength = growthData[childId].length; growthData[childId] = growthData[childId].filter(record => record.date !== date); if (growthData[childId].length < initialLength) { saveData(); res.status(200).json({ message: 'Record deleted' }); } else res.status(404).json({ message: 'Record not found' }); } else res.status(404).json({ message: 'Child not found' }); });
 
 app.get('/api/visits/:childId', (req, res) => res.json(medicalVisits[req.params.childId] || []));

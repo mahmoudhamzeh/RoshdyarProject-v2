@@ -126,17 +126,20 @@
       {
         "date": "2022/07/25",
         "height": 44,
-        "weight": 2.8
+        "weight": 2.8,
+        "headCircumference": 36
       },
       {
         "date": "2024/07/24",
         "height": 66,
-        "weight": 12
+        "weight": 12,
+        "headCircumference": 48
       },
       {
         "date": "2025/07/25",
         "height": 155,
-        "weight": 95
+        "weight": 95,
+        "headCircumference": 51
       }
     ],
     "2": [
