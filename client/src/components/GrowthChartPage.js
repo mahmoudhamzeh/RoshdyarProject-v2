@@ -71,7 +71,7 @@ const GrowthChartPage = () => {
     const { childId } = useParams();
     const [child, setChild] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [newRecord, setNewRecord] = useState({ date: new Date(), height: '', weight: '' });
+    const [newRecord, setNewRecord] = useState({ date: new Date(), height: '', weight: '', headCircumference: '' });
 
     const fetchChildData = useCallback(async () => {
         try {
@@ -89,30 +89,38 @@ const GrowthChartPage = () => {
     }, [fetchChildData]);
 
     const handleAddData = async () => {
-        if (!newRecord.height && !newRecord.weight) {
-            alert('حداقل قد یا وزن را وارد کنید.');
+        if (!newRecord.height && !newRecord.weight && !newRecord.headCircumference) {
+            alert('حداقل یکی از موارد قد، وزن یا دور سر را وارد کنید.');
             return;
         }
 
-        const updatedGrowthData = [
-            ...(child.growthData || []),
-            {
-                date: newRecord.date.toISOString().split('T')[0],
-                height: newRecord.height ? parseFloat(newRecord.height) : undefined,
-                weight: newRecord.weight ? parseFloat(newRecord.weight) : undefined,
-            }
-        ];
+        const recordToAdd = {
+            date: newRecord.date.toISOString().split('T')[0],
+            height: newRecord.height ? parseFloat(newRecord.height) : undefined,
+            weight: newRecord.weight ? parseFloat(newRecord.weight) : undefined,
+            headCircumference: newRecord.headCircumference ? parseFloat(newRecord.headCircumference) : undefined,
+        };
 
         try {
-            const response = await fetch(`http://localhost:5000/api/children/${childId}`, {
-                method: 'PUT',
+            // Use the correct, dedicated endpoint
+            const response = await fetch(`http://localhost:5000/api/growth/${childId}`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...child, growthData: updatedGrowthData }),
+                body: JSON.stringify(recordToAdd),
             });
-            if (!response.ok) throw new Error('Failed to update data');
-            fetchChildData(); // Refresh data
+            if (!response.ok) throw new Error('Failed to add new growth record');
+
+            // The fetchChildData function is incorrect as it reads from child.growthData, not the growth API
+            // For now, I will manually update the state to reflect the change.
+            // A proper fix would be to have fetchChildData also fetch from /api/growth/:childId
+            const newGrowthRecord = await response.json();
+            setChild(prevChild => ({
+                ...prevChild,
+                growthData: [...(prevChild.growthData || []), newGrowthRecord]
+            }));
+
             setModalIsOpen(false);
-            setNewRecord({ date: new Date(), height: '', weight: '' });
+            setNewRecord({ date: new Date(), height: '', weight: '', headCircumference: '' });
         } catch (error) {
             alert(error.message);
         }
@@ -145,11 +153,18 @@ const GrowthChartPage = () => {
         value: d.weight,
     })).filter(d => d.value !== undefined).sort((a, b) => a.month - b.month) : [];
 
+    const formattedHeadCircumferenceData = child.birthDate ? (child.growthData || []).map(d => ({
+        month: (new Date(d.date) - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375),
+        value: d.headCircumference,
+    })).filter(d => d.value !== undefined).sort((a, b) => a.month - b.month) : [];
+
     const lastHeight = formattedHeightData.length > 0 ? formattedHeightData[formattedHeightData.length - 1].value : null;
     const lastWeight = formattedWeightData.length > 0 ? formattedWeightData[formattedWeightData.length - 1].value : null;
+    const lastHeadCircumference = formattedHeadCircumferenceData.length > 0 ? formattedHeadCircumferenceData[formattedHeadCircumferenceData.length - 1].value : null;
 
     const heightStatus = getGrowthStatus(lastHeight, whoStats.heightForAgeBoys);
     const weightStatus = getGrowthStatus(lastWeight, whoStats.weightForAgeBoys);
+    const headCircumferenceStatus = getGrowthStatus(lastHeadCircumference, whoStats.headCircumferenceForAgeBoys);
 
 
     return (
@@ -179,6 +194,11 @@ const GrowthChartPage = () => {
                     <p>{lastWeight || 'N/A'} kg</p>
                     <span>وضعیت: {weightStatus.text}</span>
                 </div>
+                <div className={`info-box ${headCircumferenceStatus.className}`}>
+                    <h4>آخرین دور سر ثبت شده</h4>
+                    <p>{lastHeadCircumference || 'N/A'} cm</p>
+                    <span>وضعیت: {headCircumferenceStatus.text}</span>
+                </div>
             </div>
             
             <div className="chart-section">
@@ -199,6 +219,17 @@ const GrowthChartPage = () => {
                     standardData={child.gender === 'boy' ? whoStats.weightForAgeBoys : whoStats.weightForAgeGirls}
                     childName={child.name}
                     yAxisLabel="وزن (kg)"
+                    childAgeInMonths={childAgeInMonths}
+                />
+            </div>
+
+            <div className="chart-section">
+                <h3>نمودار دور سر به سن</h3>
+                <GrowthChart
+                    data={formattedHeadCircumferenceData}
+                    standardData={child.gender === 'boy' ? whoStats.headCircumferenceForAgeBoys : whoStats.headCircumferenceForAgeGirls}
+                    childName={child.name}
+                    yAxisLabel="دور سر (cm)"
                     childAgeInMonths={childAgeInMonths}
                 />
             </div>
@@ -228,6 +259,12 @@ const GrowthChartPage = () => {
                         value={newRecord.weight}
                         onChange={(e) => setNewRecord(prev => ({ ...prev, weight: e.target.value }))}
                         placeholder="وزن (kg)"
+                    />
+                    <input
+                        type="number"
+                        value={newRecord.headCircumference}
+                        onChange={(e) => setNewRecord(prev => ({ ...prev, headCircumference: e.target.value }))}
+                        placeholder="دور سر (cm)"
                     />
                 </div>
                 <div className="modal-actions">

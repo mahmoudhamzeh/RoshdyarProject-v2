@@ -50,9 +50,31 @@ const weightForAgeGirls = [
     { month: 60, P3: 14.1, P50: 17.0, P97: 20.2 }
 ];
 
+const headCircumferenceForAgeBoys = [
+    { month: 0, P3: 31.5, P50: 35.8, P97: 38.9 },
+    { month: 2, P3: 35.8, P50: 39.2, P97: 41.9 },
+    { month: 4, P3: 38.6, P50: 40.7, P97: 43.3 },
+    { month: 6, P3: 40.5, P50: 44.0, P97: 46.5 },
+    { month: 12, P3: 43.4, P50: 46.2, P97: 48.6 },
+    { month: 24, P3: 45.9, P50: 48.7, P97: 51.4 },
+    { month: 36, P3: 46.4, P50: 49.7, P97: 52.6 }
+];
+
+const headCircumferenceForAgeGirls = [
+    { month: 0, P3: 31.9, P50: 34.7, P97: 38.1 },
+    { month: 2, P3: 35.5, P50: 38.0, P97: 41.0 },
+    { month: 4, P3: 38.1, P50: 40.5, P97: 42.2 },
+    { month: 6, P3: 39.8, P50: 42.7, P97: 45.3 },
+    { month: 12, P3: 42.5, P50: 45.2, P97: 47.3 },
+    { month: 24, P3: 44.6, P50: 47.5, P97: 50.1 },
+    { month: 36, P3: 45.6, P50: 48.6, P97: 51.4 }
+];
+
 export const whoStats = {
     heightForAgeBoys,
     weightForAgeBoys,
     heightForAgeGirls,
     weightForAgeGirls,
+    headCircumferenceForAgeBoys,
+    headCircumferenceForAgeGirls,
 };
