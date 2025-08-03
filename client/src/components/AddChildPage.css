@@ -40,6 +40,14 @@
     margin-bottom: 1.5rem;
 }
 
+.form-section h3.section-title {
+    font-size: 1.2rem;
+    color: #007bff;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #eef;
+}
+
 .section-title {
     font-size: 1.1rem;
     font-weight: bold;
