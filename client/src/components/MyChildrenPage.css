@@ -1,4 +1,4 @@
-children-page-final { background-color: #f8f9fa; min-height: 100vh; }
+.children-page-final { background-color: #f8f9fa; min-height: 100vh; }
 .page-nav-final { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0.8rem 1.5rem; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 .page-nav-final h1 { grid-column: 2; text-align: center; margin: 0; font-size: 1.4rem; color: #343a40; }
 .nav-placeholder { grid-column: 3; }
