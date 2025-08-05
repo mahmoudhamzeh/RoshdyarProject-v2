@@ -98,7 +98,7 @@ const LabTestsPage = () => {
             });
             if (!res.ok) throw new Error('Failed to save test result');
 
-            fetchTests(); // Refresh list
+            fetchData(); // Refresh list
             setIsModalOpen(false); // Close modal
             setNewTest({ testType: '', date: new Date(), numericResult: '', doctorNote: '', resultFile: null }); // Reset form
         } catch (error) {
