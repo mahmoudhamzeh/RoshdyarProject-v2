@@ -4,13 +4,40 @@ import Modal from 'react-modal';
 import DatePicker from 'react-datepicker';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faVial, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { getTestStatus } from '../utils/lab-test-ranges';
 import './LabTestsPage.css';
 
 Modal.setAppElement('#root');
 
+const recommendedCheckupsData = {
+    '0-6': ['معاینه فیزیکی کامل در ۱، ۲، ۴ و ۶ ماهگی', 'بررسی شنوایی و بینایی'],
+    '6-12': ['آزمایش کم‌خونی (CBC) در ۹-۱۲ ماهگی', 'بررسی روند رشد و تغذیه تکمیلی'],
+    '12-24': ['چکاپ سالانه در ۱۸ و ۲۴ ماهگی', 'آزمایش ویتامین D'],
+    '24-60': ['چکاپ سالانه', 'ارزیابی بینایی و شنوایی دوره‌ای'],
+};
+
+const RecommendedCheckups = ({ ageInMonths }) => {
+    let ageGroup = '24-60';
+    if (ageInMonths <= 6) ageGroup = '0-6';
+    else if (ageInMonths <= 12) ageGroup = '6-12';
+    else if (ageInMonths <= 24) ageGroup = '12-24';
+
+    const recommendations = recommendedCheckupsData[ageGroup];
+
+    return (
+        <div className="recommended-checkups">
+            <h4>چکاپ‌های پیشنهادی برای این گروه سنی</h4>
+            <ul>
+                {recommendations.map((rec, i) => <li key={i}>{rec}</li>)}
+            </ul>
+        </div>
+    );
+};
+
 const LabTestsPage = () => {
     const history = useHistory();
     const { childId } = useParams();
+    const [child, setChild] = useState(null);
     const [tests, setTests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,22 +49,27 @@ const LabTestsPage = () => {
         resultFile: null,
     });
 
-    const fetchTests = useCallback(async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/lab-tests/${childId}`);
-            const data = await res.json();
-            setTests(data);
+            const [testsRes, childRes] = await Promise.all([
+                fetch(`http://localhost:5000/api/lab-tests/${childId}`),
+                fetch(`http://localhost:5000/api/children/${childId}`)
+            ]);
+            const testsData = await testsRes.json();
+            const childData = await childRes.json();
+            setTests(testsData);
+            setChild(childData);
         } catch (error) {
-            console.error("Failed to fetch lab tests", error);
+            console.error("Failed to fetch data", error);
         } finally {
             setIsLoading(false);
         }
     }, [childId]);
 
     useEffect(() => {
-        fetchTests();
-    }, [fetchTests]);
+        fetchData();
+    }, [fetchData]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -86,29 +118,40 @@ const LabTestsPage = () => {
                 </button>
             </nav>
 
-            <main className="tests-list-container">
-                {isLoading ? (
-                    <p>در حال بارگذاری...</p>
-                ) : tests.length === 0 ? (
+            <main>
+                {child && <RecommendedCheckups ageInMonths={(new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375)} />}
+                <div className="tests-list-container">
+                    {isLoading ? (
+                        <p>در حال بارگذاری...</p>
+                    ) : tests.length === 0 ? (
                     <div className="no-tests-message">
                         <p>هیچ آزمایشی ثبت نشده است.</p>
                         <p>برای افزودن اولین آزمایش، روی دکمه "افزودن آزمایش" کلیک کنید.</p>
                     </div>
                 ) : (
                     <ul className="tests-list">
-                        {tests.map(test => (
-                            <li key={test.id} className="test-item">
-                                <div className="test-item-header">
-                                    <span className="test-type">{test.testType}</span>
-                                    <span className="test-date">{new Date(test.date).toLocaleDateString('fa-IR')}</span>
-                                </div>
-                                <div className="test-item-body">
-                                    {test.numericResult && <p><strong>نتیجه:</strong> {test.numericResult}</p>}
-                                    {test.doctorNote && <p><strong>یادداشت پزشک:</strong> {test.doctorNote}</p>}
-                                    {test.fileUrl && <a href={`http://localhost:5000${test.fileUrl}`} target="_blank" rel="noopener noreferrer">مشاهده فایل</a>}
-                                </div>
-                            </li>
-                        ))}
+                        {tests.map(test => {
+                            const ageInMonths = child ? (new Date(test.date) - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375) : 0;
+                            const status = getTestStatus(test.testType, ageInMonths, test.numericResult);
+                            return (
+                                <li key={test.id} className="test-item">
+                                    <div className="test-item-header">
+                                        <span className="test-type">{test.testType}</span>
+                                        <span className="test-date">{new Date(test.date).toLocaleDateString('fa-IR')}</span>
+                                    </div>
+                                    <div className="test-item-body">
+                                        {test.numericResult && (
+                                            <p>
+                                                <strong>نتیجه:</strong> {test.numericResult}
+                                                <span className={`status-badge ${status.className}`}>{status.status}</span>
+                                            </p>
+                                        )}
+                                        {test.doctorNote && <p><strong>یادداشت پزشک:</strong> {test.doctorNote}</p>}
+                                        {test.fileUrl && <a href={`http://localhost:5000${test.fileUrl}`} target="_blank" rel="noopener noreferrer">مشاهده فایل</a>}
+                                    </div>
+                                </li>
+                            );
+                        })}
                     </ul>
                 )}
             </main>
