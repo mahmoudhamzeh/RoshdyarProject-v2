@@ -87,3 +87,46 @@
 .test-item-body a:hover {
     text-decoration: underline;
 }
+
+.status-badge {
+    margin-right: 10px; /* In RTL, this is margin-left */
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+}
+
+.status-normal {
+    background-color: #28a745;
+}
+
+.status-low {
+    background-color: #17a2b8;
+}
+
+.status-high {
+    background-color: #dc3545;
+}
+
+.status-unknown {
+    background-color: #6c757d;
+}
+
+.recommended-checkups {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.recommended-checkups h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+.recommended-checkups ul {
+    margin: 0;
+    padding-right: 20px; /* In RTL, this is padding-left */
+}
