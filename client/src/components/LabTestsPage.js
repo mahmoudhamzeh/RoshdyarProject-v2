@@ -154,6 +154,7 @@ const LabTestsPage = () => {
                         })}
                     </ul>
                 )}
+                </div>
             </main>
 
             <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} className="add-data-modal" overlayClassName="modal-overlay">
