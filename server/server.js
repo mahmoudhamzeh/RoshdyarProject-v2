@@ -84,7 +84,19 @@ app.post('/api/children', (req, res) => {
 });
 
 app.get('/api/children', (req, res) => res.json(children));
-app.get('/api/children/:id', (req, res) => { const child = children.find(c => c.id === parseInt(req.params.id)); if (child) res.json(child); else res.status(404).json({ message: 'Not found' }); });
+app.get('/api/children/:id', (req, res) => {
+    const childId = parseInt(req.params.id);
+    const child = children.find(c => c.id === childId);
+    if (child) {
+        const childWithGrowthData = {
+            ...child,
+            growthData: growthData[childId] || []
+        };
+        res.json(childWithGrowthData);
+    } else {
+        res.status(404).json({ message: 'Not found' });
+    }
+});
 
 app.put('/api/children/:id', (req, res) => {
     const childIndex = children.findIndex(c => c.id === parseInt(req.params.id));
