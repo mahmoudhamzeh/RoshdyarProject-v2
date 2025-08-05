@@ -1,16 +1,143 @@
-.health-profile-page { background-color: #f0f2f5; min-height: 100vh; }
-.back-btn { display: flex; align-items: center; gap: 0.5rem; background: none; border: none; font-size: 1rem; cursor: pointer; color: #4a90e2; }
-.profile-header { background: linear-gradient(135deg, #4a90e2 0%, #50e3c2 100%); color: white; padding: 1.5rem; text-align: center; }
-.profile-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #fff; margin-bottom: 0.5rem; }
-.profile-header-info h2 { margin: 0; font-size: 1.8rem; }
-.profile-header-info p { margin: 0.25rem 0 0; font-size: 1rem; opacity: 0.9; }
-.profile-content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 1rem; align-items: stretch; }
-.grid-col-left, .grid-col-right { display: flex; flex-direction: column; gap: 1.5rem; }
-.main-info-card, .summary-card { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-.actions-grid { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.action-card { background: #fff; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; cursor: pointer; transition: all 0.3s ease; }
-.action-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-.action-card h4 { margin-top: 0; font-size: 1.1rem; }
-.chart-preview { width: 100%; margin-bottom: 1rem; }
-.view-full-chart-btn, .edit-main-info-btn { display: block; width: 100%; background-color: #4a90e2; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; margin-top: 1rem; }
-.edit-main-info-btn { background-color: #50e3c2; }
+.health-profile-page {
+    background-color: #f4f7f9; /* Consistent background */
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.page-nav-final {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #007bff; /* Primary blue */
+}
+
+.profile-header {
+    background: #007bff; /* Primary blue */
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+    border-radius: 8px; /* Consistent border-radius */
+    margin-bottom: 1rem;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    margin-bottom: 0.5rem;
+}
+
+.profile-header-info h2 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.profile-header-info p {
+    margin: 0.25rem 0 0;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.profile-content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+.grid-col-left, .grid-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.main-info-card, .action-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px; /* Consistent border-radius */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Softer shadow */
+}
+
+.action-card {
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.action-card h4 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.chart-preview {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.view-full-chart-text, .edit-main-info-btn {
+    display: block;
+    width: 100%;
+    background-color: #007bff; /* Primary blue */
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 1rem;
+}
+
+.edit-main-info-btn {
+    background-color: #28a745; /* Consistent Green */
+}
+
+.edit-main-info-btn:hover {
+    background-color: #218838;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.tag {
+    background-color: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    color: #495057;
+}
+
+.info-section {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 1rem;
+}
+
+.info-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
