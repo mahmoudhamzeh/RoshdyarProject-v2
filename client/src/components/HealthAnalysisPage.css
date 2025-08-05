@@ -1,0 +1,33 @@
+.health-analysis-page {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.analysis-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.page-nav-final {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    background: none;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-placeholder {
+    width: 80px; /* to balance the back button */
+}
