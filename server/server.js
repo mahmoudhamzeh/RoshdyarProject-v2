@@ -64,7 +64,17 @@ app.post('/api/upload', upload.single('avatar'), (req, res) => { if (!req.file) 
 app.post('/api/children', (req, res) => {
     const { firstName, lastName, gender, birthDate, avatar, ...otherData } = req.body;
     if (!firstName || !lastName) return res.status(400).json({ message: 'Name required' });
-    const newChild = { id: childIdCounter++, name: `${firstName} ${lastName}`, gender, birthDate, age: calculateAge(birthDate), avatar: avatar || 'https://i.pravatar.cc/100', ...otherData };
+    const newChild = {
+        id: childIdCounter++,
+        name: `${firstName} ${lastName}`,
+        gender,
+        birthDate,
+        age: calculateAge(birthDate),
+        avatar: avatar || 'https://i.pravatar.cc/100',
+        ...otherData,
+        vaccinationRecords: {}, // Initialize vaccination records
+        vaccineReminder: { active: false, daysBefore: 7 } // Initialize reminder
+    };
     children.push(newChild);
     if(otherData.height && otherData.weight) { growthData[newChild.id] = [{ date: birthDate, height: parseFloat(otherData.height), weight: parseFloat(otherData.weight) }]; }
     medicalVisits[newChild.id] = [];
@@ -79,8 +89,12 @@ app.get('/api/children/:id', (req, res) => { const child = children.find(c => c.
 app.put('/api/children/:id', (req, res) => {
     const childIndex = children.findIndex(c => c.id === parseInt(req.params.id));
     if (childIndex > -1) {
-        const { name, ...finalData } = req.body;
-        children[childIndex] = { ...children[childIndex], ...finalData, name: name, age: calculateAge(finalData.birthDate) };
+        const { ...finalData } = req.body;
+        // Ensure name is correctly reconstructed if firstName/lastName are provided
+        if (finalData.firstName && finalData.lastName) {
+            finalData.name = `${finalData.firstName} ${finalData.lastName}`.trim();
+        }
+        children[childIndex] = { ...children[childIndex], ...finalData, age: calculateAge(finalData.birthDate) };
         saveData();
         res.status(200).json(children[childIndex]);
     } else { res.status(404).json({ message: 'Not found' }); }
