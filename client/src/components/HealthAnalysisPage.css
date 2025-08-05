@@ -1,12 +1,16 @@
 .health-analysis-page {
-    padding: 20px;
-    background-color: #f4f7f6;
+    padding: 1rem;
+    background-color: #f4f7f9; /* Consistent Theme Background */
 }
 
-.analysis-content .analysis-grid {
+.analysis-content {
+    /* This class is not used, but keeping it in case it's added back */
+}
+
+.analysis-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    gap: 1.5rem;
 }
 
 .analysis-card {
@@ -41,14 +45,15 @@
 }
 
 .tag {
-    background-color: #eee;
+    background-color: #e9ecef;
     padding: 5px 10px;
     border-radius: 15px;
     font-size: 0.9em;
+    color: #495057;
 }
 
-.allergy-tag { background-color: #ffebee; color: #c62828; }
-.illness-tag { background-color: #e3f2fd; color: #1565c0; }
+.allergy-tag { background-color: #f8d7da; color: #721c24; }
+.illness-tag { background-color: #d1ecf1; color: #0c5460; }
 
 .visits-list, .documents-list {
     list-style: none;
@@ -83,8 +88,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 1.5em;
-    color: #555;
+    font-size: 1em; /* Adjusted for consistency */
+    color: #007bff; /* Primary Blue */
 }
 
 .nav-placeholder {
