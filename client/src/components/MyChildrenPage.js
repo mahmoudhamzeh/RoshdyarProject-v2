@@ -29,6 +29,22 @@ const MyChildrenPage = () => {
 
     const ArrowRightIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>);
 
+    const calculateAge = (birthDateStr) => {
+        if (!birthDateStr) return 'نامشخص';
+        const birthDate = new Date(birthDateStr.replace(/\//g, '-'));
+        const today = new Date();
+        let years = today.getFullYear() - birthDate.getFullYear();
+        let months = today.getMonth() - birthDate.getMonth();
+        if (months < 0 || (months === 0 && today.getDate() < birthDate.getDate())) {
+            years--;
+            months += 12;
+        }
+        if (years === 0 && months === 0) return 'نوزاد';
+        if (years === 0) return `${months} ماهه`;
+        if (months === 0) return `${years} ساله`;
+        return `${years} سال و ${months} ماه`;
+    };
+
     return (
         <div className="children-page-final">
             <nav className="page-nav-final">
@@ -49,8 +65,8 @@ const MyChildrenPage = () => {
                             <div key={child.id} className="child-card-final">
                                 <img src={avatarUrl} alt={child.name} className="child-avatar-final" />
                                 <div className="child-info-final">
-                                    <h3>{child.name}</h3>
-                                    <p>سن: {child.age}</p>
+                                    <h3>{child.name || `${child.firstName} ${child.lastName}`}</h3>
+                                    <p>سن: {calculateAge(child.birthDate)}</p>
                                 </div>
                                 <div className="child-card-actions">
                                     <button onClick={() => history.push(`/health-profile/${child.id}`)} className="view-profile-btn-final">مشاهده پرونده</button>
