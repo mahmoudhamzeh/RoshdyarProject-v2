@@ -4,6 +4,7 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { vaccinationSchedule } = require('./vaccination-schedule');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -72,8 +73,7 @@ app.post('/api/children', (req, res) => {
         age: calculateAge(birthDate),
         avatar: avatar || 'https://i.pravatar.cc/100',
         ...otherData,
-        vaccinationRecords: {}, // Initialize vaccination records
-        vaccineReminder: { active: false, daysBefore: 7 } // Initialize reminder
+        vaccinationRecords: {},
     };
     children.push(newChild);
     if(otherData.height && otherData.weight) { growthData[newChild.id] = [{ date: birthDate, height: parseFloat(otherData.height), weight: parseFloat(otherData.weight) }]; }
@@ -136,6 +136,47 @@ app.post('/api/growth/:childId', (req, res) => {
     res.status(201).json(newRecord);
 });
 app.delete('/api/growth/:childId/:date', (req, res) => { const { childId, date } = req.params; if (growthData[childId]) { const initialLength = growthData[childId].length; growthData[childId] = growthData[childId].filter(record => record.date !== date); if (growthData[childId].length < initialLength) { saveData(); res.status(200).json({ message: 'Record deleted' }); } else res.status(404).json({ message: 'Record not found' }); } else res.status(404).json({ message: 'Child not found' }); });
+
+app.get('/api/vaccination-status/:childId', (req, res) => {
+    const { childId } = req.params;
+    const child = children.find(c => c.id === parseInt(childId));
+    if (!child) return res.status(404).json({ message: 'Child not found' });
+
+    const ageInMonths = (new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375);
+    const records = child.vaccinationRecords || {};
+
+    const status = vaccinationSchedule.map(vaccine => {
+        const key = `${vaccine.name}-${vaccine.dose}`;
+        const isDone = records[key] && records[key].done;
+        let status = 'upcoming';
+        if (isDone) {
+            status = 'done';
+        } else if (ageInMonths > vaccine.month + 2) { // 2 months grace period
+            status = 'overdue';
+        } else if (ageInMonths < vaccine.month) {
+            status = 'future';
+        }
+        return { ...vaccine, status, administeredDate: records[key] ? records[key].date : null };
+    });
+
+    res.json(status);
+});
+
+app.post('/api/vaccinate/:childId', (req, res) => {
+    const { childId } = req.params;
+    const { vaccineName, dose, date } = req.body;
+    const child = children.find(c => c.id === parseInt(childId));
+    if (!child) return res.status(404).json({ message: 'Child not found' });
+
+    if (!child.vaccinationRecords) {
+        child.vaccinationRecords = {};
+    }
+
+    const key = `${vaccineName}-${dose}`;
+    child.vaccinationRecords[key] = { done: true, date: date || new Date().toISOString().split('T')[0] };
+    saveData();
+    res.status(200).json({ message: 'Vaccination record updated' });
+});
 
 app.get('/api/visits/:childId', (req, res) => res.json(medicalVisits[req.params.childId] || []));
 app.post('/api/visits/:childId', (req, res) => { const { childId } = req.params; const { date, doctorName, reason, summary } = req.body; if (!date || !doctorName || !reason) return res.status(400).json({ message: 'All fields required' }); if (!medicalVisits[childId]) medicalVisits[childId] = []; const newVisit = { date, doctorName, reason, summary }; medicalVisits[childId].push(newVisit); medicalVisits[childId].sort((a, b) => new Date(b.date.replace(/\//g, '-')) - new Date(a.date.replace(/\//g, '-'))); saveData(); res.status(201).json(newVisit); });
