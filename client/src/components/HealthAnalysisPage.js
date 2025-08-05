@@ -50,69 +50,6 @@ const HealthAnalysisPage = () => {
         fetchAllData();
     }, [fetchAllData]);
 
-    if (isLoading) {
-        return <p>در حال بارگذاری تحلیل...</p>;
-    }
-
-    if (!child) {
-        return <p>اطلاعاتی برای نمایش وجود ندارد.</p>;
-    }
-
-    const calculateAge = (birthDate) => {
-        if (!birthDate) return { years: 0, months: 0 };
-        const today = new Date();
-        const birthDateObj = new Date(birthDate);
-        let years = today.getFullYear() - birthDateObj.getFullYear();
-        let months = today.getMonth() - birthDateObj.getMonth();
-        if (months < 0 || (months === 0 && today.getDate() < birthDateObj.getDate())) {
-            years--;
-            months = (12 + months) % 12;
-        }
-        return { years, months };
-    };
-
-    const age = calculateAge(child.birthDate);
-
-    const getPercentileForValue = (value, ageInMonths, gender, metric) => {
-        const table = whoStats[`${metric}ForAge${gender === 'boy' ? 'Boys' : 'Girls'}`];
-        if (!table) return null;
-
-        let lowerBound, upperBound;
-        for (const row of table) {
-            if (row.month <= ageInMonths) lowerBound = row;
-            if (row.month >= ageInMonths && !upperBound) upperBound = row;
-        }
-
-        if (!lowerBound || !upperBound) return null;
-
-        const interpolate = (p1, p2) => {
-            if (p1.month === p2.month) return p1;
-            const factor = (ageInMonths - p1.month) / (p2.month - p1.month);
-            return {
-                P3: p1.P3 + factor * (p2.P3 - p1.P3),
-                P50: p1.P50 + factor * (p2.P50 - p1.P50),
-                P97: p1.P97 + factor * (p2.P97 - p1.P97),
-            };
-        };
-
-        const standard = interpolate(lowerBound, upperBound);
-
-        if (value < standard.P3) return 3;
-        if (value > standard.P97) return 97;
-        if (value < standard.P50) {
-            return 3 + 47 * ((value - standard.P3) / (standard.P50 - standard.P3));
-        } else {
-            return 50 + 47 * ((value - standard.P50) / (standard.P97 - standard.P50));
-        }
-    };
-
-    const TrendIndicator = ({ trend }) => {
-        if (trend === 'stable') return <span className="trend-stable">روند ثابت</span>;
-        if (trend === 'improving') return <span className="trend-improving">روند رو به بهبود <FontAwesomeIcon icon={faArrowUp} /></span>;
-        if (trend === 'declining') return <span className="trend-declining">روند رو به کاهش <FontAwesomeIcon icon={faArrowDown} /></span>;
-        return null;
-    };
-
     useEffect(() => {
         if (child && child.growthData && child.growthData.length >= 2) {
             const sortedData = [...child.growthData].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -125,6 +62,39 @@ const HealthAnalysisPage = () => {
             const previousAge = calculateAgeInMonths(previousRecord.date);
 
             const getTrend = (metric) => {
+                const getPercentileForValue = (value, ageInMonths, gender, metric) => {
+                    const table = whoStats[`${metric}ForAge${gender === 'boy' ? 'Boys' : 'Girls'}`];
+                    if (!table) return null;
+
+                    let lowerBound, upperBound;
+                    for (const row of table) {
+                        if (row.month <= ageInMonths) lowerBound = row;
+                        if (row.month >= ageInMonths && !upperBound) upperBound = row;
+                    }
+
+                    if (!lowerBound || !upperBound) return null;
+
+                    const interpolate = (p1, p2) => {
+                        if (p1.month === p2.month) return p1;
+                        const factor = (ageInMonths - p1.month) / (p2.month - p1.month);
+                        return {
+                            P3: p1.P3 + factor * (p2.P3 - p1.P3),
+                            P50: p1.P50 + factor * (p2.P50 - p1.P50),
+                            P97: p1.P97 + factor * (p2.P97 - p1.P97),
+                        };
+                    };
+
+                    const standard = interpolate(lowerBound, upperBound);
+
+                    if (value < standard.P3) return 3;
+                    if (value > standard.P97) return 97;
+                    if (value < standard.P50) {
+                        return 3 + 47 * ((value - standard.P3) / (standard.P50 - standard.P3));
+                    } else {
+                        return 50 + 47 * ((value - standard.P50) / (standard.P97 - standard.P50));
+                    }
+                };
+
                 const latestP = getPercentileForValue(latestRecord[metric], latestAge, child.gender, metric);
                 const previousP = getPercentileForValue(previousRecord[metric], previousAge, child.gender, metric);
 
@@ -143,6 +113,36 @@ const HealthAnalysisPage = () => {
             });
         }
     }, [child]);
+
+    if (isLoading) {
+        return <p>در حال بارگذاری تحلیل...</p>;
+    }
+
+    if (!child) {
+        return <p>اطلاعاتی برای نمایش وجود ندارد.</p>;
+    }
+
+    const TrendIndicator = ({ trend }) => {
+        if (trend === 'stable') return <span className="trend-stable">روند ثابت</span>;
+        if (trend === 'improving') return <span className="trend-improving">روند رو به بهبود <FontAwesomeIcon icon={faArrowUp} /></span>;
+        if (trend === 'declining') return <span className="trend-declining">روند رو به کاهش <FontAwesomeIcon icon={faArrowDown} /></span>;
+        return null;
+    };
+
+    const calculateAge = (birthDate) => {
+        if (!birthDate) return { years: 0, months: 0 };
+        const today = new Date();
+        const birthDateObj = new Date(birthDate);
+        let years = today.getFullYear() - birthDateObj.getFullYear();
+        let months = today.getMonth() - birthDateObj.getMonth();
+        if (months < 0 || (months === 0 && today.getDate() < birthDateObj.getDate())) {
+            years--;
+            months = (12 + months) % 12;
+        }
+        return { years, months };
+    };
+
+    const age = calculateAge(child.birthDate);
 
     const renderGrowthAnalysis = () => {
         if (!child.growthData || child.growthData.length === 0) {
