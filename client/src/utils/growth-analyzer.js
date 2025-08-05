@@ -15,8 +15,8 @@ const getPercentileForValue = (value, ageInMonths, gender, metric) => {
         return { P3: p1.P3 + factor * (p2.P3 - p1.P3), P50: p1.P50 + factor * (p2.P50 - p1.P50), P97: p1.P97 + factor * (p2.P97 - p1.P97) };
     };
     const standard = interpolate(lowerBound, upperBound);
-    if (value < standard.P3) return 3;
-    if (value > standard.P97) return 97;
+    if (value < standard.P3) return 2; // Return a value < 3
+    if (value > standard.P97) return 98; // Return a value > 97
     if (value < standard.P50) return 3 + 47 * ((value - standard.P3) / (standard.P50 - standard.P3));
     return 50 + 47 * ((value - standard.P50) / (standard.P97 - standard.P50));
 };
