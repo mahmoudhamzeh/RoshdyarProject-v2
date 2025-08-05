@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import DatePicker from 'react-datepicker';
 import Modal from 'react-modal';
 import { whoStats } from '../who-stats';
+import { analyzeGrowthMetric } from '../utils/growth-analyzer';
 import './GrowthChartPage.css';
 
 Modal.setAppElement('#root');
@@ -126,20 +127,18 @@ const GrowthChartPage = () => {
         }
     };
 
-    const getGrowthStatus = (value, standardData) => {
-        if (!child || !child.birthDate || !value || !standardData || standardData.length === 0) return { text: 'نامشخص', className: 'status-unknown' };
-        
-        const childAgeInMonths = (new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375);
-        const closestMonthData = standardData.reduce((prev, curr) => 
-            Math.abs(curr.month - childAgeInMonths) < Math.abs(prev.month - childAgeInMonths) ? curr : prev
-        );
+    if (!child) return <p>در حال بارگذاری...</p>;
 
-        if (value < closestMonthData.P3) return { text: 'پایین‌تر از نرمال', className: 'status-low' };
-        if (value > closestMonthData.P97) return { text: 'بالاتر از نرمال', className: 'status-high' };
-        return { text: 'نرمال', className: 'status-normal' };
+    const getStatusClassName = (status) => {
+        if (status === 'کمبود') return 'status-low';
+        if (status === 'اضافه') return 'status-high';
+        if (status === 'نرمال') return 'status-normal';
+        return 'status-unknown';
     };
 
-    if (!child) return <p>در حال بارگذاری...</p>;
+    const heightAnalysis = analyzeGrowthMetric('height', child);
+    const weightAnalysis = analyzeGrowthMetric('weight', child);
+    const headAnalysis = analyzeGrowthMetric('headCircumference', child);
 
     const childAgeInMonths = child.birthDate ? (new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375) : 0;
 
@@ -158,15 +157,6 @@ const GrowthChartPage = () => {
         value: d.headCircumference,
     })).filter(d => d.value !== undefined).sort((a, b) => a.month - b.month) : [];
 
-    const lastHeight = formattedHeightData.length > 0 ? formattedHeightData[formattedHeightData.length - 1].value : null;
-    const lastWeight = formattedWeightData.length > 0 ? formattedWeightData[formattedWeightData.length - 1].value : null;
-    const lastHeadCircumference = formattedHeadCircumferenceData.length > 0 ? formattedHeadCircumferenceData[formattedHeadCircumferenceData.length - 1].value : null;
-
-    const heightStatus = getGrowthStatus(lastHeight, whoStats.heightForAgeBoys);
-    const weightStatus = getGrowthStatus(lastWeight, whoStats.weightForAgeBoys);
-    const headCircumferenceStatus = getGrowthStatus(lastHeadCircumference, whoStats.headCircumferenceForAgeBoys);
-
-
     return (
         <div className="growth-chart-page">
             <nav className="page-nav-final">
@@ -184,20 +174,20 @@ const GrowthChartPage = () => {
             </div>
 
             <div className="chart-info-boxes">
-                <div className={`info-box ${heightStatus.className}`}>
+                <div className={`info-box ${getStatusClassName(heightAnalysis.status)}`}>
                     <h4>آخرین قد ثبت شده</h4>
-                    <p>{lastHeight || 'N/A'} cm</p>
-                    <span>وضعیت: {heightStatus.text}</span>
+                    <p>{heightAnalysis.value || 'N/A'} cm</p>
+                    <span>وضعیت: {heightAnalysis.status}</span>
                 </div>
-                <div className={`info-box ${weightStatus.className}`}>
+                <div className={`info-box ${getStatusClassName(weightAnalysis.status)}`}>
                     <h4>آخرین وزن ثبت شده</h4>
-                    <p>{lastWeight || 'N/A'} kg</p>
-                    <span>وضعیت: {weightStatus.text}</span>
+                    <p>{weightAnalysis.value || 'N/A'} kg</p>
+                    <span>وضعیت: {weightAnalysis.status}</span>
                 </div>
-                <div className={`info-box ${headCircumferenceStatus.className}`}>
+                <div className={`info-box ${getStatusClassName(headAnalysis.status)}`}>
                     <h4>آخرین دور سر ثبت شده</h4>
-                    <p>{lastHeadCircumference || 'N/A'} cm</p>
-                    <span>وضعیت: {headCircumferenceStatus.text}</span>
+                    <p>{headAnalysis.value || 'N/A'} cm</p>
+                    <span>وضعیت: {headAnalysis.status}</span>
                 </div>
             </div>
             
