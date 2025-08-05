@@ -15,7 +15,7 @@ const HealthAnalysisPage = () => {
     const [visits, setVisits] = useState([]);
     const [documents, setDocuments] = useState([]);
     const [vaccinationStatus, setVaccinationStatus] = useState([]);
-    const [growthTrend, setGrowthTrend] = useState({ height: 'stable', weight: 'stable', head: 'stable' });
+    const [growthTrend, setGrowthTrend] = useState({});
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchAllData = useCallback(async () => {
@@ -51,66 +51,69 @@ const HealthAnalysisPage = () => {
     }, [fetchAllData]);
 
     useEffect(() => {
-        if (child && child.growthData && child.growthData.length >= 2) {
-            const sortedData = [...child.growthData].sort((a, b) => new Date(a.date) - new Date(b.date));
-            const latestRecord = sortedData[sortedData.length - 1];
-            const previousRecord = sortedData[sortedData.length - 2];
+        if (child && child.growthData && child.growthData.length > 0) {
+            const getPercentileForValue = (value, ageInMonths, gender, metric) => {
+                const table = whoStats[`${metric}ForAge${gender === 'boy' ? 'Boys' : 'Girls'}`];
+                if (!table) return null;
+                let lowerBound, upperBound;
+                for (const row of table) {
+                    if (row.month <= ageInMonths) lowerBound = row;
+                    if (row.month >= ageInMonths && !upperBound) upperBound = row;
+                }
+                if (!lowerBound || !upperBound) return null;
+                const interpolate = (p1, p2) => {
+                    if (p1.month === p2.month) return p1;
+                    const factor = (ageInMonths - p1.month) / (p2.month - p1.month);
+                    return { P3: p1.P3 + factor * (p2.P3 - p1.P3), P50: p1.P50 + factor * (p2.P50 - p1.P50), P97: p1.P97 + factor * (p2.P97 - p1.P97) };
+                };
+                const standard = interpolate(lowerBound, upperBound);
+                if (value < standard.P3) return 3;
+                if (value > standard.P97) return 97;
+                if (value < standard.P50) return 3 + 47 * ((value - standard.P3) / (standard.P50 - standard.P3));
+                return 50 + 47 * ((value - standard.P50) / (standard.P97 - standard.P50));
+            };
+
+            const getAbsoluteStatus = (percentile) => {
+                if (percentile === null) return 'نامشخص';
+                if (percentile < 3) return 'کمبود';
+                if (percentile > 97) return 'اضافه';
+                return 'نرمال';
+            };
 
             const calculateAgeInMonths = (date) => (new Date(date) - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375);
 
-            const latestAge = calculateAgeInMonths(latestRecord.date);
-            const previousAge = calculateAgeInMonths(previousRecord.date);
+            const trends = {};
+            const metrics = ['height', 'weight', 'headCircumference'];
+            const sortedData = [...child.growthData].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            const getTrend = (metric) => {
-                const getPercentileForValue = (value, ageInMonths, gender, metric) => {
-                    const table = whoStats[`${metric}ForAge${gender === 'boy' ? 'Boys' : 'Girls'}`];
-                    if (!table) return null;
+            metrics.forEach(metric => {
+                const recordsWithMetric = sortedData.filter(r => r[metric] !== undefined);
+                if (recordsWithMetric.length === 0) return;
 
-                    let lowerBound, upperBound;
-                    for (const row of table) {
-                        if (row.month <= ageInMonths) lowerBound = row;
-                        if (row.month >= ageInMonths && !upperBound) upperBound = row;
-                    }
-
-                    if (!lowerBound || !upperBound) return null;
-
-                    const interpolate = (p1, p2) => {
-                        if (p1.month === p2.month) return p1;
-                        const factor = (ageInMonths - p1.month) / (p2.month - p1.month);
-                        return {
-                            P3: p1.P3 + factor * (p2.P3 - p1.P3),
-                            P50: p1.P50 + factor * (p2.P50 - p1.P50),
-                            P97: p1.P97 + factor * (p2.P97 - p1.P97),
-                        };
-                    };
-
-                    const standard = interpolate(lowerBound, upperBound);
-
-                    if (value < standard.P3) return 3;
-                    if (value > standard.P97) return 97;
-                    if (value < standard.P50) {
-                        return 3 + 47 * ((value - standard.P3) / (standard.P50 - standard.P3));
-                    } else {
-                        return 50 + 47 * ((value - standard.P50) / (standard.P97 - standard.P50));
-                    }
-                };
-
+                const latestRecord = recordsWithMetric[recordsWithMetric.length - 1];
+                const latestAge = calculateAgeInMonths(latestRecord.date);
                 const latestP = getPercentileForValue(latestRecord[metric], latestAge, child.gender, metric);
-                const previousP = getPercentileForValue(previousRecord[metric], previousAge, child.gender, metric);
 
-                if (latestP === null || previousP === null) return 'stable';
-
-                const diff = latestP - previousP;
-                if (Math.abs(diff) < 5) return 'stable';
-                if (diff > 0) return 'improving';
-                return 'declining';
-            };
-
-            setGrowthTrend({
-                height: getTrend('height'),
-                weight: getTrend('weight'),
-                head: getTrend('headCircumference'),
+                let trend = 'stable';
+                if (recordsWithMetric.length >= 2) {
+                    const previousRecord = recordsWithMetric[recordsWithMetric.length - 2];
+                    const previousAge = calculateAgeInMonths(previousRecord.date);
+                    const previousP = getPercentileForValue(previousRecord[metric], previousAge, child.gender, metric);
+                    if (latestP !== null && previousP !== null) {
+                        const diff = latestP - previousP;
+                        if (Math.abs(diff) > 5) {
+                            trend = diff > 0 ? 'improving' : 'declining';
+                        }
+                    }
+                }
+                trends[metric] = {
+                    value: latestRecord[metric],
+                    percentile: latestP,
+                    status: getAbsoluteStatus(latestP),
+                    trend: trend
+                };
             });
+            setGrowthTrend(trends);
         }
     }, [child]);
 
@@ -145,15 +148,14 @@ const HealthAnalysisPage = () => {
     const age = calculateAge(child.birthDate);
 
     const renderGrowthAnalysis = () => {
-        if (!child.growthData || child.growthData.length === 0) {
+        if (Object.keys(growthTrend).length === 0) {
             return <p>اطلاعات رشدی برای تحلیل وجود ندارد.</p>;
         }
-        const latestRecord = child.growthData[child.growthData.length - 1];
         return (
             <div>
-                <p><strong>قد:</strong> {latestRecord.height} cm (<TrendIndicator trend={growthTrend.height} />)</p>
-                <p><strong>وزن:</strong> {latestRecord.weight} kg (<TrendIndicator trend={growthTrend.weight} />)</p>
-                {latestRecord.headCircumference && <p><strong>دور سر:</strong> {latestRecord.headCircumference} cm (<TrendIndicator trend={growthTrend.head} />)</p>}
+                {growthTrend.height && <p><strong>قد:</strong> {growthTrend.height.value} cm (وضعیت: {growthTrend.height.status}, روند: <TrendIndicator trend={growthTrend.height.trend} />)</p>}
+                {growthTrend.weight && <p><strong>وزن:</strong> {growthTrend.weight.value} kg (وضعیت: {growthTrend.weight.status}, روند: <TrendIndicator trend={growthTrend.weight.trend} />)</p>}
+                {growthTrend.headCircumference && <p><strong>دور سر:</strong> {growthTrend.headCircumference.value} cm (وضعیت: {growthTrend.headCircumference.status}, روند: <TrendIndicator trend={growthTrend.headCircumference.trend} />)</p>}
             </div>
         );
     }
