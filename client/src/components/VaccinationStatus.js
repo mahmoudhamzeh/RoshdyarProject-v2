@@ -67,7 +67,6 @@ const VaccinationStatus = () => {
         <div className="vaccination-status-container">
             {renderVaccineList(overdue, 'عقب افتاده', faExclamationTriangle)}
             {renderVaccineList(upcoming, 'آینده', faClock)}
-            {renderVaccineList(done, 'تکمیل شده', faCheckCircle)}
         </div>
     );
 };

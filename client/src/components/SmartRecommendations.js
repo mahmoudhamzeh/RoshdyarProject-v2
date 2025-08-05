@@ -3,37 +3,58 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 
 const SmartRecommendations = ({ child, growthTrend, vaccinationStatus }) => {
-    const recommendations = [];
+    const recommendations = new Map();
 
-    // Rule 1: Growth Trend
-    if (growthTrend.height === 'declining' || growthTrend.weight === 'declining') {
-        recommendations.push({
-            id: 'growth-decline',
-            text: 'روند رشد کودک شما در قد یا وزن رو به کاهش است. توصیه می‌شود برای بررسی بیشتر با پزشک مشورت کنید.',
+    // Growth Status Rules
+    if (growthTrend.weight) {
+        if (growthTrend.weight.status === 'اضافه') {
+            recommendations.set('weight-high', {
+                text: 'وزن کودک بالاتر از محدوده نرمال است. توصیه می‌شود به تنوع و تعادل در رژیم غذایی او توجه بیشتری داشته باشید و فعالیت بدنی او را افزایش دهید.',
+                severity: 'high'
+            });
+        }
+        if (growthTrend.weight.status === 'کمبود') {
+            recommendations.set('weight-low', {
+                text: 'وزن کودک پایین‌تر از محدوده نرمال است. برای اطمینان از دریافت کالری و مواد مغذی کافی، با پزشک یا متخصص تغذیه مشورت کنید.',
+                severity: 'high'
+            });
+        }
+    }
+
+    // Growth Trend Rules
+    if (growthTrend.height && growthTrend.height.trend === 'declining') {
+        recommendations.set('height-decline', {
+            text: 'روند صدک قدی کودک رو به کاهش است. این موضوع ممکن است نیاز به بررسی توسط پزشک داشته باشد.',
+            severity: 'high'
+        });
+    }
+    if (growthTrend.weight && growthTrend.weight.trend === 'declining') {
+        recommendations.set('weight-decline', {
+            text: 'روند صدک وزنی کودک رو به کاهش است. این موضوع ممکن است نیاز به بررسی توسط پزشک داشته باشد.',
             severity: 'high'
         });
     }
 
-    // Rule 2: Allergies
+    // Allergies Rule
     if (child.allergies && Object.values(child.allergies.types).some(v => v)) {
-        recommendations.push({
-            id: 'allergies',
-            text: 'کودک شما دارای آلرژی ثبت شده است. برای اطلاعات بیشتر در مورد مدیریت آلرژی در کودکان، می‌توانید به منابع معتبر مراجعه کنید.',
+        recommendations.set('allergies', {
+            text: 'با توجه به آلرژی‌های ثبت‌شده، در انتخاب مواد غذایی و محصولات بهداشتی دقت کنید. برای اطلاعات بیشتر می‌توانید به منابع معتبر مراجعه کنید.',
             severity: 'medium'
         });
     }
 
-    // Rule 3: Overdue Vaccines
+    // Overdue Vaccines Rule
     if (vaccinationStatus && vaccinationStatus.some(v => v.status === 'overdue')) {
-        recommendations.push({
-            id: 'overdue-vaccine',
-            text: 'برخی از واکسن‌های کودک شما به تأخیر افتاده است. لطفاً برای تکمیل واکسیناسیون به پزشک یا مرکز بهداشت مراجعه کنید.',
+        recommendations.set('overdue-vaccine', {
+            text: 'برخی از واکسن‌های کودک شما به تأخیر افتاده است. لطفاً برای تکمیل واکسیناسیون در اسرع وقت به پزشک یا مرکز بهداشت مراجعه کنید.',
             severity: 'high'
         });
     }
 
-    if (recommendations.length === 0) {
-        recommendations.push({
+    const finalRecommendations = Array.from(recommendations.values());
+
+    if (finalRecommendations.length === 0) {
+        finalRecommendations.push({
             id: 'all-good',
             text: 'همه چیز خوب به نظر می‌رسد! به مراقبت عالی خود از کودک ادامه دهید.',
             severity: 'low'
@@ -49,8 +70,8 @@ const SmartRecommendations = ({ child, growthTrend, vaccinationStatus }) => {
     return (
         <div className="recommendations-container">
             <ul>
-                {recommendations.map(rec => (
-                    <li key={rec.id} className={getSeverityClass(rec.severity)}>
+                {finalRecommendations.map((rec, index) => (
+                    <li key={index} className={getSeverityClass(rec.severity)}>
                         <FontAwesomeIcon icon={faLightbulb} />
                         <p>{rec.text}</p>
                     </li>
