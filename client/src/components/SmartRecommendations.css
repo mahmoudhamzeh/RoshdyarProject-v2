@@ -1,0 +1,41 @@
+.recommendations-container ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommendations-container li {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.recommendations-container li .fa-lightbulb {
+    font-size: 1.5em;
+}
+
+.recommendations-container li p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.rec-high {
+    background-color: #ffebee;
+    color: #c62828;
+    border-left: 5px solid #c62828;
+}
+
+.rec-medium {
+    background-color: #fff8e1;
+    color: #f57f17;
+    border-left: 5px solid #f57f17;
+}
+
+.rec-low {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-left: 5px solid #2e7d32;
+}

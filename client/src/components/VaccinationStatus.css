@@ -1,0 +1,44 @@
+.vaccination-status-container .vaccine-category {
+    margin-bottom: 20px;
+}
+
+.vaccination-status-container h4 {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.vaccination-status-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.vaccination-status-container li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.vaccination-status-container button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.vaccination-status-container button:hover {
+    background-color: #45a049;
+}
+
+.vaccination-status-container .done-date {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.vaccine-category h4 .fa-exclamation-triangle { color: #f44336; }
+.vaccine-category h4 .fa-clock { color: #2196F3; }
+.vaccine-category h4 .fa-check-circle { color: #4caf50; }
