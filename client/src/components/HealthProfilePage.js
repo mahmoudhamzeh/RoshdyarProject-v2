@@ -130,6 +130,10 @@ const HealthProfilePage = () => {
                         <p className="view-full-chart-text">مشاهده کامل نمودار</p>
                     </div>
                     <div className="actions-grid">
+                        <div className="action-card" onClick={() => history.push(`/lab-tests/${childId}`)}>
+                            <h4>چکاپ و آزمایش‌ها</h4>
+                            <p>مدیریت نتایج آزمایش‌ها</p>
+                        </div>
                         <div className="action-card" onClick={() => setIsVisitModalOpen(true)}>
                             <h4>مراجعات پزشکی</h4>
                             <p>تعداد: {visits.length}</p>

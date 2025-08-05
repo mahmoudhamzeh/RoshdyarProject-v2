@@ -8,6 +8,7 @@ import EditChildPage from './components/EditChildPage';
 import GrowthChartPage from './components/GrowthChartPage';
 import HealthProfilePage from './components/HealthProfilePage';
 import HealthAnalysisPage from './components/HealthAnalysisPage';
+import LabTestsPage from './components/LabTestsPage';
 import ProfilePage from './components/ProfilePage';
 import VaccinationPage from './components/VaccinationPage';
 import './App.css';
@@ -26,6 +27,7 @@ const App = () => {
                 <Route path="/growth-chart/:childId" component={GrowthChartPage} />
                 <Route path="/health-profile/:childId" component={HealthProfilePage} />
                 <Route path="/health-analysis/:childId" component={HealthAnalysisPage} />
+                <Route path="/lab-tests/:childId" component={LabTestsPage} />
                 <Route path="/vaccination/:childId" component={VaccinationPage} />
                 <Route path="/profile" component={ProfilePage} />
 
