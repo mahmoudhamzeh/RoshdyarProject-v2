@@ -22,7 +22,7 @@ const upload = multer({ storage: storage });
 
 const dbPath = path.join(__dirname, 'db.json');
 
-let users, children, growthData, medicalVisits, medicalDocuments, labTests, reminders, childIdCounter;
+let users, children, growthData, medicalVisits, medicalDocuments, checkups, reminders, childIdCounter;
 
 const loadData = () => {
     if (fs.existsSync(dbPath)) {
@@ -33,7 +33,7 @@ const loadData = () => {
         growthData = data.growthData;
         medicalVisits = data.medicalVisits;
         medicalDocuments = data.medicalDocuments;
-        labTests = data.labTests || {};
+        checkups = data.checkups || {};
         reminders = data.reminders || {};
         childIdCounter = data.childIdCounter;
     } else {
@@ -42,7 +42,7 @@ const loadData = () => {
         growthData = {};
         medicalVisits = {};
         medicalDocuments = {};
-        labTests = {};
+        checkups = {};
         reminders = {};
         childIdCounter = 1;
     }
@@ -57,7 +57,7 @@ const saveData = () => {
         growthData,
         medicalVisits,
         medicalDocuments,
-        labTests,
+        checkups,
         reminders,
         childIdCounter
     }, null, 2);
@@ -87,7 +87,7 @@ app.post('/api/children', (req, res) => {
     if(otherData.height && otherData.weight) { growthData[newChild.id] = [{ date: birthDate, height: parseFloat(otherData.height), weight: parseFloat(otherData.weight) }]; }
     medicalVisits[newChild.id] = [];
     medicalDocuments[newChild.id] = [];
-    labTests[newChild.id] = [];
+    checkups[newChild.id] = [];
     saveData();
     res.status(201).json(newChild);
 });
@@ -190,36 +190,34 @@ app.post('/api/vaccinate/:childId', (req, res) => {
 app.get('/api/visits/:childId', (req, res) => res.json(medicalVisits[req.params.childId] || []));
 app.post('/api/visits/:childId', (req, res) => { const { childId } = req.params; const { date, doctorName, reason, summary } = req.body; if (!date || !doctorName || !reason) return res.status(400).json({ message: 'All fields required' }); if (!medicalVisits[childId]) medicalVisits[childId] = []; const newVisit = { date, doctorName, reason, summary }; medicalVisits[childId].push(newVisit); medicalVisits[childId].sort((a, b) => new Date(b.date.replace(/\//g, '-')) - new Date(a.date.replace(/\//g, '-'))); saveData(); res.status(201).json(newVisit); });
 
-app.get('/api/lab-tests/:childId', (req, res) => {
+app.get('/api/checkups/:childId', (req, res) => {
     const { childId } = req.params;
-    res.json(labTests[childId] || []);
+    res.json(checkups[childId] || []);
 });
 
-app.post('/api/lab-tests/:childId', upload.single('resultFile'), (req, res) => {
+app.post('/api/checkups/:childId', (req, res) => {
     const { childId } = req.params;
-    const { testType, date, numericResult, doctorNote } = req.body;
+    const { title, date, parameters } = req.body;
 
-    if (!testType || !date) {
-        return res.status(400).json({ message: 'Test type and date are required.' });
+    if (!title || !date || !parameters) {
+        return res.status(400).json({ message: 'Title, date, and parameters are required.' });
     }
 
-    if (!labTests[childId]) {
-        labTests[childId] = [];
+    if (!checkups[childId]) {
+        checkups[childId] = [];
     }
 
-    const newTest = {
+    const newCheckup = {
         id: Date.now(),
-        testType,
+        title,
         date,
-        numericResult: numericResult || null,
-        fileUrl: req.file ? `/uploads/${req.file.filename}` : null,
-        doctorNote: doctorNote || '',
+        parameters: JSON.parse(parameters), // Parameters are sent as a JSON string
     };
 
-    labTests[childId].push(newTest);
-    labTests[childId].sort((a, b) => new Date(b.date) - new Date(a.date));
+    checkups[childId].push(newCheckup);
+    checkups[childId].sort((a, b) => new Date(b.date) - new Date(a.date));
     saveData();
-    res.status(201).json(newTest);
+    res.status(201).json(newCheckup);
 });
 
 app.post('/api/documents/:childId', upload.single('document'), (req, res) => {
