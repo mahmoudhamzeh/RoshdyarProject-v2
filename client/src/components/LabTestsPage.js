@@ -4,7 +4,7 @@ import Modal from 'react-modal';
 import DatePicker from 'react-datepicker';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faVial, faPlus, faChevronDown, faChevronUp, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { getTestStatus } from '../utils/lab-test-ranges';
+import { getTestStatus, labTestRanges } from '../utils/lab-test-ranges';
 import TestRecommendations from './TestRecommendations';
 import './LabTestsPage.css';
 
@@ -22,6 +22,11 @@ const CheckupItem = ({ checkup, child }) => {
             </div>
             {isExpanded && (
                 <div className="checkup-details">
+                    {checkup.fileUrl && (
+                        <div className="checkup-file-link">
+                            <a href={`http://localhost:5000${checkup.fileUrl}`} target="_blank" rel="noopener noreferrer">مشاهده فایل گزارش کامل</a>
+                        </div>
+                    )}
                     <table>
                         <thead>
                             <tr>
@@ -65,6 +70,7 @@ const LabTestsPage = () => {
         title: '',
         date: new Date(),
         parameters: [{ name: '', value: '', unit: '' }],
+        checkupFile: null,
     };
     const [newCheckup, setNewCheckup] = useState(initialFormState);
 
@@ -106,19 +112,24 @@ const LabTestsPage = () => {
         setNewCheckup(prev => ({ ...prev, parameters: values }));
     };
 
+    const handleFileChange = (e) => {
+        setNewCheckup(prev => ({ ...prev, checkupFile: e.target.files[0] }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const payload = {
-            ...newCheckup,
-            date: newCheckup.date.toISOString().split('T')[0],
-            parameters: JSON.stringify(newCheckup.parameters.filter(p => p.name)), // Filter out empty params
-        };
+        const formData = new FormData();
+        formData.append('title', newCheckup.title);
+        formData.append('date', newCheckup.date.toISOString().split('T')[0]);
+        formData.append('parameters', JSON.stringify(newCheckup.parameters.filter(p => p.name)));
+        if (newCheckup.checkupFile) {
+            formData.append('checkupFile', newCheckup.checkupFile);
+        }
 
         try {
             const res = await fetch(`http://localhost:5000/api/checkups/${childId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                body: formData, // No Content-Type header needed, browser sets it for FormData
             });
             if (!res.ok) throw new Error('Failed to save checkup');
 
@@ -137,9 +148,7 @@ const LabTestsPage = () => {
                     &larr; بازگشت
                 </button>
                 <h1 className="page-title"><FontAwesomeIcon icon={faVial} /> چکاپ و آزمایش‌ها</h1>
-                <button className="add-test-btn" onClick={() => setIsModalOpen(true)}>
-                    <FontAwesomeIcon icon={faPlus} /> افزودن چکاپ
-                </button>
+                <div className="nav-placeholder"></div>
             </nav>
 
             <main>
@@ -161,6 +170,11 @@ const LabTestsPage = () => {
                     )}
                 </div>
             </main>
+            <div className="add-checkup-container">
+                <button className="add-test-btn" onClick={() => setIsModalOpen(true)}>
+                    <FontAwesomeIcon icon={faPlus} /> افزودن چکاپ جدید
+                </button>
+            </div>
 
             <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} className="add-data-modal" overlayClassName="modal-overlay">
                 <form onSubmit={handleSubmit} className="add-data-form">
@@ -170,15 +184,23 @@ const LabTestsPage = () => {
 
                     <div className="parameters-section">
                         <h3>پارامترها</h3>
+                        <datalist id="common-tests">
+                            {Object.keys(labTestRanges).map(testName => <option key={testName} value={testName} />)}
+                        </datalist>
                         {newCheckup.parameters.map((param, index) => (
                             <div key={index} className="parameter-row">
-                                <input type="text" name="name" value={param.name} onChange={e => handleParamChange(index, e)} placeholder="نام پارامتر" />
+                                <input type="text" name="name" value={param.name} onChange={e => handleParamChange(index, e)} placeholder="نام پارامتر" list="common-tests" />
                                 <input type="text" name="value" value={param.value} onChange={e => handleParamChange(index, e)} placeholder="مقدار" />
                                 <input type="text" name="unit" value={param.unit} onChange={e => handleParamChange(index, e)} placeholder="واحد" />
                                 <button type="button" className="remove-param-btn" onClick={() => handleRemoveParam(index)}><FontAwesomeIcon icon={faTrash} /></button>
                             </div>
                         ))}
                         <button type="button" className="add-param-btn" onClick={handleAddParam}>+ افزودن پارامتر</button>
+                    </div>
+
+                    <div className="file-upload-section">
+                        <label>فایل گزارش کامل (اختیاری)</label>
+                        <input type="file" name="checkupFile" onChange={handleFileChange} />
                     </div>
 
                     <div className="modal-actions">
