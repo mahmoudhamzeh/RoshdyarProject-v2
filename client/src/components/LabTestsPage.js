@@ -146,6 +146,9 @@ const LabTestsPage = () => {
                                                 <span className={`status-badge ${status.className}`}>{status.status}</span>
                                             </p>
                                         )}
+                                        {status.interpretation && status.status !== 'نرمال' && (
+                                            <p className="test-interpretation">{status.interpretation}</p>
+                                        )}
                                         {test.doctorNote && <p><strong>یادداشت پزشک:</strong> {test.doctorNote}</p>}
                                         {test.fileUrl && <a href={`http://localhost:5000${test.fileUrl}`} target="_blank" rel="noopener noreferrer">مشاهده فایل</a>}
                                     </div>
