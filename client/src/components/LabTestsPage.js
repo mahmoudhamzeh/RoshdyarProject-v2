@@ -5,34 +5,10 @@ import DatePicker from 'react-datepicker';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faVial, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { getTestStatus } from '../utils/lab-test-ranges';
+import TestRecommendations from './TestRecommendations';
 import './LabTestsPage.css';
 
 Modal.setAppElement('#root');
-
-const recommendedCheckupsData = {
-    '0-6': ['معاینه فیزیکی کامل در ۱، ۲، ۴ و ۶ ماهگی', 'بررسی شنوایی و بینایی'],
-    '6-12': ['آزمایش کم‌خونی (CBC) در ۹-۱۲ ماهگی', 'بررسی روند رشد و تغذیه تکمیلی'],
-    '12-24': ['چکاپ سالانه در ۱۸ و ۲۴ ماهگی', 'آزمایش ویتامین D'],
-    '24-60': ['چکاپ سالانه', 'ارزیابی بینایی و شنوایی دوره‌ای'],
-};
-
-const RecommendedCheckups = ({ ageInMonths }) => {
-    let ageGroup = '24-60';
-    if (ageInMonths <= 6) ageGroup = '0-6';
-    else if (ageInMonths <= 12) ageGroup = '6-12';
-    else if (ageInMonths <= 24) ageGroup = '12-24';
-
-    const recommendations = recommendedCheckupsData[ageGroup];
-
-    return (
-        <div className="recommended-checkups">
-            <h4>چکاپ‌های پیشنهادی برای این گروه سنی</h4>
-            <ul>
-                {recommendations.map((rec, i) => <li key={i}>{rec}</li>)}
-            </ul>
-        </div>
-    );
-};
 
 const LabTestsPage = () => {
     const history = useHistory();
@@ -119,7 +95,7 @@ const LabTestsPage = () => {
             </nav>
 
             <main>
-                {child && <RecommendedCheckups ageInMonths={(new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375)} />}
+                <TestRecommendations />
                 <div className="tests-list-container">
                     {isLoading ? (
                         <p>در حال بارگذاری...</p>
