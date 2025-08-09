@@ -152,6 +152,11 @@ const LabTestsPage = () => {
             </nav>
 
             <main>
+                <div className="add-checkup-container">
+                    <button className="add-test-btn" onClick={() => setIsModalOpen(true)}>
+                        <FontAwesomeIcon icon={faPlus} /> افزودن چکاپ جدید
+                    </button>
+                </div>
                 <TestRecommendations />
                 <div className="checkups-list-container">
                     {isLoading ? (
@@ -159,7 +164,6 @@ const LabTestsPage = () => {
                     ) : checkups.length === 0 ? (
                         <div className="no-tests-message">
                             <p>هیچ چکاپ یا آزمایشی ثبت نشده است.</p>
-                            <p>برای افزودن، روی دکمه "افزودن چکاپ" کلیک کنید.</p>
                         </div>
                     ) : (
                         <ul className="checkups-list">
@@ -170,11 +174,6 @@ const LabTestsPage = () => {
                     )}
                 </div>
             </main>
-            <div className="add-checkup-container">
-                <button className="add-test-btn" onClick={() => setIsModalOpen(true)}>
-                    <FontAwesomeIcon icon={faPlus} /> افزودن چکاپ جدید
-                </button>
-            </div>
 
             <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} className="add-data-modal" overlayClassName="modal-overlay">
                 <form onSubmit={handleSubmit} className="add-data-form">
