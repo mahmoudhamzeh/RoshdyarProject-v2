@@ -113,6 +113,16 @@
     background-color: #6c757d;
 }
 
+.test-interpretation {
+    font-size: 0.9em;
+    color: #555;
+    background-color: #f8f9fa;
+    border-left: 3px solid #6c757d;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border-radius: 4px;
+}
+
 .recommended-checkups {
     background-color: #e3f2fd;
     color: #0d47a1;
