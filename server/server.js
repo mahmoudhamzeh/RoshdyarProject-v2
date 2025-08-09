@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { vaccinationSchedule } = require('./vaccination-schedule');
+const { recommendedCheckupsData } = require('./recommendations');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -283,6 +284,22 @@ app.post('/api/generate-reminders/:userId', (req, res) => {
 
     saveData();
     res.status(201).json({ message: 'Reminders generated' });
+});
+
+app.get('/api/recommended-tests/:childId', (req, res) => {
+    const { childId } = req.params;
+    const child = children.find(c => c.id === parseInt(childId));
+    if (!child) return res.status(404).json({ message: 'Child not found' });
+
+    const ageInMonths = (new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375);
+
+    let ageGroup = '24-60';
+    if (ageInMonths <= 6) ageGroup = '0-6';
+    else if (ageInMonths <= 12) ageGroup = '6-12';
+    else if (ageInMonths <= 24) ageGroup = '12-24';
+
+    const recommendations = recommendedCheckupsData[ageGroup] || [];
+    res.json(recommendations);
 });
 
 
