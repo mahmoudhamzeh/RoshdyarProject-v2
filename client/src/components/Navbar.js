@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import Reminders from './Reminders';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -26,7 +27,7 @@ const Navbar = () => {
                 <Link to="/support">پشتیبانی</Link>
             </div>
             <div className="navbar-profile">
-                <span>🔔</span>
+                <Reminders />
                 <button onClick={handleProfileClick} className="profile-btn">پروفایل من</button>
                 <button onClick={handleLogout} className="logout-btn">خروج</button>
             </div>

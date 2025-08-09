@@ -1,0 +1,75 @@
+.reminders-widget {
+    position: relative;
+    display: inline-block;
+}
+
+.reminders-bell {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+}
+
+.reminder-count {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+.reminders-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0; /* In RTL, this should be right: 0 */
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.reminders-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.reminders-dropdown li {
+    padding: 10px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+}
+
+.reminders-dropdown li:last-child {
+    border-bottom: none;
+}
+
+.dismiss-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.dismiss-btn:hover {
+    color: #333;
+}
+
+.no-reminders {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}

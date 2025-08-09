@@ -140,6 +140,13 @@
     margin-bottom: 15px;
 }
 
+.generate-reminders-btn {
+    margin-top: 15px;
+    background-color: #ffc107 !important; /* Different color to stand out */
+    color: #212529 !important;
+    font-weight: bold;
+}
+
 .success-message {
     color: #4F8A10;
     background-color: #DFF2BF;
