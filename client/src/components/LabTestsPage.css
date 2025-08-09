@@ -39,8 +39,17 @@
     margin: 0;
 }
 
-.lab-tests-nav .add-test-btn {
-    justify-self: end;
+.add-checkup-container {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.add-test-btn {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.8rem;
+    font-size: 1.1em;
+    justify-content: center;
 }
 
 .checkups-list-container {
@@ -107,6 +116,24 @@
 
 .checkup-details th {
     background-color: #f2f2f2;
+}
+
+.checkup-file-link {
+    padding: 10px;
+    background-color: #f8f9fa;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.checkup-file-link a {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.file-upload-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 }
 
 /* Modal Form Styles */

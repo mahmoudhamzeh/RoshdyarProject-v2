@@ -195,7 +195,7 @@ app.get('/api/checkups/:childId', (req, res) => {
     res.json(checkups[childId] || []);
 });
 
-app.post('/api/checkups/:childId', (req, res) => {
+app.post('/api/checkups/:childId', upload.single('checkupFile'), (req, res) => {
     const { childId } = req.params;
     const { title, date, parameters } = req.body;
 
@@ -211,7 +211,8 @@ app.post('/api/checkups/:childId', (req, res) => {
         id: Date.now(),
         title,
         date,
-        parameters: JSON.parse(parameters), // Parameters are sent as a JSON string
+        parameters: JSON.parse(parameters),
+        fileUrl: req.file ? `/uploads/${req.file.filename}` : null,
     };
 
     checkups[childId].push(newCheckup);
