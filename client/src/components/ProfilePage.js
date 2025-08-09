@@ -9,6 +9,21 @@ const ProfilePage = () => {
     const history = useHistory();
     const [activeTab, setActiveTab] = useState('userInfo');
 
+    const handleGenerateReminders = async () => {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (!user) return;
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/generate-reminders/${user.id}`, {
+                method: 'POST',
+            });
+            if (!res.ok) throw new Error('Failed to generate reminders');
+            alert('یادآورها با موفقیت تولید شدند. لطفاً بخش یادآورها را چک کنید.');
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case 'userInfo':
@@ -42,6 +57,7 @@ const ProfilePage = () => {
                     <button onClick={() => setActiveTab('consultations')} className={activeTab === 'consultations' ? 'active' : ''}>مشاوره های متنی</button>
                     <button onClick={() => setActiveTab('support')} className={activeTab === 'support' ? 'active' : ''}>پشتبانی</button>
                     <button onClick={() => setActiveTab('changePassword')} className={activeTab === 'changePassword' ? 'active' : ''}>تغییر رمز</button>
+                    <button onClick={handleGenerateReminders} className="generate-reminders-btn">تولید یادآورها</button>
                 </aside>
                 <main className="profile-content">
                     {renderContent()}

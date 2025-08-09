@@ -21,7 +21,7 @@ const upload = multer({ storage: storage });
 
 const dbPath = path.join(__dirname, 'db.json');
 
-let users, children, growthData, medicalVisits, medicalDocuments, labTests, childIdCounter;
+let users, children, growthData, medicalVisits, medicalDocuments, labTests, reminders, childIdCounter;
 
 const loadData = () => {
     if (fs.existsSync(dbPath)) {
@@ -33,6 +33,7 @@ const loadData = () => {
         medicalVisits = data.medicalVisits;
         medicalDocuments = data.medicalDocuments;
         labTests = data.labTests || {};
+        reminders = data.reminders || {};
         childIdCounter = data.childIdCounter;
     } else {
         users = {};
@@ -41,6 +42,7 @@ const loadData = () => {
         medicalVisits = {};
         medicalDocuments = {};
         labTests = {};
+        reminders = {};
         childIdCounter = 1;
     }
 };
@@ -55,6 +57,7 @@ const saveData = () => {
         medicalVisits,
         medicalDocuments,
         labTests,
+        reminders,
         childIdCounter
     }, null, 2);
     fs.writeFileSync(dbPath, data);
@@ -66,10 +69,11 @@ function calculateAge(birthDate) { /* ... */ }
 app.post('/api/upload', upload.single('avatar'), (req, res) => { if (!req.file) return res.status(400).json({ message: 'No file' }); res.json({ filePath: `/uploads/${req.file.filename}` }); });
 
 app.post('/api/children', (req, res) => {
-    const { firstName, lastName, gender, birthDate, avatar, ...otherData } = req.body;
+    const { userId, firstName, lastName, gender, birthDate, avatar, ...otherData } = req.body;
     if (!firstName || !lastName) return res.status(400).json({ message: 'Name required' });
     const newChild = {
         id: childIdCounter++,
+        userId: parseInt(userId), // Add userId
         name: `${firstName} ${lastName}`,
         gender,
         birthDate,
@@ -228,6 +232,59 @@ app.post('/api/documents/:childId', upload.single('document'), (req, res) => {
     res.status(201).json(newDocument);
 });
 app.get('/api/documents/:childId', (req, res) => res.json(medicalDocuments[req.params.childId] || []));
+
+// --- Reminder Endpoints ---
+app.get('/api/reminders/:userId', (req, res) => {
+    const { userId } = req.params;
+    res.json(reminders[userId] || []);
+});
+
+app.delete('/api/reminders/:userId/:reminderId', (req, res) => {
+    const { userId, reminderId } = req.params;
+    if (reminders[userId]) {
+        reminders[userId] = reminders[userId].filter(r => r.id !== parseInt(reminderId));
+        saveData();
+    }
+    res.status(200).json({ message: 'Reminder dismissed' });
+});
+
+app.post('/api/generate-reminders/:userId', (req, res) => {
+    const { userId } = req.params;
+    if (!reminders[userId]) {
+        reminders[userId] = [];
+    }
+
+    // This is a simplified simulation of a cron job.
+    // In a real app, this logic would run on a schedule.
+    const userChildren = children.filter(c => c.userId === parseInt(userId)); // Assuming children have a userId
+
+    userChildren.forEach(child => {
+        const ageInMonths = (new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375);
+
+        // Check for upcoming vaccines
+        vaccinationSchedule.forEach(vaccine => {
+            const reminderId = `vaccine-${child.id}-${vaccine.name}-${vaccine.dose}`;
+            const alreadyExists = reminders[userId].some(r => r.id === reminderId);
+            if (alreadyExists) return;
+
+            const isDone = child.vaccinationRecords && child.vaccinationRecords[`${vaccine.name}-${vaccine.dose}`];
+            const isDue = ageInMonths >= vaccine.month - 1 && ageInMonths < vaccine.month + 2;
+
+            if (!isDone && isDue) {
+                reminders[userId].push({
+                    id: reminderId,
+                    type: 'vaccine',
+                    message: `واکسن ${vaccine.name} (دوز ${vaccine.dose}) برای ${child.name} به زودی فرا می‌رسد.`,
+                    date: new Date(),
+                });
+            }
+        });
+    });
+
+    saveData();
+    res.status(201).json({ message: 'Reminders generated' });
+});
+
 
 app.get('/api/backup', (req, res) => {
     const backupData = {
