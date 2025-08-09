@@ -28,6 +28,18 @@ export const labTestRanges = {
         // We are using Hemoglobin as a representative part.
         unit: '',
         ranges: []
+    },
+    'TSH': {
+        unit: 'mIU/L',
+        ranges: [
+            { age_months: [0, 1200], low: 0.4, high: 4.0, interpretation: { low: 'ممکن است نشانه پرکاری تیروئید باشد.', normal: 'عملکرد تیروئید در محدوده طبیعی است.', high: 'ممکن است نشانه کم‌کاری تیروئید باشد.' } }
+        ]
+    },
+    'Bilirubin, Total': {
+        unit: 'mg/dL',
+        ranges: [
+            { age_months: [0, 1200], low: 0.1, high: 1.2, interpretation: { low: 'نرمال', normal: 'میزان بیلی‌روبین در محدوده طبیعی است.', high: 'میزان بیلی‌روبین بالا است که ممکن است به بررسی عملکرد کبد نیاز داشته باشد.' } }
+        ]
     }
 };
 
