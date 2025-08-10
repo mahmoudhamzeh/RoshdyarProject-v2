@@ -59,6 +59,14 @@
   margin-bottom: 1.5rem;
 }
 
+.chart-info-boxes > * {
+  margin-right: 1rem;
+}
+
+.chart-info-boxes > *:last-child {
+  margin-right: 0;
+}
+
 .info-box {
   flex: 0 1 300px; /* Make boxes narrower */
   background-color: #fff;
@@ -138,6 +146,14 @@
   gap: 1rem;
 }
 
+.add-data-form > * {
+  margin-bottom: 1rem;
+}
+
+.add-data-form > *:last-child {
+  margin-bottom: 0;
+}
+
 .add-data-form input, .add-data-form .react-datepicker-wrapper input {
   padding: 0.8rem;
   border: 1px solid #ccc;
@@ -150,6 +166,14 @@
   justify-content: space-between;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+.modal-actions > * {
+  margin-right: 1rem;
+}
+
+.modal-actions > *:last-child {
+  margin-right: 0;
 }
 
 .modal-actions button {
@@ -180,9 +204,25 @@
     gap: 1rem;
 }
 
+.custom-legend > * {
+    margin-right: 1rem;
+}
+
+.custom-legend > *:last-child {
+    margin-right: 0;
+}
+
 .custom-legend li {
     cursor: help;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.custom-legend li > * {
+    margin-right: 0.5rem;
+}
+
+.custom-legend li > *:last-child {
+    margin-right: 0;
 }
