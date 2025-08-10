@@ -33,18 +33,22 @@ const CheckupItem = ({ checkup, child }) => {
                                 <th>پارامتر</th>
                                 <th>نتیجه</th>
                                 <th>واحد</th>
+                                <th>محدوده مرجع</th>
                                 <th>وضعیت</th>
                             </tr>
                         </thead>
                         <tbody>
                             {checkup.parameters.map((param, index) => {
                                 const ageInMonths = child ? (new Date(checkup.date) - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375) : 0;
+                                const testInfo = labTestRanges[param.name];
+                                const applicableRange = testInfo ? testInfo.ranges.find(r => ageInMonths >= r.age_months[0] && ageInMonths < r.age_months[1]) : null;
                                 const status = getTestStatus(param.name, ageInMonths, param.value);
                                 return (
                                     <tr key={index}>
                                         <td>{param.name}</td>
                                         <td>{param.value}</td>
                                         <td>{param.unit}</td>
+                                        <td>{applicableRange ? `${applicableRange.ref_low} - ${applicableRange.ref_high}` : 'N/A'}</td>
                                         <td><span className={`status-badge ${status.className}`}>{status.status}</span></td>
                                     </tr>
                                 );
