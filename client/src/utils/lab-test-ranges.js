@@ -4,43 +4,55 @@ export const labTestRanges = {
     'Vitamin D': {
         unit: 'ng/mL',
         ranges: [
-            {
-                age_months: [0, 1200],
-                low: 20,
-                high: 50,
-                interpretation: {
-                    low: 'سطح ویتامین D پایین است که می‌تواند بر سلامت استخوان تاثیر بگذارد. توصیه به مشورت با پزشک می‌شود.',
-                    normal: 'سطح ویتامین D در محدوده طبیعی است.',
-                    high: 'سطح ویتامین D بالاتر از حد طبیعی است. مقادیر بسیار بالا می‌تواند مسمومیت‌زا باشد.'
-                }
-            }
+            { age_months: [0, 1200], ref_low: 20, ref_high: 50, interpretation: { low: 'سطح ویتامین D پایین است که می‌تواند بر سلامت استخوان تاثیر بگذارد.', normal: 'سطح ویتامین D در محدوده طبیعی است.', high: 'سطح ویتامین D بالاتر از حد طبیعی است.' } }
         ]
     },
     'Hemoglobin': {
         unit: 'g/dL',
         ranges: [
-            { age_months: [0, 6], low: 9.5, high: 14.0, interpretation: { low: 'میزان هموگلوبین پایین است و ممکن است نشانه کم‌خونی باشد. لطفاً با پزشک مشورت کنید.', normal: 'میزان هموگلوبین در محدوده طبیعی است.', high: 'میزان هموگلوبین بالاتر از حد طبیعی است.' } },
-            { age_months: [6, 144], low: 10.5, high: 15.5, interpretation: { low: 'میزان هموگلوبین پایین است و ممکن است نشانه کم‌خونی باشد. لطفاً با پزشک مشورت کنید.', normal: 'میزان هموگلوبین در محدوده طبیعی است.', high: 'میزان هموگلوبین بالاتر از حد طبیعی است.' } }
+            { age_months: [0, 6], ref_low: 9.5, ref_high: 14.0, interpretation: { low: 'پایین (احتمال کم‌خونی)', normal: 'نرمال', high: 'بالا' } },
+            { age_months: [6, 144], ref_low: 10.5, ref_high: 15.5, interpretation: { low: 'پایین (احتمال کم‌خونی)', normal: 'نرمال', high: 'بالا' } }
         ]
     },
-    'CBC': {
-        // This is a placeholder as CBC has many components.
-        // We are using Hemoglobin as a representative part.
-        unit: '',
-        ranges: []
+    'WBC': {
+        unit: 'x10^9/L',
+        ranges: [
+            { age_months: [0, 1], ref_low: 9.0, ref_high: 30.0, interpretation: { low: 'پایین (احتمال عفونت یا مشکل ایمنی)', normal: 'نرمال', high: 'بالا (احتمال عفونت)' } },
+            { age_months: [1, 24], ref_low: 6.0, ref_high: 17.5, interpretation: { low: 'پایین (احتمال عفونت یا مشکل ایمنی)', normal: 'نرمال', high: 'بالا (احتمال عفونت)' } },
+            { age_months: [24, 144], ref_low: 5.0, ref_high: 15.5, interpretation: { low: 'پایین (احتمال عفونت یا مشکل ایمنی)', normal: 'نرمال', high: 'بالا (احتمال عفونت)' } },
+        ]
+    },
+    'Platelets': {
+        unit: 'x10^9/L',
+        ranges: [
+            { age_months: [0, 1200], ref_low: 150, ref_high: 450, interpretation: { low: 'پایین (خطر خونریزی)', normal: 'نرمال', high: 'بالا (خطر لخته شدن خون)' } },
+        ]
     },
     'TSH': {
         unit: 'mIU/L',
         ranges: [
-            { age_months: [0, 1200], low: 0.4, high: 4.0, interpretation: { low: 'ممکن است نشانه پرکاری تیروئید باشد.', normal: 'عملکرد تیروئید در محدوده طبیعی است.', high: 'ممکن است نشانه کم‌کاری تیروئید باشد.' } }
+            { age_months: [0, 1200], ref_low: 0.4, ref_high: 4.0, interpretation: { low: 'پایین (احتمال پرکاری تیروئید)', normal: 'نرمال', high: 'بالا (احتمال کم‌کاری تیروئید)' } }
         ]
     },
     'Bilirubin, Total': {
         unit: 'mg/dL',
         ranges: [
-            { age_months: [0, 1200], low: 0.1, high: 1.2, interpretation: { low: 'نرمال', normal: 'میزان بیلی‌روبین در محدوده طبیعی است.', high: 'میزان بیلی‌روبین بالا است که ممکن است به بررسی عملکرد کبد نیاز داشته باشد.' } }
+            { age_months: [0, 1200], ref_low: 0.1, ref_high: 1.2, interpretation: { low: 'نرمال', normal: 'نرمال', high: 'بالا (نیاز به بررسی عملکرد کبد)' } }
         ]
-    }
+    },
+    'ALT': {
+        unit: 'U/L',
+        ranges: [
+            { age_months: [0, 1200], ref_low: 7, ref_high: 55, interpretation: { low: 'نرمال', normal: 'نرمال', high: 'بالا (آسیب کبدی)' } }
+        ]
+    },
+    'Iron': {
+        unit: 'mcg/dL',
+        ranges: [
+            { age_months: [6, 24], ref_low: 40, ref_high: 100, interpretation: { low: 'پایین (کمبود آهن)', normal: 'نرمال', high: 'بالا' } },
+            { age_months: [24, 144], ref_low: 50, ref_high: 120, interpretation: { low: 'پایین (کمبود آهن)', normal: 'نرمال', high: 'بالا' } }
+        ]
+    },
 };
 
 export const getTestStatus = (testType, ageInMonths, value) => {
@@ -54,10 +66,10 @@ export const getTestStatus = (testType, ageInMonths, value) => {
         return { status: 'محدوده نامشخص', className: 'status-unknown', interpretation: null };
     }
 
-    if (value < applicableRange.low) {
+    if (value < applicableRange.ref_low) {
         return { status: 'پایین', className: 'status-low', interpretation: applicableRange.interpretation.low };
     }
-    if (value > applicableRange.high) {
+    if (value > applicableRange.ref_high) {
         return { status: 'بالا', className: 'status-high', interpretation: applicableRange.interpretation.high };
     }
     return { status: 'نرمال', className: 'status-normal', interpretation: applicableRange.interpretation.normal };
