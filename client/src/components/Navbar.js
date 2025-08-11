@@ -18,7 +18,7 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <div className="navbar-brand">
-                <Link to="/dashboard">👶 رشدیار</Link>
+                <Link to="/dashboard">رشدیار 👶</Link>
             </div>
             <div className="navbar-links">
                 <Link to="/dashboard">خانه</Link>
@@ -28,8 +28,8 @@ const Navbar = () => {
             </div>
             <div className="navbar-profile">
                 <Reminders />
-                <button onClick={handleProfileClick} className="profile-btn">پروفایل من</button>
-                <button onClick={handleLogout} className="logout-btn">خروج</button>
+                <Link to="/profile" className="btn btn-profile">پروفایل من</Link>
+                <button onClick={handleLogout} className="btn btn-logout" type="button">خروج</button>
             </div>
         </nav>
     );
