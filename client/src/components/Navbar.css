@@ -1,27 +1,76 @@
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #1565c0;
-    padding: 1rem 2rem;
-    color: white;
-    font-family: 'Vazirmatn', Tahoma, sans-serif;
+/* Reset‌های لازم و یکدست‌سازی رندر متن */
+html,body{margin:0;padding:0}
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100% }
+*{ box-sizing:border-box }
+:root{
+  --primary:#1565c0;
+  --danger:#d32f2f;
+  --text-on-primary:#fff;
 }
-.navbar-brand a { color: white; text-decoration: none; font-weight: bold; font-size: 1.5rem; }
-.navbar-links a { color: white; text-decoration: none; margin: 0 1rem; font-weight: 500; }
-.navbar-profile { display: flex; align-items: center; gap: 1rem; }
-.navbar-profile span { font-size: 1.5rem; cursor: pointer; }
-.profile-btn, .logout-btn {
-    background: none;
-    border: 1px solid #fff;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: 'Vazirmatn', Tahoma, sans-serif;
-    white-space: nowrap;
+body{
+  font-family:'Vazirmatn', Tahoma, sans-serif;
+  background:#f5f7fb;
+  color:#1f2937;
+  line-height:1.6;
 }
-.logout-btn {
-    background-color: #d32f2f;
-    border-color: #d32f2f;
+/* کمک به یکدست شدن رندر فارسی بین مرورگرها */
+body, .navbar{
+  -webkit-font-smoothing:antialiased; /* کروم/سافاری */
+  -moz-osx-font-smoothing:grayscale;  /* فایرفاکس روی مک */
+  font-kerning:normal;
+  font-feature-settings:"kern","liga","clig","calt";
+}
+
+/* ناوبَر */
+.navbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  background-color:var(--primary);
+  color:var(--text-on-primary);
+  padding:.875rem 1.25rem;
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+.navbar-brand a{
+  color:#fff; text-decoration:none;
+  font-weight:700; font-size:1.375rem; white-space:nowrap;
+}
+
+/* لینک‌ها: راست‌به‌چپ + جلوگیری از به‌هم‌ریختگی کرنینگ در کروم */
+.navbar-links{
+  display:flex; align-items:center; gap:.75rem;
+  direction:rtl; unicode-bidi:plaintext;
+  flex-wrap:wrap;
+}
+.navbar-links a{
+  color:#fff; text-decoration:none;
+  padding:.4rem .6rem; border-radius:.5rem;
+  font-weight:500; line-height:1.4; white-space:nowrap;
+}
+.navbar-links a:hover{ background-color:rgba(255,255,255,.12) }
+
+/* پروفایل/دکمه‌ها */
+.navbar-profile{ display:flex; align-items:center; gap:.5rem }
+.navbar-profile span{ font-size:1.25rem; cursor:pointer; line-height:1 }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.4rem;
+  padding:.5rem .9rem;
+  font-size:1rem; line-height:1.5;
+  border-radius:.5rem; cursor:pointer;
+  border:1px solid #fff; background:transparent; color:#fff;
+  white-space:nowrap; text-decoration:none;
+}
+.btn:focus{ outline:2px solid rgba(255,255,255,.6); outline-offset:2px }
+.btn-profile{ }
+.btn-logout{ background-color:var(--danger); border-color:var(--danger) }
+
+/* واکنش‌گرا */
+@media (max-width:768px){
+  .navbar{ flex-wrap:wrap }
+  .navbar-links{ order:3; width:100%; justify-content:center; padding-top:.25rem }
+  .navbar-brand{ order:1 }
+  .navbar-profile{ order:2; margin-inline-start:auto }
 }
