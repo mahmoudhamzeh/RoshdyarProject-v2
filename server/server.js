@@ -234,18 +234,123 @@ app.post('/api/documents/:childId', upload.single('document'), (req, res) => {
 app.get('/api/documents/:childId', (req, res) => res.json(medicalDocuments[req.params.childId] || []));
 
 // --- Reminder Endpoints ---
+
+app.get('/api/reminders/all/:childId', (req, res) => {
+    const { childId } = req.params;
+    const child = children.find(c => c.id === parseInt(childId));
+    if (!child) return res.status(404).json({ message: 'Child not found' });
+
+    const allReminders = [];
+    const ageInMonths = (new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375);
+    const records = child.vaccinationRecords || {};
+
+    // 1. Generate Vaccine Reminders
+    vaccinationSchedule.forEach(vaccine => {
+        const key = `${vaccine.name}-${vaccine.dose}`;
+        const isDone = records[key] && records[key].done;
+
+        if (isDone) return; // Skip completed vaccines
+
+        let status = 'upcoming';
+        let type = 'info';
+
+        if (ageInMonths > vaccine.month + 2) { // 2 months grace period
+            status = `Overdue by ${Math.floor(ageInMonths - vaccine.month)} months`;
+            type = 'danger';
+        } else if (ageInMonths >= vaccine.month) {
+            status = 'Due now';
+            type = 'warning';
+        } else if (ageInMonths >= vaccine.month - 1) {
+            status = 'Upcoming in the next month';
+            type = 'info';
+        } else {
+            return; // Skip future vaccines that are not yet upcoming
+        }
+
+        allReminders.push({
+            id: `vaccine-${child.id}-${key}`,
+            type: type,
+            title: `واکسن: ${vaccine.name} (دوز ${vaccine.dose})`,
+            message: `وضعیت: ${status}`,
+            source: 'auto'
+        });
+    });
+
+    // 2. Generate Lab Test Reminders (Simplified)
+    const checkupHistory = checkups[childId] || [];
+    Object.entries(recommendedCheckupsData).forEach(([ageGroup, recommendations]) => {
+        const [minAge, maxAge] = ageGroup.split('-').map(Number);
+        if (ageInMonths >= minAge && ageInMonths <= maxAge) {
+            recommendations.forEach(rec => {
+                // A simple check: does any checkup title contain the recommendation?
+                const isDone = checkupHistory.some(c => c.title.includes(rec.split(' ')[1]));
+                if (!isDone) {
+                    allReminders.push({
+                        id: `checkup-${child.id}-${rec.replace(/\s/g, '-')}`,
+                        type: 'info',
+                        title: 'توصیه چکاپ',
+                        message: rec,
+                        source: 'auto'
+                    });
+                }
+            });
+        }
+    });
+
+    // 3. Add Manual Reminders
+    const manualReminders = reminders[childId] || [];
+    allReminders.push(...manualReminders);
+
+
+    res.json(allReminders);
+});
+
+app.post('/api/reminders/manual/:childId', (req, res) => {
+    const { childId } = req.params;
+    const { title, date, type = 'custom' } = req.body;
+
+    if (!title || !date) {
+        return res.status(400).json({ message: 'Title and date are required.' });
+    }
+
+    if (!reminders[childId]) {
+        reminders[childId] = [];
+    }
+
+    const newReminder = {
+        id: `manual-${Date.now()}`,
+        type: type,
+        title: title,
+        message: `یادآور سفارشی در تاریخ: ${date}`,
+        date: date,
+        source: 'manual'
+    };
+
+    reminders[childId].push(newReminder);
+    saveData();
+    res.status(201).json(newReminder);
+});
+
+
 app.get('/api/reminders/:userId', (req, res) => {
     const { userId } = req.params;
     res.json(reminders[userId] || []);
 });
 
-app.delete('/api/reminders/:userId/:reminderId', (req, res) => {
-    const { userId, reminderId } = req.params;
-    if (reminders[userId]) {
-        reminders[userId] = reminders[userId].filter(r => r.id !== parseInt(reminderId));
-        saveData();
+app.delete('/api/reminders/manual/:childId/:reminderId', (req, res) => {
+    const { childId, reminderId } = req.params;
+    if (reminders[childId]) {
+        const initialLength = reminders[childId].length;
+        reminders[childId] = reminders[childId].filter(r => r.id !== reminderId);
+        if (reminders[childId].length < initialLength) {
+            saveData();
+            res.status(200).json({ message: 'Reminder dismissed' });
+        } else {
+            res.status(404).json({ message: 'Reminder not found' });
+        }
+    } else {
+        res.status(404).json({ message: 'No reminders found for this child' });
     }
-    res.status(200).json({ message: 'Reminder dismissed' });
 });
 
 app.post('/api/generate-reminders/:userId', (req, res) => {

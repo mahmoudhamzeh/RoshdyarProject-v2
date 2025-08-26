@@ -1,45 +1,65 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faTimes, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import AddReminderModal from './AddReminderModal'; // Import the modal
 import './Reminders.css';
 
 const Reminders = () => {
     const [reminders, setReminders] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false); // State for the modal
+    const [activeChildId, setActiveChildId] = useState(null);
 
-    // Assume userId is stored in localStorage after login
-    const getUserId = () => {
-        const user = localStorage.getItem('loggedInUser');
-        return user ? JSON.parse(user).id : null;
-    };
-
-    const userId = getUserId();
-
-    const fetchReminders = useCallback(async () => {
-        if (!userId) return;
+    const fetchReminders = useCallback(async (childId) => {
+        if (!childId) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/reminders/${userId}`);
-            const data = await res.json();
-            setReminders(data);
+            const res = await fetch(`http://localhost:5000/api/reminders/all/${childId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setReminders(data);
+            } else {
+                setReminders([]);
+            }
         } catch (error) {
             console.error("Failed to fetch reminders", error);
+            setReminders([]);
         }
-    }, [userId]);
+    }, []);
 
-    useEffect(() => {
-        fetchReminders();
+    const fetchAndSetChild = useCallback(async () => {
+        try {
+            const childrenRes = await fetch(`http://localhost:5000/api/children`);
+            const childrenData = await childrenRes.json();
+            if (childrenData && childrenData.length > 0) {
+                const firstChildId = childrenData[0].id;
+                setActiveChildId(firstChildId);
+                fetchReminders(firstChildId);
+            }
+        } catch (error) {
+            console.error("Failed to fetch children", error);
+        }
     }, [fetchReminders]);
 
-    const handleDismiss = async (reminderId) => {
-        if (!userId) return;
+    useEffect(() => {
+        fetchAndSetChild();
+        const interval = setInterval(fetchAndSetChild, 60000); // Refresh every minute
+        return () => clearInterval(interval);
+    }, [fetchAndSetChild]);
+
+    const handleDismiss = async (reminder) => {
+        if (!activeChildId || reminder.source !== 'manual') return; // Only dismiss manual reminders
         try {
-            await fetch(`http://localhost:5000/api/reminders/${userId}/${reminderId}`, {
+            await fetch(`http://localhost:5000/api/reminders/manual/${activeChildId}/${reminder.id}`, {
                 method: 'DELETE',
             });
-            fetchReminders(); // Refresh list
+            fetchReminders(activeChildId); // Refresh list
         } catch (error) {
             console.error("Failed to dismiss reminder", error);
         }
+    };
+
+    const handleReminderAdded = () => {
+        fetchReminders(activeChildId);
     };
 
     return (
@@ -50,21 +70,40 @@ const Reminders = () => {
             </button>
             {isOpen && (
                 <div className="reminders-dropdown">
+                    <div className="reminders-header">
+                        <h4>یادآورها</h4>
+                        <button className="add-reminder-btn" title="افزودن یادآور جدید" onClick={() => setIsModalOpen(true)}>
+                            <FontAwesomeIcon icon={faPlusCircle} />
+                        </button>
+                    </div>
                     {reminders.length === 0 ? (
                         <p className="no-reminders">هیچ یادآور جدیدی وجود ندارد.</p>
                     ) : (
-                        <ul>
+                        <ul className="reminders-list">
                             {reminders.map(r => (
-                                <li key={r.id}>
-                                    <span>{r.message}</span>
-                                    <button className="dismiss-btn" onClick={() => handleDismiss(r.id)}>
-                                        <FontAwesomeIcon icon={faTimes} />
-                                    </button>
+                                <li key={r.id} className={`reminder-item type-${r.type}`}>
+                                    <div className="reminder-content">
+                                        <strong>{r.title}</strong>
+                                        <p>{r.message}</p>
+                                    </div>
+                                    {r.source === 'manual' && (
+                                        <button className="dismiss-btn" onClick={() => handleDismiss(r)}>
+                                            <FontAwesomeIcon icon={faTimes} />
+                                        </button>
+                                    )}
                                 </li>
                             ))}
                         </ul>
                     )}
                 </div>
+            )}
+            {activeChildId && (
+                <AddReminderModal
+                    isOpen={isModalOpen}
+                    onRequestClose={() => setIsModalOpen(false)}
+                    childId={activeChildId}
+                    onReminderAdded={handleReminderAdded}
+                />
             )}
         </div>
     );
