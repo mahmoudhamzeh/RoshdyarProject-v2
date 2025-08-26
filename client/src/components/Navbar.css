@@ -73,4 +73,5 @@ body, .navbar{
   .navbar-links{ order:3; width:100%; justify-content:center; padding-top:.25rem }
   .navbar-brand{ order:1 }
   .navbar-profile{ order:2; margin-inline-start:auto }
-}
+  }
+
