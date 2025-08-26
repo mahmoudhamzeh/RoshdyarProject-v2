@@ -272,7 +272,8 @@ app.get('/api/reminders/all/:childId', (req, res) => {
             type: type,
             title: `واکسن: ${vaccine.name} (دوز ${vaccine.dose})`,
             message: `وضعیت: ${status}`,
-            source: 'auto'
+            source: 'auto',
+            link: `/vaccination/${child.id}` // Add link for vaccine reminders
         });
     });
 
@@ -290,7 +291,8 @@ app.get('/api/reminders/all/:childId', (req, res) => {
                         type: 'info',
                         title: 'توصیه چکاپ',
                         message: rec,
-                        source: 'auto'
+                        source: 'auto',
+                        link: `/lab-tests/${child.id}` // Add link for checkup reminders
                     });
                 }
             });
