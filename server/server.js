@@ -184,7 +184,7 @@ app.post('/api/vaccinate/:childId', (req, res) => {
         child.vaccinationRecords = {};
     }
 
-    const key = `${vaccineName}-${dose}`;
+    const key = `${vaccine.name}-${dose}`;
     child.vaccinationRecords[key] = { done: true, date: date || new Date().toISOString().split('T')[0] };
     saveData();
     res.status(200).json({ message: 'Vaccination record updated' });
@@ -239,20 +239,41 @@ app.get('/api/documents/:childId', (req, res) => res.json(medicalDocuments[req.p
 // --- Reminder Endpoints ---
 
 app.get('/api/reminders/all/:childId', (req, res) => {
+    console.log(`
+--- Generating Reminders for Child ID: ${req.params.childId} ---`);
     const { childId } = req.params;
     const child = children.find(c => c.id === parseInt(childId));
-    if (!child) return res.status(404).json({ message: 'Child not found' });
+    
+    if (!child) {
+        console.log('[DEBUG] Child not found.');
+        return res.status(404).json({ message: 'Child not found' });
+    }
+    console.log(`[DEBUG] Found child: ${child.name}, Birthdate: ${child.birthDate}`);
 
     const allReminders = [];
-    const ageInMonths = (new Date() - new Date(child.birthDate.replace(/\//g, '-'))) / (1000 * 60 * 60 * 24 * 30.4375);
+    const birthDate = new Date(child.birthDate.replace(/\//g, '-'));
+    const ageInMonths = (new Date() - birthDate) / (1000 * 60 * 60 * 24 * 30.4375);
+    console.log(`[DEBUG] Calculated Age: ${ageInMonths.toFixed(2)} months`);
+
     const records = child.vaccinationRecords || {};
+    console.log('[DEBUG] Vaccination Records:', JSON.stringify(records));
 
     // 1. Generate Vaccine Reminders
+    console.log('
+--- Checking Vaccine Schedule ---');
     vaccinationSchedule.forEach(vaccine => {
         const key = `${vaccine.name}-${vaccine.dose}`;
         const isDone = records[key] && records[key].done;
+        
+        console.log(`
+[DEBUG] Checking Vaccine: ${key}`);
+        console.log(`  - Due at: ${vaccine.month} months`);
+        console.log(`  - Is Done? ${isDone}`);
 
-        if (isDone) return; // Skip completed vaccines
+        if (isDone) {
+            console.log('  - SKIPPING: Already done.');
+            return;
+        }
 
         let status = '';
         let type = '';
@@ -260,21 +281,26 @@ app.get('/api/reminders/all/:childId', (req, res) => {
         if (ageInMonths > vaccine.month) {
             status = `این واکسن دیر شده است (موعد: ${vaccine.month} ماهگی)`;
             type = 'danger';
+            console.log(`  - STATUS: Overdue. (Age: ${ageInMonths.toFixed(2)} > Due: ${vaccine.month})`);
         } else if (ageInMonths >= vaccine.month - 1) {
             status = `موعد این واکسن نزدیک است (در ${vaccine.month} ماهگی)`;
             type = 'warning';
+            console.log(`  - STATUS: Upcoming. (Age: ${ageInMonths.toFixed(2)} >= Due-1: ${vaccine.month - 1})`);
         } else {
-            return; // Skip future vaccines that are not yet upcoming
+            console.log('  - SKIPPING: Too far in the future.');
+            return;
         }
 
-        allReminders.push({
+        const reminder = {
             id: `vaccine-${child.id}-${key}`,
             type: type,
             title: `واکسن: ${vaccine.name} (دوز ${vaccine.dose})`,
             message: status,
             source: 'auto',
             link: `/vaccination/${child.id}`
-        });
+        };
+        allReminders.push(reminder);
+        console.log('  - PUSHED REMINDER:', JSON.stringify(reminder));
     });
 
     // 2. Generate Lab Test Reminders (Simplified)
@@ -298,7 +324,7 @@ app.get('/api/reminders/all/:childId', (req, res) => {
             });
         }
     });
-
+    
     // 3. Add Manual Reminders
     const manualReminders = reminders[childId] || [];
     allReminders.push(...manualReminders);
@@ -327,7 +353,7 @@ app.post('/api/reminders/manual/:childId', (req, res) => {
         date: date,
         source: 'manual'
     };
-
+    
     reminders[childId].push(newReminder);
     saveData();
     res.status(201).json(newReminder);
