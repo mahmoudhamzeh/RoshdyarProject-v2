@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Switch, Route, useRouteMatch } from 'react-router-dom';
+import { NavLink, Switch, Route, useRouteMatch, Redirect } from 'react-router-dom';
 import './AdminPage.css';
 import AdminDashboard from './admin/AdminDashboard';
 import UserManagement from './admin/UserManagement';
