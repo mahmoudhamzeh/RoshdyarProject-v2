@@ -1,0 +1,49 @@
+.user-management h2 {
+    text-align: right;
+    margin-bottom: 1.5rem;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.users-table th,
+.users-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: right;
+}
+
+.users-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.users-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.users-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.users-table .btn-edit,
+.users-table .btn-delete {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.users-table .btn-edit {
+    background-color: #3498db; /* Blue */
+}
+
+.users-table .btn-delete {
+    background-color: #e74c3c; /* Red */
+}

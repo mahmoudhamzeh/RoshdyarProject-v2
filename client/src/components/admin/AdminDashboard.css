@@ -1,0 +1,30 @@
+.admin-dashboard h2 {
+    text-align: right;
+    margin-bottom: 1.5rem;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.stat-card h3 {
+    margin: 0 0 0.5rem 0;
+    color: #34495e;
+}
+
+.stat-card p {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1abc9c;
+    margin: 0;
+}

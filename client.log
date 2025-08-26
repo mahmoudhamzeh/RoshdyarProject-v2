@@ -1,0 +1,5 @@
+
+> roshdyar-client@1.0.0 start
+> npx react-scripts --openssl-legacy-provider start
+
+sh: 1: react-scripts: Permission denied

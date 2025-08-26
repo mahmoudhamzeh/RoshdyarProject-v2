@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import LoginPage from './components/LoginPage';
+import AdminPage from './components/AdminPage';
+import AdminRoute from './components/AdminRoute';
 import DashboardPage from './components/DashboardPage';
 import MyChildrenPage from './components/MyChildrenPage';
 import AddChildPage from './components/AddChildPage';
@@ -30,6 +32,7 @@ const App = () => {
                 <Route path="/lab-tests/:childId" component={LabTestsPage} />
                 <Route path="/vaccination/:childId" component={VaccinationPage} />
                 <Route path="/profile" component={ProfilePage} />
+                <AdminRoute path="/admin" component={AdminPage} />
 
                 <Route path="/">
                     <Redirect to={isLoggedIn() ? "/dashboard" : "/login"} />

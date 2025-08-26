@@ -1,0 +1,5 @@
+
+> roshdyar-server@1.0.0 dev
+> node server.js
+
+Roshdyar server is listening on port 5000

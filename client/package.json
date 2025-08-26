@@ -18,9 +18,9 @@
     "html2canvas": "^1.4.1"
   },
   "scripts": {
-    "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "npx react-scripts --openssl-legacy-provider start",
+    "build": "npx react-scripts --openssl-legacy-provider build",
+    "test": "npx react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

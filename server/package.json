@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon --watch . --ignore db.json server.js"
+    "dev": "node server.js"
   },
   "dependencies": {
     "express": "^4.17.1",
