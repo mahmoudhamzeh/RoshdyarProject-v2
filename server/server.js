@@ -244,7 +244,7 @@ app.get('/api/reminders/all/:childId', (req, res) => {
     if (!child) return res.status(404).json({ message: 'Child not found' });
 
     const allReminders = [];
-    const ageInMonths = (new Date() - new Date(child.birthDate)) / (1000 * 60 * 60 * 24 * 30.4375);
+    const ageInMonths = (new Date() - new Date(child.birthDate.replace(/\//g, '-'))) / (1000 * 60 * 60 * 24 * 30.4375);
     const records = child.vaccinationRecords || {};
 
     // 1. Generate Vaccine Reminders
