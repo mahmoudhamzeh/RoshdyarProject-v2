@@ -239,13 +239,12 @@ app.get('/api/documents/:childId', (req, res) => res.json(medicalDocuments[req.p
 // --- Reminder Endpoints ---
 
 app.get('/api/reminders/all/:childId', (req, res) => {
-    console.log(`
---- Generating Reminders for Child ID: ${req.params.childId} ---`);
+    console.log(`--- Generating Reminders for Child ID: ${req.params.childId} ---`);
     const { childId } = req.params;
     const child = children.find(c => c.id === parseInt(childId));
-    
+
     if (!child) {
-        console.log('[DEBUG] Child not found.');
+        console.log("[DEBUG] Child not found.");
         return res.status(404).json({ message: 'Child not found' });
     }
     console.log(`[DEBUG] Found child: ${child.name}, Birthdate: ${child.birthDate}`);
@@ -259,19 +258,17 @@ app.get('/api/reminders/all/:childId', (req, res) => {
     console.log('[DEBUG] Vaccination Records:', JSON.stringify(records));
 
     // 1. Generate Vaccine Reminders
-    console.log('
---- Checking Vaccine Schedule ---');
+    console.log("--- Checking Vaccine Schedule ---");
     vaccinationSchedule.forEach(vaccine => {
         const key = `${vaccine.name}-${vaccine.dose}`;
         const isDone = records[key] && records[key].done;
-        
-        console.log(`
-[DEBUG] Checking Vaccine: ${key}`);
+
+        console.log(`[DEBUG] Checking Vaccine: ${key}`);
         console.log(`  - Due at: ${vaccine.month} months`);
         console.log(`  - Is Done? ${isDone}`);
 
         if (isDone) {
-            console.log('  - SKIPPING: Already done.');
+            console.log("  - SKIPPING: Already done.");
             return;
         }
 
@@ -287,7 +284,7 @@ app.get('/api/reminders/all/:childId', (req, res) => {
             type = 'warning';
             console.log(`  - STATUS: Upcoming. (Age: ${ageInMonths.toFixed(2)} >= Due-1: ${vaccine.month - 1})`);
         } else {
-            console.log('  - SKIPPING: Too far in the future.');
+            console.log("  - SKIPPING: Too far in the future.");
             return;
         }
 
@@ -300,7 +297,7 @@ app.get('/api/reminders/all/:childId', (req, res) => {
             link: `/vaccination/${child.id}`
         };
         allReminders.push(reminder);
-        console.log('  - PUSHED REMINDER:', JSON.stringify(reminder));
+        console.log("  - PUSHED REMINDER:", JSON.stringify(reminder));
     });
 
     // 2. Generate Lab Test Reminders (Simplified)
