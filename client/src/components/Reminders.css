@@ -114,3 +114,9 @@
     text-align: center;
     color: #666;
 }
+
+.reminder-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}

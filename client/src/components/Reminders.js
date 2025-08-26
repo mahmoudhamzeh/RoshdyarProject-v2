@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom'; // Import Link
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faTimes, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import AddReminderModal from './AddReminderModal'; // Import the modal
@@ -80,19 +81,30 @@ const Reminders = () => {
                         <p className="no-reminders">هیچ یادآور جدیدی وجود ندارد.</p>
                     ) : (
                         <ul className="reminders-list">
-                            {reminders.map(r => (
-                                <li key={r.id} className={`reminder-item type-${r.type}`}>
-                                    <div className="reminder-content">
-                                        <strong>{r.title}</strong>
-                                        <p>{r.message}</p>
-                                    </div>
-                                    {r.source === 'manual' && (
-                                        <button className="dismiss-btn" onClick={() => handleDismiss(r)}>
-                                            <FontAwesomeIcon icon={faTimes} />
-                                        </button>
-                                    )}
-                                </li>
-                            ))}
+                            {reminders.map(r => {
+                                const reminderContent = (
+                                    <li key={r.id} className={`reminder-item type-${r.type}`}>
+                                        <div className="reminder-content">
+                                            <strong>{r.title}</strong>
+                                            <p>{r.message}</p>
+                                        </div>
+                                        {r.source === 'manual' && (
+                                            <button className="dismiss-btn" onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleDismiss(r);
+                                            }}>
+                                                <FontAwesomeIcon icon={faTimes} />
+                                            </button>
+                                        )}
+                                    </li>
+                                );
+
+                                if (r.link) {
+                                    return <Link to={r.link} key={r.id} className="reminder-link">{reminderContent}</Link>;
+                                }
+                                return reminderContent;
+                            })}
                         </ul>
                     )}
                 </div>
