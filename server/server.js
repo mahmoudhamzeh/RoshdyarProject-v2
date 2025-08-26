@@ -29,7 +29,10 @@ const loadData = () => {
         const rawData = fs.readFileSync(dbPath);
         const data = JSON.parse(rawData);
         users = data.users;
-        children = data.children;
+        children = data.children.map(child => ({
+            ...child,
+            vaccinationRecords: child.vaccinationRecords || {} // Ensure property exists
+        }));
         growthData = data.growthData;
         medicalVisits = data.medicalVisits;
         medicalDocuments = data.medicalDocuments;
