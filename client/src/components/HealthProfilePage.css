@@ -50,49 +50,61 @@
     opacity: 0.9;
 }
 
-.profile-content-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    align-items: stretch;
-}
-
-.grid-col-left, .grid-col-right {
+.profile-content-container {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 1.5rem;
 }
 
-.main-info-card, .action-card {
+.main-info-card-large {
+    flex: 2 1 500px; /* Takes more space */
     background: #fff;
     padding: 1.5rem;
-    border-radius: 8px; /* Consistent border-radius */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Softer shadow */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.action-card {
+.side-cards-container {
+    flex: 1 1 250px; /* Takes less space */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.action-card-small {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
 }
 
-.action-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+.action-card-small:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
-.action-card h4 {
-    margin-top: 0;
-    font-size: 1.1rem;
+.card-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.action-card-small h4 {
+    margin: 0.5rem 0;
+    font-size: 1rem;
     color: #333;
 }
-
-.chart-preview {
-    width: 100%;
-    margin-bottom: 1rem;
+.action-card-small p {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0;
 }
 
-.view-full-chart-text, .edit-main-info-btn {
+
+.edit-main-info-btn {
     display: block;
     width: 100%;
     background-color: #007bff; /* Primary blue */
