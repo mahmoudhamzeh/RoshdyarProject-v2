@@ -1,10 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import Reminders from './Reminders';
 import './Navbar.css';
 
 const Navbar = () => {
     const history = useHistory();
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        try {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                const user = JSON.parse(loggedInUser);
+                if (user && user.isAdmin) {
+                    setIsAdmin(true);
+                }
+            }
+        } catch (error) {
+            console.error("Error parsing user data from localStorage", error);
+        }
+    }, []);
 
     const handleProfileClick = () => {
         history.push('/profile');
@@ -25,6 +40,7 @@ const Navbar = () => {
                 <Link to="/about">درباره ما</Link>
                 <Link to="/contact">تماس با ما</Link>
                 <Link to="/support">پشتیبانی</Link>
+                {isAdmin && <Link to="/admin" className="admin-link">پنل مدیریت</Link>}
             </div>
             <div className="navbar-profile">
                 <Reminders />

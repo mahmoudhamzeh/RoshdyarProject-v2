@@ -1,5 +1,13 @@
 {
-  "users": {},
+  "users": {
+    "1": {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@example.com",
+      "password": "admin",
+      "isAdmin": true
+    }
+  },
   "children": [
     {
       "id": 1,
@@ -186,5 +194,9 @@
     "5": [],
     "6": []
   },
-  "childIdCounter": 7
+  "childIdCounter": 7,
+  "banners": [],
+  "articles": [],
+  "news": [],
+  "tickets": []
 }
