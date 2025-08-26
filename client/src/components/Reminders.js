@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom'; // Import Link
+import React, { useState, useEffect, useCallback, useRef } from 'react'; // Import useRef
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faTimes, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
-import AddReminderModal from './AddReminderModal'; // Import the modal
+import AddReminderModal from './AddReminderModal';
 import './Reminders.css';
 
 const Reminders = () => {
     const [reminders, setReminders] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false); // State for the modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeChildId, setActiveChildId] = useState(null);
+    const dropdownRef = useRef(null); // Create a ref for the dropdown
 
     const fetchReminders = useCallback(async (childId) => {
         if (!childId) return;
@@ -47,6 +48,25 @@ const Reminders = () => {
         return () => clearInterval(interval);
     }, [fetchAndSetChild]);
 
+    // Effect for handling clicks outside the dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        // Add event listener when the dropdown is open
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        // Clean up the event listener
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]); // Only re-run if isOpen changes
+
     const handleDismiss = async (reminder) => {
         if (!activeChildId || reminder.source !== 'manual') return; // Only dismiss manual reminders
         try {
@@ -64,7 +84,7 @@ const Reminders = () => {
     };
 
     return (
-        <div className="reminders-widget">
+        <div className="reminders-widget" ref={dropdownRef}>
             <button className="reminders-bell" onClick={() => setIsOpen(!isOpen)}>
                 <FontAwesomeIcon icon={faBell} />
                 {reminders.length > 0 && <span className="reminder-count">{reminders.length}</span>}

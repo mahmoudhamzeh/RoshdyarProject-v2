@@ -251,18 +251,15 @@ app.get('/api/reminders/all/:childId', (req, res) => {
 
         if (isDone) return; // Skip completed vaccines
 
-        let status = 'upcoming';
-        let type = 'info';
+        let status = '';
+        let type = '';
 
-        if (ageInMonths > vaccine.month + 2) { // 2 months grace period
-            status = `Overdue by ${Math.floor(ageInMonths - vaccine.month)} months`;
+        if (ageInMonths > vaccine.month) {
+            status = `این واکسن دیر شده است (موعد: ${vaccine.month} ماهگی)`;
             type = 'danger';
-        } else if (ageInMonths >= vaccine.month) {
-            status = 'Due now';
-            type = 'warning';
         } else if (ageInMonths >= vaccine.month - 1) {
-            status = 'Upcoming in the next month';
-            type = 'info';
+            status = `موعد این واکسن نزدیک است (در ${vaccine.month} ماهگی)`;
+            type = 'warning';
         } else {
             return; // Skip future vaccines that are not yet upcoming
         }
@@ -271,9 +268,9 @@ app.get('/api/reminders/all/:childId', (req, res) => {
             id: `vaccine-${child.id}-${key}`,
             type: type,
             title: `واکسن: ${vaccine.name} (دوز ${vaccine.dose})`,
-            message: `وضعیت: ${status}`,
+            message: status,
             source: 'auto',
-            link: `/vaccination/${child.id}` // Add link for vaccine reminders
+            link: `/vaccination/${child.id}`
         });
     });
 
