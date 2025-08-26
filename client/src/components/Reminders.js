@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'; // Import useRef
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faTimes, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import AddReminderModal from './AddReminderModal';
@@ -11,9 +11,13 @@ const Reminders = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeChildId, setActiveChildId] = useState(null);
     const dropdownRef = useRef(null); // Create a ref for the dropdown
+    const location = useLocation(); // Get location object
 
     const fetchReminders = useCallback(async (childId) => {
-        if (!childId) return;
+        if (!childId) {
+            setReminders([]);
+            return;
+        };
         try {
             const res = await fetch(`http://localhost:5000/api/reminders/all/${childId}`);
             if (res.ok) {
@@ -28,25 +32,38 @@ const Reminders = () => {
         }
     }, []);
 
-    const fetchAndSetChild = useCallback(async () => {
-        try {
-            const childrenRes = await fetch(`http://localhost:5000/api/children`);
-            const childrenData = await childrenRes.json();
-            if (childrenData && childrenData.length > 0) {
-                const firstChildId = childrenData[0].id;
-                setActiveChildId(firstChildId);
-                fetchReminders(firstChildId);
-            }
-        } catch (error) {
-            console.error("Failed to fetch children", error);
-        }
-    }, [fetchReminders]);
-
+    // Effect to determine the active child and fetch reminders
     useEffect(() => {
-        fetchAndSetChild();
-        const interval = setInterval(fetchAndSetChild, 60000); // Refresh every minute
-        return () => clearInterval(interval);
-    }, [fetchAndSetChild]);
+        const pathParts = location.pathname.split('/');
+        // Check for URLs like /health-profile/:childId, /growth-chart/:childId etc.
+        const childIdFromUrl = pathParts.length > 2 && !isNaN(pathParts[2]) ? parseInt(pathParts[2], 10) : null;
+
+        const determineChildAndFetch = async () => {
+            if (childIdFromUrl) {
+                setActiveChildId(childIdFromUrl);
+                fetchReminders(childIdFromUrl);
+            } else {
+                // Fallback to first child if on a general page
+                try {
+                    const childrenRes = await fetch(`http://localhost:5000/api/children`);
+                    const childrenData = await childrenRes.json();
+                    if (childrenData && childrenData.length > 0) {
+                        const firstChildId = childrenData[0].id;
+                        setActiveChildId(firstChildId);
+                        fetchReminders(firstChildId);
+                    } else {
+                        setActiveChildId(null);
+                        fetchReminders(null);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch children", error);
+                }
+            }
+        };
+
+        determineChildAndFetch();
+        // Re-run this effect whenever the URL changes
+    }, [location, fetchReminders]);
 
     // Effect for handling clicks outside the dropdown
     useEffect(() => {
