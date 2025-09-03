@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './UserManagement.css';
 import EditUserModal from './EditUserModal';
 
@@ -109,7 +110,9 @@ const UserManagement = () => {
                     {users.map(user => (
                         <tr key={user.id}>
                             <td>{user.id}</td>
-                            <td>{user.username}</td>
+                            <td>
+                                <Link to={`/admin/users/${user.id}`}>{user.username}</Link>
+                            </td>
                             <td>{user.email}</td>
                             <td>{user.isAdmin ? 'بله' : 'خیر'}</td>
                             <td>

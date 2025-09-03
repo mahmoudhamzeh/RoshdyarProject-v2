@@ -3,6 +3,7 @@ import { NavLink, Switch, Route, useRouteMatch, Redirect } from 'react-router-do
 import './AdminPage.css';
 import AdminDashboard from './admin/AdminDashboard';
 import UserManagement from './admin/UserManagement';
+import UserDetailPage from './admin/UserDetailPage';
 import BannerManagement from './admin/BannerManagement';
 import ArticleManagement from './admin/ArticleManagement';
 import TicketManagement from './admin/TicketManagement';
@@ -31,7 +32,8 @@ const AdminPage = () => {
                         <Redirect to={`${path}/dashboard`} />
                     </Route>
                     <Route path={`${path}/dashboard`} component={AdminDashboard} />
-                    <Route path={`${path}/users`} component={UserManagement} />
+                    <Route exact path={`${path}/users`} component={UserManagement} />
+                    <Route path={`${path}/users/:userId`} component={UserDetailPage} />
                     <Route path={`${path}/banners`} component={BannerManagement} />
                     <Route path={`${path}/articles`} component={ArticleManagement} />
                     <Route path={`${path}/tickets`} component={TicketManagement} />

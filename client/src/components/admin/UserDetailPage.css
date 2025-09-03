@@ -1,0 +1,57 @@
+.user-detail-page {
+    direction: rtl;
+}
+
+.user-detail-page h2, .user-detail-page h3 {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.user-info-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-info-card p {
+    text-align: right;
+    margin: 0.5rem 0;
+}
+
+.children-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.child-card {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.child-card img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.child-card p {
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.btn-view-profile {
+    background-color: #1abc9c;
+    color: white;
+    padding: 8px 12px;
+    text-decoration: none;
+    border-radius: 4px;
+    display: inline-block;
+}

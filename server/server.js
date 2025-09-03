@@ -149,6 +149,13 @@ app.delete('/api/admin/users/:id', isAdmin, (req, res) => {
     res.status(200).json({ message: 'کاربر با موفقیت حذف شد' });
 });
 
+app.get('/api/admin/users/:userId/children', isAdmin, (req, res) => {
+    const { userId } = req.params;
+    const userChildren = children.filter(c => c.userId === parseInt(userId));
+    res.json(userChildren);
+});
+
+
 // --- Content Management Routes ---
 app.get('/api/banners', (req, res) => {
     res.json(banners);
