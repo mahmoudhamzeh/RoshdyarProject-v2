@@ -87,10 +87,15 @@ const Reminders = () => {
     const handleDismiss = async (reminder) => {
         if (!activeChildId || reminder.source !== 'manual') return; // Only dismiss manual reminders
         try {
-            await fetch(`http://localhost:5000/api/reminders/manual/${activeChildId}/${reminder.id}`, {
+            const response = await fetch(`http://localhost:5000/api/reminders/manual/${activeChildId}/${reminder.id}`, {
                 method: 'DELETE',
             });
-            fetchReminders(activeChildId); // Refresh list
+            if (response.ok) {
+                // Optimistically update the UI by removing the reminder from the local state
+                setReminders(prevReminders => prevReminders.filter(r => r.id !== reminder.id));
+            } else {
+                console.error("Failed to dismiss reminder on server");
+            }
         } catch (error) {
             console.error("Failed to dismiss reminder", error);
         }

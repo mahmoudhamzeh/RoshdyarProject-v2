@@ -17,26 +17,44 @@ const mockArticles = Array.from({ length: 8 }, (_, i) => ({
 
 const DashboardPage = () => {
     const [banners, setBanners] = useState([]);
+    const [articles, setArticles] = useState([]);
 
     useEffect(() => {
-        const fetchBanners = async () => {
+        const fetchData = async () => {
+            // Fetch Banners
             try {
-                const response = await fetch('http://localhost:5000/api/banners');
-                if (response.ok) {
-                    const data = await response.json();
-                    // Transform the banner data to the format expected by Carousel
+                const bannersResponse = await fetch('http://localhost:5000/api/banners');
+                if (bannersResponse.ok) {
+                    const data = await bannersResponse.json();
                     const formattedBanners = data.map(banner => ({
                         image: `http://localhost:5000${banner.imageUrl}`,
                         title: banner.title,
-                        link: banner.link
+                        link: banner.link,
                     }));
                     setBanners(formattedBanners);
                 }
             } catch (error) {
                 console.error("Failed to fetch banners:", error);
             }
+
+            // Fetch Articles
+            try {
+                const articlesResponse = await fetch('http://localhost:5000/api/news');
+                if (articlesResponse.ok) {
+                    const data = await articlesResponse.json();
+                    const formattedArticles = data.slice(0, 8).map(article => ({ // Take first 8
+                        id: article.id,
+                        title: article.title,
+                        image: article.imageUrl ? `http://localhost:5000${article.imageUrl}` : `https://placehold.co/220x140/f44336/FFFFFF?text=مقاله`,
+                        link: `/news/${article.id}`
+                    }));
+                    setArticles(formattedArticles);
+                }
+            } catch (error) {
+                console.error("Failed to fetch articles:", error);
+            }
         };
-        fetchBanners();
+        fetchData();
     }, []);
 
     return (
@@ -47,7 +65,7 @@ const DashboardPage = () => {
                 <ServiceTiles />
 
                 <ContentRow title="ویدیوهای آموزشی و تربیتی" items={mockVideos} />
-                <ContentRow title="جدیدترین مقالات" items={mockArticles} />
+                <ContentRow title="جدیدترین مقالات" items={articles} />
             </main>
             <Footer />
         </div>
