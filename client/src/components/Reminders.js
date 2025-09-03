@@ -18,7 +18,9 @@ const Reminders = () => {
             const res = await fetch(`http://localhost:5000/api/reminders/all/${childId}`);
             if (res.ok) {
                 const data = await res.json();
-                setReminders(data);
+                const seen = getSeenReminders();
+                const freshReminders = data.filter(r => !seen.includes(r.id));
+                setReminders(freshReminders);
             } else {
                 setReminders([]);
             }
@@ -26,7 +28,7 @@ const Reminders = () => {
             console.error("Failed to fetch reminders", error);
             setReminders([]);
         }
-    }, []);
+    }, []); // getSeenReminders is stable, no need to add to deps
 
     const fetchAndSetChild = useCallback(async () => {
         try {
@@ -67,21 +69,37 @@ const Reminders = () => {
         };
     }, [isOpen]); // Only re-run if isOpen changes
 
-    const handleDismiss = async (reminder) => {
-        if (!activeChildId || reminder.source !== 'manual') return; // Only dismiss manual reminders
-        try {
-            const response = await fetch(`http://localhost:5000/api/reminders/manual/${activeChildId}/${reminder.id}`, {
-                method: 'DELETE',
-            });
-            if (response.ok) {
-                // Optimistically update the UI by removing the reminder from the local state
-                setReminders(prevReminders => prevReminders.filter(r => r.id !== reminder.id));
-            } else {
-                console.error("Failed to dismiss reminder on server");
-            }
-        } catch (error) {
-            console.error("Failed to dismiss reminder", error);
+    const getSeenReminders = () => {
+        return JSON.parse(localStorage.getItem('seenReminders') || '[]');
+    };
+
+    const addSeenReminder = (reminderId) => {
+        const seen = getSeenReminders();
+        if (!seen.includes(reminderId)) {
+            localStorage.setItem('seenReminders', JSON.stringify([...seen, reminderId]));
         }
+    };
+
+    const handleDismiss = async (reminder) => {
+        // For manual reminders, delete from server
+        if (reminder.source === 'manual' && activeChildId) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/reminders/manual/${activeChildId}/${reminder.id}`, {
+                    method: 'DELETE',
+                });
+                if (!response.ok) {
+                    alert('خطا در حذف یادآور از سرور.');
+                    return; // Stop if server deletion fails
+                }
+            } catch (error) {
+                alert('خطا در ارتباط با سرور برای حذف یادآور.');
+                return;
+            }
+        }
+
+        // For all reminders (manual or automatic), add to seen list and update UI
+        addSeenReminder(reminder.id);
+        setReminders(prevReminders => prevReminders.filter(r => r.id !== reminder.id));
     };
 
     const handleReminderAdded = () => {
@@ -126,7 +144,11 @@ const Reminders = () => {
                                 );
 
                                 if (r.link) {
-                                    return <Link to={r.link} key={r.id} className="reminder-link">{reminderContent}</Link>;
+                                    return (
+                                        <Link to={r.link} key={r.id} className="reminder-link" onClick={() => handleDismiss(r)}>
+                                            {reminderContent}
+                                        </Link>
+                                    );
                                 }
                                 return reminderContent;
                             })}
