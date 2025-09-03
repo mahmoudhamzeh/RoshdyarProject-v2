@@ -65,7 +65,7 @@ const DashboardPage = () => {
                 <ServiceTiles />
 
                 <ContentRow title="ویدیوهای آموزشی و تربیتی" items={mockVideos} />
-                <ContentRow title="جدیدترین مقالات" items={articles} />
+                <ContentRow title="جدیدترین مقالات" items={articles} viewAllLink="/news" />
             </main>
             <Footer />
         </div>
