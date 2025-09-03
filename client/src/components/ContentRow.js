@@ -7,7 +7,10 @@ const ContentRow = ({ title, items, viewAllLink }) => {
         const card = (
             <div className="content-card">
                 <img src={item.image} alt={item.title} />
-                <p>{item.title}</p>
+                <div className="content-card-text">
+                    <h4>{item.title}</h4>
+                    {item.summary && <p>{item.summary}</p>}
+                </div>
             </div>
         );
 

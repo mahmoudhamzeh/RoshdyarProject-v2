@@ -27,6 +27,7 @@ const DashboardPage = () => {
                 if (bannersResponse.ok) {
                     const data = await bannersResponse.json();
                     const formattedBanners = data.map(banner => ({
+                        id: banner.id, // Pass the id for the key prop
                         image: `http://localhost:5000${banner.imageUrl}`,
                         title: banner.title,
                         link: banner.link,
@@ -45,6 +46,7 @@ const DashboardPage = () => {
                     const formattedArticles = data.slice(0, 8).map(article => ({ // Take first 8
                         id: article.id,
                         title: article.title,
+                        summary: article.summary, // Add summary
                         image: article.imageUrl ? `http://localhost:5000${article.imageUrl}` : `https://placehold.co/220x140/f44336/FFFFFF?text=مقاله`,
                         link: `/news/${article.id}`
                     }));

@@ -35,17 +35,27 @@ const Carousel = ({ slides = defaultSlides }) => {
     return (
         <div className="carousel">
             <div className="carousel-inner" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
-                {slides.map((slide, i) => (
-                    <div className="carousel-item" key={i}>
-                        <Link to={slide.link || '#'}>
+                {slides.map((slide) => {
+                    const slideContent = (
+                        <>
                             <img src={slide.image} alt={slide.title} />
                             <div className="carousel-caption">
                                 <h2>{slide.title}</h2>
                                 {slide.subtitle && <p>{slide.subtitle}</p>}
                             </div>
-                        </Link>
-                    </div>
-                ))}
+                        </>
+                    );
+
+                    return (
+                        <div className="carousel-item" key={slide.id || slide.title}>
+                            {slide.link ? (
+                                <Link to={slide.link}>{slideContent}</Link>
+                            ) : (
+                                <div>{slideContent}</div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
