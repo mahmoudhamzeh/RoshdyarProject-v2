@@ -54,10 +54,26 @@
   object-fit: cover;
 }
 
-.content-card p {
+.content-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.content-card-text {
   padding: 0.8rem;
-  margin: 0;
-  font-weight: 500;
-  text-align: center;
+  text-align: right; /* Align text to the right for Farsi */
+}
+
+.content-card-text h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
   color: #333;
+}
+
+.content-card-text p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 400; /* Reset font-weight */
 }
