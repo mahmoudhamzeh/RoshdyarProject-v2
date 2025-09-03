@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import Carousel from './Carousel';
@@ -16,12 +16,34 @@ const mockArticles = Array.from({ length: 8 }, (_, i) => ({
 }));
 
 const DashboardPage = () => {
+    const [banners, setBanners] = useState([]);
+
+    useEffect(() => {
+        const fetchBanners = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/banners');
+                if (response.ok) {
+                    const data = await response.json();
+                    // Transform the banner data to the format expected by Carousel
+                    const formattedBanners = data.map(banner => ({
+                        image: `http://localhost:5000${banner.imageUrl}`,
+                        title: banner.title,
+                        link: banner.link
+                    }));
+                    setBanners(formattedBanners);
+                }
+            } catch (error) {
+                console.error("Failed to fetch banners:", error);
+            }
+        };
+        fetchBanners();
+    }, []);
 
     return (
         <div>
             <Navbar />
             <main>
-                <Carousel />
+                <Carousel slides={banners} />
                 <ServiceTiles />
 
                 <ContentRow title="ویدیوهای آموزشی و تربیتی" items={mockVideos} />

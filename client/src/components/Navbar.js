@@ -37,6 +37,7 @@ const Navbar = () => {
             </div>
             <div className="navbar-links">
                 <Link to="/dashboard">خانه</Link>
+                <Link to="/news">اخبار و مقالات</Link>
                 <Link to="/about">درباره ما</Link>
                 <Link to="/contact">تماس با ما</Link>
                 <Link to="/support">پشتیبانی</Link>
