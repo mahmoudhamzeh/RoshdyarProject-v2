@@ -31,6 +31,9 @@ body, .navbar{
   color:var(--text-on-primary);
   padding:.875rem 1.25rem;
   border-bottom:1px solid rgba(255,255,255,.12);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 .navbar-brand a{
   color:#fff; text-decoration:none;
