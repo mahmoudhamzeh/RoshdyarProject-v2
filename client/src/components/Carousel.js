@@ -32,13 +32,18 @@ const Carousel = ({ slides = defaultSlides }) => {
         return null; // Don't render anything if there are no slides
     }
 
+    const handleImageError = (e) => {
+        e.target.onerror = null; // prevent infinite loop
+        e.target.src = 'https://placehold.co/1200x400/cccccc/ffffff?text=Image+Not+Found';
+    };
+
     return (
         <div className="carousel">
             <div className="carousel-inner" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
                 {slides.map((slide) => {
                     const slideContent = (
                         <>
-                            <img src={slide.image} alt={slide.title} />
+                            <img src={slide.image} alt={slide.title} onError={handleImageError} />
                             <div className="carousel-caption">
                                 <h2>{slide.title}</h2>
                                 {slide.subtitle && <p>{slide.subtitle}</p>}
