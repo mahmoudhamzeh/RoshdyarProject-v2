@@ -43,7 +43,7 @@ const DashboardPage = () => {
                 const articlesResponse = await fetch('http://localhost:5000/api/news');
                 if (articlesResponse.ok) {
                     const data = await articlesResponse.json();
-                    const formattedArticles = data.slice(0, 8).map(article => ({ // Take first 8
+                    const formattedArticles = data.slice(0, 5).map(article => ({ // Take first 5
                         id: article.id,
                         title: article.title,
                         summary: article.summary, // Add summary
