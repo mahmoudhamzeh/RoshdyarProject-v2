@@ -22,19 +22,20 @@
 }
 
 .content-row {
-  display: grid;
-  grid-template-columns: 1fr; /* A single column */
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 1rem;
   gap: 1rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
 
-.content-card-link {
-  display: block; /* Make the link a block for better layout */
+.content-row::-webkit-scrollbar { /* WebKit */
+  display: none;
 }
 
 .content-card {
-  display: flex; /* Use flex for internal layout */
-  align-items: center;
-  gap: 1rem;
+  flex: 0 0 220px;
   background-color: white;
   border-radius: 12px;
   overflow: hidden;
@@ -44,14 +45,13 @@
 }
 
 .content-card:hover {
-  transform: scale(1.02);
+  transform: scale(1.05);
 }
 
 .content-card img {
-  width: 120px; /* Fixed width for the image */
-  height: 80px;
+  width: 100%;
+  height: 140px;
   object-fit: cover;
-  border-radius: 8px; /* Rounded corners for the image */
 }
 
 .content-card-link {
@@ -61,7 +61,6 @@
 
 .content-card-text {
   padding: 0.8rem;
-  text-align: right; /* Align text to the right for Farsi */
 }
 
 .content-card-text h4 {
@@ -69,11 +68,13 @@
   font-size: 1rem;
   font-weight: 600;
   color: #333;
+  text-align: right;
 }
 
 .content-card-text p {
   margin: 0;
   font-size: 0.85rem;
   color: #666;
-  font-weight: 400; /* Reset font-weight */
+  font-weight: 400;
+  text-align: right;
 }
