@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faExclamationTriangle, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faExclamationTriangle, faClock } from '@fortawesome/free-solid-svg-icons';
 import './VaccinationStatus.css';
 
 const VaccinationStatus = () => {
@@ -61,7 +61,6 @@ const VaccinationStatus = () => {
 
     const overdue = vaccinationStatus.filter(v => v.status === 'overdue');
     const upcoming = vaccinationStatus.filter(v => v.status === 'upcoming');
-    const done = vaccinationStatus.filter(v => v.status === 'done');
 
     return (
         <div className="vaccination-status-container">

@@ -21,10 +21,6 @@ const Navbar = () => {
         }
     }, []);
 
-    const handleProfileClick = () => {
-        history.push('/profile');
-    };
-
     const handleLogout = () => {
         localStorage.removeItem('loggedInUser');
         history.push('/login');

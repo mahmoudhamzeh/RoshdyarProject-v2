@@ -17,12 +17,16 @@
     position: relative;
     flex-shrink: 0;
     width: 100%;
+    display: flex; /* Make the item a flex container */
+    align-items: stretch; /* Make children stretch to full height */
 }
 
-/* Ensure both Link (a) and div children behave as blocks */
+/* Ensure both Link (a) and div children fill the container */
 .carousel-item > a,
 .carousel-item > div {
-    display: block;
+    display: flex; /* Use flex for inner content too */
+    flex-direction: column;
+    width: 100%;
     text-decoration: none;
     color: inherit;
 }
