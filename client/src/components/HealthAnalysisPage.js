@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { whoStats } from '../who-stats';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faIdCard, faAllergies, faStethoscope, faChartLine, faCalendarCheck, faFileMedical, faArrowUp, faArrowDown, faSyringe, faBrain } from '@fortawesome/free-solid-svg-icons';
 import VaccinationStatus from './VaccinationStatus';

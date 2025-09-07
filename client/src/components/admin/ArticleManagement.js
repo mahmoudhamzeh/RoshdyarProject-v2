@@ -4,7 +4,6 @@ import './ArticleManagement.css';
 const ArticleManagement = () => {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [newArticle, setNewArticle] = useState({ title: '', summary: '', content: '', image: null });
 
@@ -16,7 +15,7 @@ const ArticleManagement = () => {
             const data = await response.json();
             setArticles(data);
         } catch (err) {
-            setError(err.message);
+            console.error(err.message);
         } finally {
             setLoading(false);
         }
@@ -59,7 +58,7 @@ const ArticleManagement = () => {
             setNewArticle({ title: '', summary: '', content: '', image: null });
             alert('مقاله با موفقیت ایجاد شد');
         } catch (err) {
-            setError(err.message);
+            console.error(err.message);
             alert(`خطا در ایجاد مقاله: ${err.message}`);
         }
     };
