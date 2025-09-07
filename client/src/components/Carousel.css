@@ -19,6 +19,14 @@
     width: 100%;
 }
 
+/* Ensure both Link (a) and div children behave as blocks */
+.carousel-item > a,
+.carousel-item > div {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
 .carousel-inner img {
     width: 100%;
     height: 400px;
