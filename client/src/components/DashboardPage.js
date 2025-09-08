@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import Carousel from './Carousel';
+import AppCarousel from './Carousel';
 import ServiceTiles from './ServiceTiles';
 import ContentRow from './ContentRow';
 
@@ -60,7 +60,7 @@ const DashboardPage = () => {
         <div>
             <Navbar />
             <main>
-                <Carousel slides={banners} />
+                <AppCarousel slides={banners} />
                 <ServiceTiles />
 
                 <ContentRow title="ویدیوهای آموزشی و تربیتی" items={mockVideos} />
