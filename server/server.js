@@ -10,11 +10,12 @@ const { recommendedCheckupsData } = require('./recommendations');
 const app = express();
 const port = process.env.PORT || 5000;
 
-const uploadsDir = path.join(__dirname, '../client/public/uploads');
+const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) { fs.mkdirSync(uploadsDir, { recursive: true }); }
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use('/uploads', express.static(uploadsDir));
 
 const storage = multer.diskStorage({ destination: (req, file, cb) => cb(null, uploadsDir), filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)) });
 const upload = multer({ storage: storage });
@@ -157,6 +158,7 @@ app.get('/api/admin/users/:userId/children', isAdmin, (req, res) => {
 
 // --- Content Management Routes ---
 app.get('/api/banners', (req, res) => {
+    res.set('Cache-Control', 'no-store');
     res.json(banners);
 });
 

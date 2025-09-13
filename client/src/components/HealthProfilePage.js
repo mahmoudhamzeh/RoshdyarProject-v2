@@ -53,7 +53,7 @@ const HealthProfilePage = () => {
         return <p>کودک یافت نشد.</p>;
     }
 
-    const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? child.avatar : (child.avatar || 'https://i.pravatar.cc/100');
+    const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
 
     const calculateAge = (birthDate) => {
         if (!birthDate) return '';
