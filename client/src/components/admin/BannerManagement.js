@@ -107,7 +107,7 @@ const BannerManagement = () => {
             <div className="banners-list">
                 {banners.map(banner => (
                     <div key={banner.id} className="banner-card">
-                        <img src={`http://localhost:5000${banner.imageUrl}`} alt={banner.title} />
+                        <img src={banner.imageUrl} alt={banner.title} />
                         <div className="banner-info">
                             <h4>{banner.title}</h4>
                             <a href={banner.link} target="_blank" rel="noopener noreferrer">{banner.link}</a>

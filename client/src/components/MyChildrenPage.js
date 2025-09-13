@@ -60,7 +60,7 @@ const MyChildrenPage = () => {
                 <div className="children-list-final">
                     {children.length === 0 ? <p className="no-children-message">هنوز کودکی اضافه نشده است.</p> :
                      children.map(child => {
-                        const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
+                        const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? child.avatar : (child.avatar || 'https://i.pravatar.cc/100');
                         return (
                             <div key={child.id} className="child-card-final">
                                 <img src={avatarUrl} alt={child.name} className="child-avatar-final" />

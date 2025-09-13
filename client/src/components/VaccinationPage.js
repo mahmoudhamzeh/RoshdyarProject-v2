@@ -164,7 +164,7 @@ const VaccinationPage = () => {
                 </button>
                 <h1>کارت واکسیناسیون</h1>
                 <div className="nav-avatar">
-                    <img src={child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/50')} alt={child.firstName} />
+                    <img src={child.avatar && child.avatar.startsWith('/uploads') ? child.avatar : (child.avatar || 'https://i.pravatar.cc/50')} alt={child.firstName} />
                     <span>{child.firstName}</span>
                 </div>
             </nav>
