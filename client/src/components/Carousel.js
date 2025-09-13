@@ -1,6 +1,6 @@
 import React from 'react';
 import { Carousel as ResponsiveCarousel } from 'react-responsive-carousel';
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+import "~react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import './Carousel.css'; // Your custom styles
 
 const Carousel = ({ slides = [] }) => {
