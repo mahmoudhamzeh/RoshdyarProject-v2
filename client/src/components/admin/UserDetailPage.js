@@ -56,7 +56,7 @@ const UserDetailPage = () => {
                 {children.length > 0 ? (
                     children.map(child => (
                         <div key={child.id} className="child-card">
-                            <img src={child.avatar.startsWith('http') ? child.avatar : child.avatar} alt={child.name} />
+                            <img src={child.avatar.startsWith('http') ? child.avatar : `http://localhost:5000${child.avatar}`} alt={child.name} />
                             <p>{child.name}</p>
                             <Link to={`/health-profile/${child.id}`} className="btn-view-profile">
                                 مشاهده پروفایل سلامت

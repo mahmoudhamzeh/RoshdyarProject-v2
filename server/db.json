@@ -195,26 +195,7 @@
     "6": []
   },
   "childIdCounter": 7,
-  "banners": [
-    {
-      "id": 1753019771847,
-      "title": "Banner 1",
-      "link": "#",
-      "imageUrl": "/uploads/1753019771847.webp"
-    },
-    {
-      "id": 1753038195992,
-      "title": "Banner 2",
-      "link": "#",
-      "imageUrl": "/uploads/1753038195992.webp"
-    },
-    {
-      "id": 1753040138775,
-      "title": "Banner 3",
-      "link": "#",
-      "imageUrl": "/uploads/1753040138775.webp"
-    }
-  ],
+  "banners": [],
   "articles": [],
   "news": [],
   "tickets": []
