@@ -38,7 +38,7 @@ const NewsPage = () => {
                     {error && <p className="error-message">{error}</p>}
                     {articles.map(article => (
                         <Link to={`/news/${article.id}`} key={article.id} className="article-card">
-                            <img src={article.imageUrl ? `http://localhost:5000${article.imageUrl}` : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
+                            <img src={article.imageUrl ? article.imageUrl : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
                             <div className="article-card-content">
                                 <h3>{article.title}</h3>
                                 <p>{article.summary}</p>

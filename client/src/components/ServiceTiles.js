@@ -103,7 +103,7 @@ const ServiceTiles = () => {
                             className={`child-item-modal ${selectedChild === child.id ? 'selected' : ''}`}
                             onClick={() => setSelectedChild(child.id)}
                         >
-                            <img src={child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/50')} alt={child.name} />
+                            <img src={child.avatar && child.avatar.startsWith('/uploads') ? child.avatar : (child.avatar || 'https://i.pravatar.cc/50')} alt={child.name} />
                             <span>{child.name}</span>
                         </div>
                     ))}
