@@ -62,21 +62,30 @@ const loadData = () => {
 loadData();
 
 const saveData = () => {
-    const data = JSON.stringify({
-        users,
-        children,
-        growthData,
-        medicalVisits,
-        medicalDocuments,
-        checkups,
-        reminders,
-        childIdCounter,
-        banners,
-        articles,
-        news,
-        tickets
-    }, null, 2);
-    fs.writeFileSync(dbPath, data);
+    console.log('[DEBUG] Attempting to save data...');
+    try {
+        const data = JSON.stringify({
+            users,
+            children,
+            growthData,
+            medicalVisits,
+            medicalDocuments,
+            checkups,
+            reminders,
+            childIdCounter,
+            banners,
+            articles,
+            news,
+            tickets
+        }, null, 2);
+
+        console.log('[DEBUG] Banners array before writing:', JSON.stringify(banners, null, 2));
+        fs.writeFileSync(dbPath, data);
+        console.log('[SUCCESS] Data saved successfully to db.json.');
+
+    } catch (error) {
+        console.error('[ERROR] Failed to save data:', error);
+    }
 };
 
 function calculateAge(birthDate) { /* ... */ }
