@@ -155,6 +155,24 @@ app.get('/api/admin/users/:userId/children', isAdmin, (req, res) => {
     res.json(userChildren);
 });
 
+app.put('/api/admin/users/:id/set-password', isAdmin, (req, res) => {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!users[id]) {
+        return res.status(404).json({ message: 'کاربر یافت نشد' });
+    }
+
+    if (!newPassword || newPassword.length < 4) {
+        return res.status(400).json({ message: 'رمز عبور جدید باید حداقل ۴ کاراکتر باشد' });
+    }
+
+    users[id].password = newPassword;
+    saveData();
+
+    res.status(200).json({ message: 'رمز عبور کاربر با موفقیت تغییر کرد' });
+});
+
 
 // --- Content Management Routes ---
 app.get('/api/banners', (req, res) => {

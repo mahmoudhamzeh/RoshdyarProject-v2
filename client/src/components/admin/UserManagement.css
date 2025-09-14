@@ -30,18 +30,27 @@
     background-color: #f1f1f1;
 }
 
-.users-table .btn-edit,
-.users-table .btn-delete {
+.users-table .actions {
+    text-align: left;
+    white-space: nowrap;
+}
+
+.users-table .btn-action {
     border: none;
     padding: 8px 12px;
     border-radius: 4px;
     color: white;
     cursor: pointer;
-    margin-left: 5px;
+    margin-right: 5px; /* RTL friendly margin */
+}
+
+.users-table .set-password-btn {
+    background-color: #17a2b8; /* Teal */
 }
 
 .users-table .btn-edit {
-    background-color: #3498db; /* Blue */
+    background-color: #ffc107; /* Yellow */
+    color: #333;
 }
 
 .users-table .btn-delete {

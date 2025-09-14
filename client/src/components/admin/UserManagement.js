@@ -2,13 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './UserManagement.css';
 import EditUserModal from './EditUserModal';
+import SetPasswordModal from './SetPasswordModal'; // Import the new modal
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // State for Edit User Modal
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+
+    // State for Set Password Modal
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [passwordEditingUser, setPasswordEditingUser] = useState(null);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -48,7 +55,6 @@ const UserManagement = () => {
                 if (!response.ok) {
                     throw new Error(data.message || 'Failed to delete user');
                 }
-                // Refresh user list
                 setUsers(users.filter(user => user.id !== userId));
                 alert('کاربر با موفقیت حذف شد');
             } catch (err) {
@@ -58,13 +64,14 @@ const UserManagement = () => {
         }
     };
 
+    // --- Edit User Modal Handlers ---
     const handleEditClick = (user) => {
         setEditingUser(user);
-        setIsModalOpen(true);
+        setIsEditModalOpen(true);
     };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
         setEditingUser(null);
     };
 
@@ -84,11 +91,45 @@ const UserManagement = () => {
                 throw new Error(data.message || 'Failed to update user');
             }
             setUsers(users.map(user => user.id === updatedUser.id ? data : user));
-            handleCloseModal();
+            handleCloseEditModal();
             alert('کاربر با موفقیت به‌روز شد');
         } catch (err) {
             setError(err.message);
             alert(`خطا در به‌روزرسانی کاربر: ${err.message}`);
+        }
+    };
+
+    // --- Set Password Modal Handlers ---
+    const handleSetPasswordClick = (user) => {
+        setPasswordEditingUser(user);
+        setIsPasswordModalOpen(true);
+    };
+
+    const handleClosePasswordModal = () => {
+        setIsPasswordModalOpen(false);
+        setPasswordEditingUser(null);
+    };
+
+    const handleSetPassword = async (userId, newPassword) => {
+        try {
+            const adminUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/set-password`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-id': adminUser.id
+                },
+                body: JSON.stringify({ newPassword })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to set password');
+            }
+            handleClosePasswordModal();
+            alert(data.message);
+        } catch (err) {
+            setError(err.message);
+            alert(`خطا در تنظیم رمز عبور: ${err.message}`);
         }
     };
 
@@ -103,7 +144,7 @@ const UserManagement = () => {
                         <th>نام کاربری</th>
                         <th>ایمیل</th>
                         <th>مدیر</th>
-                        <th>عملیات</th>
+                        <th className="actions">عملیات</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -115,19 +156,29 @@ const UserManagement = () => {
                             </td>
                             <td>{user.email}</td>
                             <td>{user.isAdmin ? 'بله' : 'خیر'}</td>
-                            <td>
-                                <button onClick={() => handleEditClick(user)} className="btn-edit">ویرایش</button>
-                                <button onClick={() => handleDelete(user.id)} className="btn-delete">حذف</button>
+                            <td className="actions">
+                                <button onClick={() => handleSetPasswordClick(user)} className="btn-action set-password-btn">تنظیم رمز</button>
+                                <button onClick={() => handleEditClick(user)} className="btn-action btn-edit">ویرایش</button>
+                                <button onClick={() => handleDelete(user.id)} className="btn-action btn-delete">حذف</button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            {isModalOpen && (
+
+            {isEditModalOpen && (
                 <EditUserModal
                     user={editingUser}
-                    onClose={handleCloseModal}
+                    onClose={handleCloseEditModal}
                     onSave={handleSaveUser}
+                />
+            )}
+
+            {isPasswordModalOpen && (
+                <SetPasswordModal
+                    user={passwordEditingUser}
+                    onClose={handleClosePasswordModal}
+                    onSave={handleSetPassword}
                 />
             )}
         </div>
