@@ -70,10 +70,48 @@ body, .navbar{
 .btn-profile{ }
 .btn-logout{ background-color:var(--danger); border-color:var(--danger) }
 
+/* استایل‌های دکمه همبرگر */
+.navbar-toggler {
+  display: none;
+  font-size: 1.5rem;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.navbar-profile-mobile {
+  display: none;
+}
 /* واکنش‌گرا */
-@media (max-width:768px){
-  .navbar{ flex-wrap:wrap }
-  .navbar-links{ order:3; width:100%; justify-content:center; padding-top:.25rem }
-  .navbar-brand{ order:1 }
-  .navbar-profile{ order:2; margin-inline-start:auto }
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    order: 3;
+    padding-top: .5rem;
+    background-color: var(--primary);
+  }
+  .navbar-links.active {
+    display: flex;
+  }
+  .navbar-toggler {
+    display: block;
+    order: 2;
+  }
+  .navbar-brand {
+    order: 1;
+  }
+  .navbar-profile {
+    display: none;
+  }
+  .navbar-profile-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin-top: .5rem;
+    padding-top: .5rem;
+    border-top: 1px solid rgba(255,255,255,.12);
+  }
 }
