@@ -30,6 +30,7 @@ const Carousel = ({ slides = [] }) => {
     return (
         // The library's Carousel component handles all the state and sliding logic
         <ResponsiveCarousel
+            key={slides.length}
             showThumbs={false}
             showStatus={false}
             infiniteLoop
