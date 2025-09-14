@@ -6,6 +6,7 @@ import './Navbar.css';
 const Navbar = () => {
     const history = useHistory();
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         try {
@@ -26,18 +27,29 @@ const Navbar = () => {
         history.push('/login');
     };
 
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
     return (
         <nav className="navbar">
             <div className="navbar-brand">
                 <Link to="/dashboard">رشدیار 👶</Link>
             </div>
-            <div className="navbar-links">
+            <button className="navbar-toggler" type="button" onClick={toggleMenu}>
+                &#9776;
+            </button>
+            <div className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
                 <Link to="/dashboard">خانه</Link>
                 <Link to="/news">اخبار و مقالات</Link>
                 <Link to="/about">درباره ما</Link>
                 <Link to="/contact">تماس با ما</Link>
                 <Link to="/support">پشتیبانی</Link>
                 {isAdmin && <Link to="/admin" className="admin-link">پنل مدیریت</Link>}
+                <div className="navbar-profile-mobile">
+                    <Link to="/profile" className="btn btn-profile">پروفایل من</Link>
+                    <button onClick={handleLogout} className="btn btn-logout" type="button">خروج</button>
+                </div>
             </div>
             <div className="navbar-profile">
                 <Reminders />
