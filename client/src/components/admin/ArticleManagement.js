@@ -5,7 +5,7 @@ const ArticleManagement = () => {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [newArticle, setNewArticle] = useState({ title: '', summary: '', content: '', image: null });
+    const [newArticle, setNewArticle] = useState({ title: '', summary: '', content: '', category: 'عمومی', image: null });
 
     const fetchArticles = async () => {
         setLoading(true);
@@ -40,6 +40,7 @@ const ArticleManagement = () => {
         formData.append('title', newArticle.title);
         formData.append('summary', newArticle.summary);
         formData.append('content', newArticle.content);
+        formData.append('category', newArticle.category);
         if (newArticle.image) {
             formData.append('image', newArticle.image);
         }
@@ -55,7 +56,7 @@ const ArticleManagement = () => {
 
             fetchArticles(); // Re-fetch to get the new list
             setShowForm(false);
-            setNewArticle({ title: '', summary: '', content: '', image: null });
+            setNewArticle({ title: '', summary: '', content: '', category: 'عمومی', image: null });
             alert('مقاله با موفقیت ایجاد شد');
         } catch (err) {
             console.error(err.message);
@@ -91,6 +92,15 @@ const ArticleManagement = () => {
                     <input type="text" name="title" value={newArticle.title} onChange={handleInputChange} placeholder="عنوان" required />
                     <textarea name="summary" value={newArticle.summary} onChange={handleInputChange} placeholder="خلاصه مقاله" rows="3"></textarea>
                     <textarea name="content" value={newArticle.content} onChange={handleInputChange} placeholder="محتوای کامل" rows="10" required></textarea>
+                    <label>دسته بندی</label>
+                    <select name="category" value={newArticle.category} onChange={handleInputChange}>
+                        <option value="عمومی">عمومی</option>
+                        <option value="بیماری">بیماری</option>
+                        <option value="آموزشی">آموزشی</option>
+                        <option value="تغذیه">تغذیه</option>
+                        <option value="مادر و کودک">مادر و کودک</option>
+                        <option value="تربیتی">تربیتی</option>
+                    </select>
                     <label>تصویر مقاله (اختیاری)</label>
                     <input type="file" name="image" onChange={handleFileChange} />
                     <button type="submit">ذخیره مقاله</button>

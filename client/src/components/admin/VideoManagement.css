@@ -1,0 +1,86 @@
+.video-management {
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin: 1rem;
+}
+
+.video-management h2 {
+    text-align: right;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+}
+
+.btn-add-video {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Vazirmatn', sans-serif;
+    margin-bottom: 1rem;
+}
+
+.video-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 2rem;
+}
+
+.video-form input,
+.video-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+.video-form button {
+    background-color: #2ecc71;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 1rem;
+}
+
+.videos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.video-item {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.video-item-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+}
+
+.video-item-info p {
+    margin: 0.5rem 0 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.video-item-actions .btn-delete {
+    background-color: #e74c3c;
+    color: white;
+}
