@@ -31,8 +31,44 @@
 }
 
 .users-table .actions {
+    position: relative;
     text-align: left;
-    white-space: nowrap;
+}
+
+.actions-menu-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.actions-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+    width: 150px;
+    padding: 0.5rem 0;
+}
+
+.actions-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    text-align: right;
+    cursor: pointer;
+}
+
+.actions-dropdown button:hover {
+    background-color: #f1f1f1;
 }
 
 .users-table .btn-action {

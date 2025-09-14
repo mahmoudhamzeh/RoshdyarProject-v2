@@ -1,19 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './UserManagement.css';
 import EditUserModal from './EditUserModal';
-import SetPasswordModal from './SetPasswordModal'; // Import the new modal
+import SetPasswordModal from './SetPasswordModal';
+
+// A new sub-component for the actions dropdown
+const ActionsMenu = ({ user, onEdit, onDelete, onSetPassword }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    // Close the dropdown if clicking outside of it
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [menuRef]);
+
+    return (
+        <div className="actions" ref={menuRef}>
+            <button onClick={() => setIsOpen(!isOpen)} className="actions-menu-btn">
+                ...
+            </button>
+            {isOpen && (
+                <div className="actions-dropdown">
+                    <button onClick={() => { onSetPassword(user); setIsOpen(false); }}>تنظیم رمز</button>
+                    <button onClick={() => { onEdit(user); setIsOpen(false); }}>ویرایش</button>
+                    <button onClick={() => { onDelete(user.id); setIsOpen(false); }}>حذف</button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // State for Edit User Modal
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
 
-    // State for Set Password Modal
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [passwordEditingUser, setPasswordEditingUser] = useState(null);
 
@@ -64,7 +97,6 @@ const UserManagement = () => {
         }
     };
 
-    // --- Edit User Modal Handlers ---
     const handleEditClick = (user) => {
         setEditingUser(user);
         setIsEditModalOpen(true);
@@ -99,7 +131,6 @@ const UserManagement = () => {
         }
     };
 
-    // --- Set Password Modal Handlers ---
     const handleSetPasswordClick = (user) => {
         setPasswordEditingUser(user);
         setIsPasswordModalOpen(true);
@@ -157,9 +188,12 @@ const UserManagement = () => {
                             <td>{user.email}</td>
                             <td>{user.isAdmin ? 'بله' : 'خیر'}</td>
                             <td className="actions">
-                                <button onClick={() => handleSetPasswordClick(user)} className="btn-action set-password-btn">تنظیم رمز</button>
-                                <button onClick={() => handleEditClick(user)} className="btn-action btn-edit">ویرایش</button>
-                                <button onClick={() => handleDelete(user.id)} className="btn-action btn-delete">حذف</button>
+                                <ActionsMenu
+                                    user={user}
+                                    onEdit={handleEditClick}
+                                    onDelete={handleDelete}
+                                    onSetPassword={handleSetPasswordClick}
+                                />
                             </td>
                         </tr>
                     ))}

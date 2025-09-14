@@ -8,11 +8,30 @@ const MyChildrenPage = () => {
 
     const fetchChildren = useCallback(async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/children');
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (!loggedInUser) {
+                console.error("No user logged in.");
+                // Optionally redirect to login
+                history.push('/login');
+                return;
+            }
+
+            const response = await fetch('http://localhost:5000/api/children', {
+                headers: {
+                    'x-user-id': loggedInUser.id
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch children data.');
+            }
+
             const data = await response.json();
             setChildren(data);
-        } catch (error) { console.error('Failed to fetch children:', error); }
-    }, []);
+        } catch (error) {
+            console.error('Failed to fetch children:', error);
+        }
+    }, [history]);
 
     useEffect(() => {
         fetchChildren();
