@@ -15,14 +15,17 @@ const Carousel = ({ slides = [] }) => {
     };
 
     const handleItemClick = (index, item) => {
-        // The library gives us the item clicked, which has the link property
-        if (item.props.url) {
-            // A simple redirect. For internal links, React Router's useHistory would be better.
-            // Using window.open to open in a new tab if the link is external.
-            if (item.props.url.startsWith('http')) {
-                window.open(item.props.url, '_blank', 'noopener,noreferrer');
+        let url = item.props.url;
+        if (url) {
+            // Check for internal links (e.g., /dashboard, /profile)
+            if (url.startsWith('/')) {
+                window.location.href = url;
             } else {
-                 window.location.href = item.props.url;
+                // It's an external link, ensure it has a protocol
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+                window.open(url, '_blank', 'noopener,noreferrer');
             }
         }
     }

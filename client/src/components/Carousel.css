@@ -16,10 +16,5 @@
 
 /* The library uses a `legend` class for captions by default */
 .presentation-mode .legend {
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent) !important;
-    opacity: 1 !important;
-    font-size: 1.5rem !important;
-    font-weight: bold !important;
-    padding: 2rem !important;
-    direction: rtl; /* Ensure caption text is RTL */
+    display: none; /* Hide the legend as requested by the user */
 }
