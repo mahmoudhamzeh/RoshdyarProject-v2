@@ -1,0 +1,29 @@
+
+> roshdyar-client@1.0.0 build
+> npx react-scripts --openssl-legacy-provider build
+
+Creating an optimized production build...
+Compiled successfully.
+
+File sizes after gzip:
+
+  405.7 KB          build/static/js/2.d0c7a2c8.chunk.js
+  33.5 KB           build/static/js/3.053cc891.chunk.js
+  26.12 KB (+23 B)  build/static/js/main.3c6256b0.chunk.js
+  8.51 KB           build/static/js/4.e7b603c6.chunk.js
+  7.89 KB (+58 B)   build/static/css/main.4ac44101.chunk.css
+  4.55 KB           build/static/css/2.faf81bb8.chunk.css
+  1.18 KB           build/static/js/runtime-main.4e6795cc.js
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment

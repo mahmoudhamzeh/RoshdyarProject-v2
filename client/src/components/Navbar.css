@@ -31,9 +31,21 @@ body, .navbar{
   color:var(--text-on-primary);
   padding:.875rem 1.25rem;
   border-bottom:1px solid rgba(255,255,255,.12);
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 1000;
+}
+.navbar-left, .navbar-right {
+  flex: 1 0 0;
+}
+.navbar-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.navbar-center{
+  flex: 1 0 0;
+  text-align: center;
 }
 .navbar-brand a{
   color:#fff; text-decoration:none;
@@ -44,7 +56,6 @@ body, .navbar{
 .navbar-links{
   display:flex; align-items:center; gap:.75rem;
   direction:rtl; unicode-bidi:plaintext;
-  flex-wrap:wrap;
 }
 .navbar-links a{
   color:#fff; text-decoration:none;
@@ -70,7 +81,6 @@ body, .navbar{
 .btn-profile{ }
 .btn-logout{ background-color:var(--danger); border-color:var(--danger) }
 
-/* استایل‌های دکمه همبرگر */
 .navbar-toggler {
   display: none;
   font-size: 1.5rem;
@@ -80,38 +90,34 @@ body, .navbar{
   cursor: pointer;
 }
 
-.navbar-profile-mobile {
-  display: none;
-}
 /* واکنش‌گرا */
 @media (max-width: 768px) {
+  .navbar-right .navbar-links {
+    display: none; /* Hide desktop links container on mobile */
+  }
+
   .navbar-links {
     display: none;
     flex-direction: column;
+    position: absolute;
+    top: 100%;
+    right: 0;
     width: 100%;
-    order: 3;
-    padding-top: .5rem;
     background-color: var(--primary);
+    border-top: 1px solid rgba(255,255,255,.12);
+    padding: .5rem 0;
+    z-index: 999;
   }
   .navbar-links.active {
     display: flex;
   }
   .navbar-toggler {
     display: block;
-    order: 2;
   }
-  .navbar-brand {
-    order: 1;
-  }
-  .navbar-profile {
+  .navbar-profile .btn-profile, .navbar-profile .btn-logout {
     display: none;
   }
-  .navbar-profile-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-    margin-top: .5rem;
-    padding-top: .5rem;
-    border-top: 1px solid rgba(255,255,255,.12);
+  .navbar-profile span {
+    font-size: 1.5rem;
   }
 }

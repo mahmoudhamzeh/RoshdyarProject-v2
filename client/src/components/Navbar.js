@@ -33,28 +33,30 @@ const Navbar = () => {
 
     return (
         <nav className="navbar">
-            <div className="navbar-brand">
-                <Link to="/dashboard">رشدیار 👶</Link>
-            </div>
-            <button className="navbar-toggler" type="button" onClick={toggleMenu}>
-                &#9776;
-            </button>
-            <div className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
-                <Link to="/dashboard">خانه</Link>
-                <Link to="/news">اخبار و مقالات</Link>
-                <Link to="/about">درباره ما</Link>
-                <Link to="/contact">تماس با ما</Link>
-                <Link to="/support">پشتیبانی</Link>
-                {isAdmin && <Link to="/admin" className="admin-link">پنل مدیریت</Link>}
-                <div className="navbar-profile-mobile">
+            <div className="navbar-left">
+                <div className="navbar-profile">
+                    <Reminders />
                     <Link to="/profile" className="btn btn-profile">پروفایل من</Link>
                     <button onClick={handleLogout} className="btn btn-logout" type="button">خروج</button>
                 </div>
             </div>
-            <div className="navbar-profile">
-                <Reminders />
-                <Link to="/profile" className="btn btn-profile">پروفایل من</Link>
-                <button onClick={handleLogout} className="btn btn-logout" type="button">خروج</button>
+            <div className="navbar-center">
+                <div className="navbar-brand">
+                    <Link to="/dashboard">رشدیار 👶</Link>
+                </div>
+            </div>
+            <div className="navbar-right">
+                <button className="navbar-toggler" type="button" onClick={toggleMenu}>
+                    &#9776;
+                </button>
+                <div className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
+                    <Link to="/dashboard">خانه</Link>
+                    <Link to="/news">اخبار و مقالات</Link>
+                    <Link to="/about">درباره ما</Link>
+                    <Link to="/contact">تماس با ما</Link>
+                    <Link to="/support">پشتیبانی</Link>
+                    {isAdmin && <Link to="/admin" className="admin-link">پنل مدیریت</Link>}
+                </div>
             </div>
         </nav>
     );
