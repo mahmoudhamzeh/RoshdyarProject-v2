@@ -22,7 +22,7 @@ const upload = multer({ storage: storage });
 
 const dbPath = path.join(__dirname, 'db.json');
 
-let users, children, growthData, medicalVisits, medicalDocuments, checkups, reminders, childIdCounter, banners, articles, news, tickets;
+let users, children, growthData, medicalVisits, medicalDocuments, checkups, reminders, childIdCounter, banners, articles, news, tickets, videos;
 
 const loadData = () => {
     if (fs.existsSync(dbPath)) {
@@ -43,6 +43,7 @@ const loadData = () => {
         articles = data.articles || [];
         news = data.news || [];
         tickets = data.tickets || [];
+        videos = data.videos || [];
     } else {
         users = {};
         children = [];
@@ -56,6 +57,7 @@ const loadData = () => {
         articles = [];
         news = [];
         tickets = [];
+        videos = [];
     }
 };
 
@@ -74,7 +76,8 @@ const saveData = () => {
         banners,
         articles,
         news,
-        tickets
+        tickets,
+        videos
     }, null, 2);
     fs.writeFileSync(dbPath, data);
 };
@@ -223,12 +226,13 @@ app.get('/api/news/:id', (req, res) => {
 });
 
 app.post('/api/admin/news', isAdmin, upload.single('image'), (req, res) => {
-    const { title, content, summary } = req.body;
+    const { title, content, summary, category } = req.body;
     const newArticle = {
         id: Date.now(),
         title,
         summary,
         content,
+        category: category || 'عمومی', // Default category
         imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
         createdAt: new Date().toISOString()
     };
@@ -239,7 +243,7 @@ app.post('/api/admin/news', isAdmin, upload.single('image'), (req, res) => {
 
 app.put('/api/admin/news/:id', isAdmin, upload.single('image'), (req, res) => {
     const { id } = req.params;
-    const { title, content, summary } = req.body;
+    const { title, content, summary, category } = req.body;
     const articleIndex = news.findIndex(n => n.id === parseInt(id));
 
     if (articleIndex === -1) {
@@ -251,6 +255,7 @@ app.put('/api/admin/news/:id', isAdmin, upload.single('image'), (req, res) => {
         title,
         summary,
         content,
+        category: category || news[articleIndex].category,
         updatedAt: new Date().toISOString()
     };
 
@@ -274,6 +279,41 @@ app.delete('/api/admin/news/:id', isAdmin, (req, res) => {
         res.status(404).json({ message: 'مقاله یافت نشد' });
     }
 });
+
+// Videos
+app.get('/api/videos', (req, res) => {
+    res.json(videos);
+});
+
+app.post('/api/admin/videos', isAdmin, (req, res) => {
+    const { title, url, summary } = req.body;
+    if (!title || !url) {
+        return res.status(400).json({ message: 'Title and URL are required' });
+    }
+    const newVideo = {
+        id: Date.now(),
+        title,
+        url,
+        summary,
+        createdAt: new Date().toISOString()
+    };
+    videos.unshift(newVideo);
+    saveData();
+    res.status(201).json(newVideo);
+});
+
+app.delete('/api/admin/videos/:id', isAdmin, (req, res) => {
+    const { id } = req.params;
+    const initialLength = videos.length;
+    videos = videos.filter(v => v.id !== parseInt(id));
+    if (videos.length < initialLength) {
+        saveData();
+        res.status(200).json({ message: 'ویدیو با موفقیت حذف شد' });
+    } else {
+        res.status(404).json({ message: 'ویدیو یافت نشد' });
+    }
+});
+
 
 // --- Ticketing System Routes ---
 app.get('/api/admin/tickets', isAdmin, (req, res) => {
