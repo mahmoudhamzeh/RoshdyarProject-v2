@@ -6,6 +6,7 @@
     border-radius: 16px;
     overflow: hidden; /* Ensures the border-radius is applied to images */
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    direction: ltr; /* Force LTR for the carousel container */
 }
 
 .presentation-mode .carousel .slide img {
@@ -20,4 +21,5 @@
     font-size: 1.5rem !important;
     font-weight: bold !important;
     padding: 2rem !important;
+    direction: rtl; /* Ensure caption text is RTL */
 }
