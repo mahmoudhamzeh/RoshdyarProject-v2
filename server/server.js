@@ -357,7 +357,17 @@ app.post('/api/children', (req, res) => {
     res.status(201).json(newChild);
 });
 
-app.get('/api/children', (req, res) => res.json(children));
+app.get('/api/children', (req, res) => {
+    const userId = req.headers['x-user-id'];
+    if (!userId) {
+        // It's important to secure this endpoint.
+        // Only return children for a specific user.
+        return res.status(401).json({ message: 'شناسه کاربری ارائه نشده است' });
+    }
+
+    const userChildren = children.filter(c => c.userId === parseInt(userId));
+    res.json(userChildren);
+});
 app.get('/api/children/:id', (req, res) => {
     const childId = parseInt(req.params.id);
     const child = children.find(c => c.id === childId);
