@@ -84,3 +84,26 @@
   font-weight: 400;
   text-align: right;
 }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-row-container {
+    padding: 0 1rem;
+    margin: 2rem auto;
+  }
+  .content-card {
+    flex: 0 0 180px; /* Slightly smaller cards on mobile */
+  }
+}
+
+@media (min-width: 769px) {
+  .content-row {
+    flex-wrap: wrap; /* Allow wrapping on larger screens */
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+    justify-content: center; /* Center the items */
+  }
+  .content-card {
+    flex: 1 1 280px; /* Allow cards to grow and shrink */
+    max-width: 320px; /* Set a max-width for consistency */
+  }
+}

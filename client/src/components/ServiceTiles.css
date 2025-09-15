@@ -41,6 +41,46 @@
     font-weight: 500;
 }
 
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tiles-container {
+        padding: 1.5rem;
+        gap: 0.8rem;
+    }
+    .tile {
+        /*
+         Allow tiles to grow and shrink, with a preferred base size.
+         On a typical mobile screen (e.g., 360px wide), this allows
+         for two tiles to sit side-by-side comfortably.
+        */
+        flex-basis: calc(50% - 1rem); /* 2 items per row with gap */
+        height: auto; /* Auto height for content */
+        min-height: 110px;
+        padding: 0.8rem 0.5rem;
+    }
+    .tile-icon {
+        font-size: 2rem;
+    }
+    .tile-name {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tiles-container {
+        padding: 1rem;
+    }
+    .tile {
+       /*
+        On very small screens, still aim for two tiles, but provide
+        a slightly smaller base size to prevent overflow.
+       */
+       flex-basis: calc(50% - 0.8rem);
+       min-height: 100px;
+    }
+}
+
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
