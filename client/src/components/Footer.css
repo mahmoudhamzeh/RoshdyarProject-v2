@@ -5,3 +5,18 @@
 .footer-section ul { list-style: none; padding: 0; }
 .footer-section ul li a { color: white; text-decoration: none; line-height: 2; }
 .footer-bottom { text-align: center; padding-top: 1rem; border-top: 1px solid #1565c0; margin-top: 1rem; }
+
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .footer-section {
+    margin-bottom: 2rem;
+  }
+  .footer-section h4 {
+    display: inline-block;
+    border-bottom: 2px solid #1565c0;
+    padding-bottom: 0.5rem;
+  }
+}
