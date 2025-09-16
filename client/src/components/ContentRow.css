@@ -23,15 +23,8 @@
 
 .content-row {
   display: flex;
-  overflow-x: auto;
   padding-bottom: 1rem;
   gap: 1rem;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-}
-
-.content-row::-webkit-scrollbar { /* WebKit */
-  display: none;
 }
 
 .content-card {
@@ -91,6 +84,14 @@
     padding: 0 1rem;
     margin: 2rem auto;
   }
+  .content-row {
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE 10+ */
+  }
+  .content-row::-webkit-scrollbar {
+    display: none; /* WebKit */
+  }
   .content-card {
     flex: 0 0 180px; /* Slightly smaller cards on mobile */
   }
@@ -99,7 +100,6 @@
 @media (min-width: 769px) {
   .content-row {
     flex-wrap: wrap; /* Allow wrapping on larger screens */
-    overflow-x: hidden; /* Hide horizontal scrollbar */
     justify-content: center; /* Center the items */
   }
   .content-card {
