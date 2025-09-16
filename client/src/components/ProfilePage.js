@@ -9,6 +9,11 @@ const ProfilePage = () => {
     const history = useHistory();
     const [activeTab, setActiveTab] = useState('userInfo');
 
+    const handleLogout = () => {
+        localStorage.removeItem('loggedInUser');
+        history.push('/login');
+    };
+
     const handleGenerateReminders = async () => {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
         if (!user) return;
@@ -58,6 +63,7 @@ const ProfilePage = () => {
                     <button onClick={() => setActiveTab('support')} className={activeTab === 'support' ? 'active' : ''}>پشتبانی</button>
                     <button onClick={() => setActiveTab('changePassword')} className={activeTab === 'changePassword' ? 'active' : ''}>تغییر رمز</button>
                     <button onClick={handleGenerateReminders} className="generate-reminders-btn">تولید یادآورها</button>
+                    <button onClick={handleLogout} className="logout-btn">خروج از حساب</button>
                 </aside>
                 <main className="profile-content">
                     {renderContent()}

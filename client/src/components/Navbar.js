@@ -22,33 +22,22 @@ const Navbar = () => {
         }
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('loggedInUser');
-        history.push('/login');
-    };
-
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
     return (
         <nav className="navbar">
+            {/* Left Section: Profile and Reminders */}
             <div className="navbar-left">
                 <div className="navbar-profile">
                     <Reminders />
                     <Link to="/profile" className="btn btn-profile">پروفایل من</Link>
-                    <button onClick={handleLogout} className="btn btn-logout" type="button">خروج</button>
                 </div>
             </div>
+
+            {/* Center Section: Navigation Links */}
             <div className="navbar-center">
-                <div className="navbar-brand">
-                    <Link to="/dashboard">رشدیار 👶</Link>
-                </div>
-            </div>
-            <div className="navbar-right">
-                <button className="navbar-toggler" type="button" onClick={toggleMenu}>
-                    &#9776;
-                </button>
                 <div className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
                     <Link to="/dashboard">خانه</Link>
                     <Link to="/news">اخبار و مقالات</Link>
@@ -57,6 +46,16 @@ const Navbar = () => {
                     <Link to="/support">پشتیبانی</Link>
                     {isAdmin && <Link to="/admin" className="admin-link">پنل مدیریت</Link>}
                 </div>
+            </div>
+
+            {/* Right Section: Brand and Toggler */}
+            <div className="navbar-right">
+                <div className="navbar-brand">
+                    <Link to="/dashboard">رشدیار 👶</Link>
+                </div>
+                <button className="navbar-toggler" type="button" onClick={toggleMenu}>
+                    &#9776;
+                </button>
             </div>
         </nav>
     );
