@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import './NewsPage.css';
+
+function useQuery() {
+    return new URLSearchParams(useLocation().search);
+}
 
 const NewsPage = () => {
     const [articles, setArticles] = useState([]);
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('همه');
 
-    const categories = ['همه', 'بیماری', 'آموزشی', 'تغذیه', 'مادر و کودک', 'تربیتی'];
+    const query = useQuery();
+    const selectedCategory = query.get('category') || 'همه';
 
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const [articlesRes, videosRes] = await Promise.all([
                     fetch('http://localhost:5000/api/news'),
@@ -33,7 +38,7 @@ const NewsPage = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [selectedCategory]);
 
     const filteredArticles = articles.filter(article =>
         selectedCategory === 'همه' || article.category === selectedCategory
@@ -51,19 +56,6 @@ const NewsPage = () => {
                     <h1>مجله سلامت رشد‌یار</h1>
                     <p>جدیدترین مقالات، ویدیوها و توصیه‌های تخصصی برای والدین</p>
                 </header>
-
-                <nav className="category-nav">
-                    {categories.map(category => (
-                        <button
-                            key={category}
-                            className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-                            onClick={() => setSelectedCategory(category)}
-                        >
-                            {category}
-                        </button>
-                    ))}
-                     <a href="/" className="category-btn roshdyar-btn">رشد یار</a>
-                </nav>
 
                 {loading && <p>در حال بارگذاری...</p>}
                 {error && <p className="error-message">{error}</p>}

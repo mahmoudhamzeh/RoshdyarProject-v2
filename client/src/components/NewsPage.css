@@ -24,53 +24,6 @@
     margin-top: 0.5rem;
 }
 
-/* Category Navigation */
-.category-nav {
-    display: flex;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 1.5rem;
-}
-
-.category-btn {
-    padding: 10px 22px;
-    font-size: 1rem;
-    background-color: transparent;
-    color: #5a6a7b;
-    border: 1px solid #d1d5db;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.category-btn:hover {
-    background-color: #f0f2f5;
-    border-color: #3498db;
-    color: #3498db;
-}
-
-.category-btn.active {
-    background-color: #3498db;
-    color: white;
-    border-color: #3498db;
-}
-
-.roshdyar-btn {
-    background-color: #e67e22;
-    color: white;
-    border-color: #e67e22;
-}
-.roshdyar-btn:hover {
-    background-color: #d35400;
-    border-color: #d35400;
-    color: white;
-}
-
 /* Section Styles */
 .news-section {
     margin-bottom: 3.5rem;

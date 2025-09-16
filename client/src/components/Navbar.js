@@ -7,6 +7,7 @@ const Navbar = () => {
     const history = useHistory();
     const [isAdmin, setIsAdmin] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isDropdownOpen, setDropdownOpen] = useState(false);
 
     useEffect(() => {
         try {
@@ -41,7 +42,22 @@ const Navbar = () => {
             </button>
             <div className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
                 <Link to="/dashboard">خانه</Link>
-                <Link to="/news">اخبار و مقالات</Link>
+                <div
+                    className="dropdown"
+                    onMouseEnter={() => setDropdownOpen(true)}
+                    onMouseLeave={() => setDropdownOpen(false)}
+                >
+                    <Link to="/news" className="dropdown-toggle">مجله سلامت</Link>
+                    {isDropdownOpen && (
+                        <div className="dropdown-menu">
+                            <Link to="/news?category=بیماری">بیماری</Link>
+                            <Link to="/news?category=آموزشی">آموزشی</Link>
+                            <Link to="/news?category=تغذیه">تغذیه</Link>
+                            <Link to="/news?category=مادر و کودک">مادر و کودک</Link>
+                            <Link to="/news?category=تربیتی">تربیتی</Link>
+                        </div>
+                    )}
+                </div>
                 <Link to="/about">درباره ما</Link>
                 <Link to="/contact">تماس با ما</Link>
                 <Link to="/support">پشتیبانی</Link>
