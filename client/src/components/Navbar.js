@@ -28,11 +28,10 @@ const Navbar = () => {
 
     return (
         <nav className="navbar">
-            {/* Left Section: Profile and Reminders */}
+            {/* Left Section: Brand */}
             <div className="navbar-left">
-                <div className="navbar-profile">
-                    <Reminders />
-                    <Link to="/profile" className="btn btn-profile">پروفایل من</Link>
+                <div className="navbar-brand">
+                    <Link to="/dashboard">رشدیار 👶</Link>
                 </div>
             </div>
 
@@ -44,14 +43,16 @@ const Navbar = () => {
                     <Link to="/about">درباره ما</Link>
                     <Link to="/contact">تماس با ما</Link>
                     <Link to="/support">پشتیبانی</Link>
+                    <Link to="/profile" className="btn btn-profile mobile-only-profile">پروفایل من</Link>
                     {isAdmin && <Link to="/admin" className="admin-link">پنل مدیریت</Link>}
                 </div>
             </div>
 
-            {/* Right Section: Brand and Toggler */}
+            {/* Right Section: Profile, Reminders, and Toggler */}
             <div className="navbar-right">
-                <div className="navbar-brand">
-                    <Link to="/dashboard">رشدیار 👶</Link>
+                <div className="navbar-profile">
+                    <Reminders />
+                    <Link to="/profile" className="btn btn-profile desktop-only-profile">پروفایل من</Link>
                 </div>
                 <button className="navbar-toggler" type="button" onClick={toggleMenu}>
                     &#9776;

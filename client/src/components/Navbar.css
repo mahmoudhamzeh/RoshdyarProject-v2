@@ -35,87 +35,75 @@ body, .navbar{
   top: 0;
   z-index: 1000;
 }
-/* New Flexbox Layout for Desktop */
+/* Desktop First Layout */
 .navbar-left, .navbar-center, .navbar-right {
   display: flex;
   align-items: center;
 }
+.navbar-left { flex: 1; justify-content: flex-start; }
+.navbar-center { flex: 2; justify-content: center; }
+.navbar-right { flex: 1; justify-content: flex-end; }
 
-.navbar-left {
-  flex: 1;
-  justify-content: flex-start;
+.navbar-brand a {
+  color: #fff; text-decoration: none;
+  font-weight: 700; font-size: 1.375rem; white-space: nowrap;
 }
 
-.navbar-center {
-  flex: 2; /* Give more space to the center links */
-  justify-content: center;
+.navbar-links {
+  display: flex; align-items: center; gap: .75rem;
 }
-
-.navbar-right {
-  flex: 1;
-  justify-content: flex-end;
+.navbar-links a {
+  color: #fff; text-decoration: none;
+  padding: .4rem .6rem; border-radius: .5rem;
+  font-weight: 500; line-height: 1.4; white-space: nowrap;
 }
+.navbar-links a:hover { background-color: rgba(255,255,255,.12); }
 
-.navbar-brand a{
-  color:#fff; text-decoration:none;
-  font-weight:700; font-size:1.375rem; white-space:nowrap;
+.navbar-profile { display: flex; align-items: center; gap: .5rem; }
+.navbar-profile span { font-size: 1.25rem; cursor: pointer; line-height: 1; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .4rem; padding: .5rem .9rem; font-size: 1rem;
+  line-height: 1.5; border-radius: .5rem; cursor: pointer;
+  border: 1px solid #fff; background: transparent; color: #fff;
+  white-space: nowrap; text-decoration: none;
 }
+.btn:focus { outline: 2px solid rgba(255,255,255,.6); outline-offset: 2px; }
 
-/* Links */
-.navbar-links{
-  display:flex; align-items:center; gap:.75rem;
-}
-.navbar-links a{
-  color:#fff; text-decoration:none;
-  padding:.4rem .6rem; border-radius:.5rem;
-  font-weight:500; line-height:1.4; white-space:nowrap;
-}
-.navbar-links a:hover{ background-color:rgba(255,255,255,.12) }
+/* --- Responsive Profile Links --- */
+.mobile-only-profile { display: none; } /* Hidden on desktop */
+.desktop-only-profile { display: inline-flex; } /* Visible on desktop */
 
-/* Profile/Buttons */
-.navbar-profile{ display:flex; align-items:center; gap:.5rem }
-.navbar-profile span{ font-size:1.25rem; cursor:pointer; line-height:1 } /* Bell icon */
-
-.btn{
-  display:inline-flex; align-items:center; justify-content:center;
-  gap:.4rem;
-  padding:.5rem .9rem;
-  font-size:1rem; line-height:1.5;
-  border-radius:.5rem; cursor:pointer;
-  border:1px solid #fff; background:transparent; color:#fff;
-  white-space:nowrap; text-decoration:none;
-}
-.btn:focus{ outline:2px solid rgba(255,255,255,.6); outline-offset:2px }
-.btn-logout{ background-color:var(--danger); border-color:var(--danger) }
-
-/* Toggler is hidden on desktop */
+/* --- Toggler --- */
 .navbar-toggler {
-  display: none;
-  font-size: 1.5rem;
-  background: transparent;
-  border: none;
-  color: white;
-  cursor: pointer;
+  display: none; /* Hidden on desktop */
+  font-size: 1.5rem; background: transparent;
+  border: none; color: white; cursor: pointer;
 }
 
-/* Responsive (Mobile View) */
+/* --- Mobile View --- */
 @media (max-width: 768px) {
-  .navbar {
-    /* space-between is better for mobile to push items to edges */
-    justify-content: space-between;
+  /* Hide desktop-specific elements */
+  .navbar-center { display: none; }
+  .desktop-only-profile { display: none; }
+
+  /* Show mobile-specific elements */
+  .navbar-toggler { display: block; }
+  .mobile-only-profile {
+    display: flex;
+    width: calc(100% - 2rem);
+    margin: .5rem 1rem;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.1);
   }
 
-  /* Hide the desktop links */
-  .navbar-center {
-    display: none;
-  }
-
-  /* Style the mobile dropdown menu */
+  /* Full-width dropdown menu */
   .navbar-links {
     display: none; /* Hidden by default */
     flex-direction: column;
     position: absolute;
-    top: 100%; /* Position below the navbar */
+    top: 100%;
     left: 0;
     width: 100%;
     background-color: var(--primary);
@@ -123,41 +111,10 @@ body, .navbar{
     padding: .5rem 0;
     z-index: 999;
   }
-
-  /* This class is toggled by JS to show the menu */
   .navbar-links.active {
-    display: flex;
+    display: flex; /* Show when toggled */
   }
 
-  /* Show the hamburger toggler */
-  .navbar-toggler {
-    display: block;
-  }
-
-  /* Make sure profile button is visible */
-  .navbar-profile .btn-profile {
-    display: inline-flex;
-  }
-
-  /* Adjust bell icon size */
-  .navbar-profile span {
-    font-size: 1.5rem;
-  }
-
-  /* The user wants the brand/logo in the center on mobile */
-  .navbar-right .navbar-brand {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  /* The toggler should be on the right */
-  .navbar-right {
-    order: 3; /* Push to the far right */
-  }
-
-  /* The profile/reminders should be on the left */
-  .navbar-left {
-    order: 1;
-  }
+  /* Ensure profile icon (bell) is a good size */
+  .navbar-profile span { font-size: 1.5rem; }
 }
