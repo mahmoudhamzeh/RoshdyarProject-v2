@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import "~normalize.css/normalize.css";
 @import "~react-datepicker/dist/react-datepicker.css";
 
