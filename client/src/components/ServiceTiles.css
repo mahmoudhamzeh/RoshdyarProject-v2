@@ -48,14 +48,8 @@
         gap: 0.8rem;
     }
     .tile {
-        /*
-         Allow tiles to grow and shrink, with a preferred base size.
-         On a typical mobile screen (e.g., 360px wide), this allows
-         for two tiles to sit side-by-side comfortably.
-        */
         flex-basis: calc(50% - 1rem); /* 2 items per row with gap */
-        height: auto; /* Auto height for content */
-        min-height: 110px;
+        height: 120px; /* Set a fixed height to ensure uniformity */
         padding: 0.8rem 0.5rem;
     }
     .tile-icon {
