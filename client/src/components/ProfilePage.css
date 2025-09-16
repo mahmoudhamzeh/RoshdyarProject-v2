@@ -140,6 +140,33 @@
     margin-bottom: 15px;
 }
 
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    .profile-layout {
+        flex-direction: column;
+        margin: 10px;
+        gap: 10px;
+    }
+    .profile-sidebar {
+        flex-basis: auto; /* Let it take the width it needs */
+        display: flex;
+        flex-wrap: wrap;
+        padding: 5px;
+    }
+    .profile-sidebar button {
+        flex-grow: 1; /* Allow buttons to grow and fill space */
+        border-radius: 5px;
+        margin: 5px;
+        border: 1px solid #eee;
+        justify-content: center;
+        text-align: center;
+    }
+    .info-grid {
+        grid-template-columns: 1fr; /* Stack grid items */
+        gap: 10px;
+    }
+}
+
 .generate-reminders-btn {
     margin-top: 15px;
     background-color: #ffc107 !important; /* Different color to stand out */

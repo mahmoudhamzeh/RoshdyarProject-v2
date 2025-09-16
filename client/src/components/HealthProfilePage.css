@@ -153,3 +153,26 @@
     margin-bottom: 0;
     padding-bottom: 0;
 }
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    .health-profile-page {
+        padding: 0.5rem;
+    }
+    .profile-header {
+        padding: 1rem;
+    }
+    .profile-header-info h2 {
+        font-size: 1.5rem;
+    }
+    .profile-content-container {
+        flex-direction: column;
+    }
+    .main-info-card-large, .side-cards-container {
+        flex-basis: auto; /* Reset flex-basis */
+    }
+    .side-cards-container {
+        /* This will show 2 columns if space allows, or wrap to 1 */
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}

@@ -27,9 +27,10 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="navbar">
-            {/* Left Section: Brand */}
-            <div className="navbar-left">
+        <>
+            <nav className="navbar">
+                {/* Left Section: Brand */}
+                <div className="navbar-left">
                 <div className="navbar-brand">
                     <Link to="/dashboard">رشدیار 👶</Link>
                 </div>
@@ -59,6 +60,8 @@ const Navbar = () => {
                 </button>
             </div>
         </nav>
+        {isMenuOpen && <div className="menu-backdrop" onClick={toggleMenu}></div>}
+        </>
     );
 };
 
