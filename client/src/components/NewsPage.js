@@ -39,6 +39,8 @@ const NewsPage = () => {
         selectedCategory === 'همه' || article.category === selectedCategory
     );
 
+    const featuredArticle = filteredArticles.length > 0 ? filteredArticles[0] : null;
+    const otherArticles = filteredArticles.slice(1);
     const parentingArticles = articles.filter(article => article.category === 'تربیتی');
 
     return (
@@ -46,8 +48,8 @@ const NewsPage = () => {
             <Navbar />
             <main className="news-page-container">
                 <header className="news-page-header">
-                    <h1>اخبار و مقالات</h1>
-                    <p>آخرین اخبار و مقالات آموزشی را در اینجا بیابید.</p>
+                    <h1>مجله سلامت رشد‌یار</h1>
+                    <p>جدیدترین مقالات، ویدیوها و توصیه‌های تخصصی برای والدین</p>
                 </header>
 
                 <nav className="category-nav">
@@ -63,17 +65,32 @@ const NewsPage = () => {
                      <a href="/" className="category-btn roshdyar-btn">رشد یار</a>
                 </nav>
 
+                {loading && <p>در حال بارگذاری...</p>}
+                {error && <p className="error-message">{error}</p>}
+
+                {featuredArticle && selectedCategory === 'همه' && (
+                    <section className="featured-article-section">
+                        <Link to={`/news/${featuredArticle.id}`} className="featured-article-card">
+                            <img src={featuredArticle.imageUrl ? `http://localhost:5000${featuredArticle.imageUrl}` : 'https://placehold.co/600x400/3498db/FFFFFF?text=مقاله+ویژه'} alt={featuredArticle.title} />
+                            <div className="featured-article-content">
+                                <span className="featured-badge">مقاله ویژه</span>
+                                <h3>{featuredArticle.title}</h3>
+                                <p>{featuredArticle.summary}</p>
+                            </div>
+                        </Link>
+                    </section>
+                )}
+
                 <section className="news-section">
-                    <h2>{selectedCategory === 'همه' ? 'جدیدترین مقالات' : `مقالات دسته ${selectedCategory}`}</h2>
+                     <h2>{selectedCategory === 'همه' ? 'آخرین مقالات' : `مقالات دسته ${selectedCategory}`}</h2>
                     <div className="articles-grid">
-                        {loading && <p>در حال بارگذاری...</p>}
-                        {error && <p className="error-message">{error}</p>}
-                        {filteredArticles.map(article => (
+                        {(selectedCategory === 'همه' ? otherArticles : filteredArticles).map(article => (
                             <Link to={`/news/${article.id}`} key={article.id} className="article-card">
                                 <img src={article.imageUrl ? `http://localhost:5000${article.imageUrl}` : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
                                 <div className="article-card-content">
                                     <h3>{article.title}</h3>
-                                    <p>{article.summary}</p>
+                                     <p className="article-category-badge">{article.category}</p>
+                                    <p className="article-summary">{article.summary}</p>
                                     <span className="read-more">ادامه مطلب...</span>
                                 </div>
                             </Link>
@@ -81,36 +98,42 @@ const NewsPage = () => {
                     </div>
                 </section>
 
-                <section className="news-section">
-                    <h2>موضوعات تربیتی</h2>
-                    <div className="articles-grid">
-                        {parentingArticles.length > 0 ? parentingArticles.map(article => (
-                            <Link to={`/news/${article.id}`} key={article.id} className="article-card">
-                                <img src={article.imageUrl ? `http://localhost:5000${article.imageUrl}` : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
-                                <div className="article-card-content">
-                                    <h3>{article.title}</h3>
-                                    <p>{article.summary}</p>
-                                    <span className="read-more">ادامه مطلب...</span>
-                                </div>
-                            </Link>
-                        )) : <p>مقاله‌ای در این دسته یافت نشد.</p>}
-                    </div>
-                </section>
+                {parentingArticles.length > 0 && selectedCategory === 'همه' && (
+                    <section className="news-section">
+                        <h2>موضوعات تربیتی</h2>
+                        <div className="articles-grid">
+                            {parentingArticles.map(article => (
+                                <Link to={`/news/${article.id}`} key={article.id} className="article-card">
+                                    <img src={article.imageUrl ? `http://localhost:5000${article.imageUrl}` : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
+                                    <div className="article-card-content">
+                                        <h3>{article.title}</h3>
+                                        <p className="article-category-badge">{article.category}</p>
+                                        <p className="article-summary">{article.summary}</p>
+                                        <span className="read-more">ادامه مطلب...</span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
-                <section className="news-section">
-                    <h2>ویدیوهای آموزشی</h2>
-                    <div className="videos-grid">
-                         {videos.map(video => (
-                            <a href={video.url} key={video.id} target="_blank" rel="noopener noreferrer" className="video-card">
-                                <div className="video-card-content">
-                                    <h3>{video.title}</h3>
-                                    <p>{video.summary}</p>
-                                    <span className="watch-video">مشاهده ویدیو</span>
-                                </div>
-                            </a>
-                        ))}
-                    </div>
-                </section>
+
+                {videos.length > 0 && (
+                    <section className="news-section">
+                        <h2>ویدیوهای آموزشی</h2>
+                        <div className="videos-grid">
+                             {videos.map(video => (
+                                <a href={video.url} key={video.id} target="_blank" rel="noopener noreferrer" className="video-card">
+                                    <div className="video-play-icon">▶</div>
+                                    <div className="video-card-content">
+                                        <h3>{video.title}</h3>
+                                        <p>{video.summary}</p>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
             </main>
             <Footer />
