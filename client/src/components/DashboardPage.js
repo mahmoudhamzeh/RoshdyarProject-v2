@@ -63,7 +63,7 @@ const DashboardPage = () => {
                 <AppCarousel slides={banners} />
                 <ServiceTiles />
 
-                <ContentRow title="ویدیوهای آموزشی و تربیتی" items={mockVideos} />
+                <ContentRow title="ویدیوهای آموزشی و تربیتی" items={mockVideos} scrollable={true} />
                 <ContentRow title="جدیدترین مقالات" items={articles} viewAllLink="/news" />
             </main>
             <Footer />
