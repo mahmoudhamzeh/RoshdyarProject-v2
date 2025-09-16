@@ -39,3 +39,18 @@
     text-align: right;
     color: #333;
 }
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    .article-detail-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    .article-detail-header h1 {
+        font-size: 1.8rem;
+    }
+    .article-detail-content {
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+}

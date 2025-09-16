@@ -226,3 +226,35 @@
 .custom-legend li > *:last-child {
     margin-right: 0;
 }
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    .growth-chart-page {
+        padding: 0.5rem;
+    }
+    .page-nav-final {
+        margin: -0.5rem -0.5rem 1rem -0.5rem;
+        padding: 0.5rem 1rem;
+    }
+    .page-title {
+        font-size: 1.2rem;
+    }
+    .chart-info-boxes {
+        flex-direction: column; /* Stack info boxes */
+        gap: 0.8rem;
+    }
+    .info-box {
+        flex-basis: auto; /* Allow boxes to take full width */
+    }
+    .chart-section {
+        padding: 0.8rem;
+    }
+    /* Reduce font size inside charts to prevent overlap */
+    .recharts-text {
+        font-size: 0.8em;
+    }
+    .custom-legend {
+        flex-wrap: wrap; /* Allow legend items to wrap */
+        font-size: 0.9em;
+    }
+}

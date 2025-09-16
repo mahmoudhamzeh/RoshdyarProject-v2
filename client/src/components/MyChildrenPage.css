@@ -101,3 +101,38 @@
     background-color: #007bff;
     color: #fff;
 }
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    .page-nav-final {
+        padding: 0.5rem 1rem;
+    }
+    .page-nav-final h1 {
+        font-size: 1.2rem;
+    }
+    .home-btn-final span {
+        display: none; /* Hide text on mobile, icon is enough */
+    }
+    .home-btn-final {
+        flex-basis: auto; /* Let it shrink */
+    }
+    .nav-placeholder {
+        flex-basis: auto;
+    }
+    .children-content-final {
+        margin: 1rem;
+        padding: 0;
+    }
+    .child-card-final {
+        grid-template-columns: 1fr; /* A single column */
+        gap: 1rem;
+        text-align: center;
+    }
+    .child-avatar-final {
+        margin: 0 auto; /* Center the avatar */
+    }
+    .child-card-actions {
+        flex-direction: column; /* Stack buttons vertically */
+        align-items: stretch; /* Make buttons full-width */
+    }
+}

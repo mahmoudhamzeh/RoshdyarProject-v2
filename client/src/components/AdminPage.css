@@ -49,3 +49,32 @@
     padding: 2rem;
     background-color: #ecf0f1;
 }
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    .admin-page-container {
+        flex-direction: column;
+    }
+    .admin-sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
+    .admin-sidebar-header {
+        display: none; /* Hide header on mobile for more space */
+    }
+    .admin-nav {
+        flex-direction: row;
+        overflow-x: auto; /* Allow horizontal scrolling for nav items */
+        padding-bottom: 10px; /* For scrollbar */
+    }
+    .admin-nav a {
+        white-space: nowrap; /* Prevent nav items from wrapping */
+        margin-bottom: 0;
+        margin-left: 10px;
+    }
+    .admin-main-content {
+        margin-right: 0;
+        padding: 1rem;
+    }
+}
