@@ -1,0 +1,10 @@
+# Log files
+*.log
+/client/client/
+/uploads/
+/server/uploads/
+
+# dependencies
+/node_modules/
+/client/node_modules/
+/server/node_modules/
