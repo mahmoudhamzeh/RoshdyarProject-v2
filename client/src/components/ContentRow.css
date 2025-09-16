@@ -37,6 +37,7 @@
   transition: transform 0.3s;
   display: flex;
   flex-direction: column;
+  min-height: 250px; /* Set a minimum height for all cards */
 }
 
 .content-card:hover {
@@ -99,11 +100,23 @@
 
 @media (min-width: 769px) {
   .content-row {
-    flex-wrap: wrap; /* Allow wrapping on larger screens */
+    flex-wrap: wrap; /* Default behavior: wrap on larger screens */
     justify-content: center; /* Center the items */
   }
   .content-card {
-    flex: 1 1 280px; /* Allow cards to grow and shrink */
+    flex: 1 1 280px; /* Default behavior: cards grow and shrink */
     max-width: 320px; /* Set a max-width for consistency */
+  }
+
+  /* Scrollable variant for desktop */
+  .content-row.scrollable {
+    flex-wrap: nowrap; /* Prevent wrapping */
+    overflow-x: auto; /* Enable horizontal scroll */
+    justify-content: flex-start; /* Align to the start */
+    padding-bottom: 1rem; /* Space for scrollbar */
+  }
+
+  .content-row.scrollable .content-card {
+    flex: 0 0 280px; /* Give scrollable cards a fixed width */
   }
 }

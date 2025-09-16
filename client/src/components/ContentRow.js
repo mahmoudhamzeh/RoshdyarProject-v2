@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './ContentRow.css';
 
-const ContentRow = ({ title, items, viewAllLink }) => {
+const ContentRow = ({ title, items, viewAllLink, scrollable = false }) => {
     const renderItem = (item) => {
         const card = (
             <div className="content-card">
@@ -30,7 +30,7 @@ const ContentRow = ({ title, items, viewAllLink }) => {
                 <h3>{title}</h3>
                 {viewAllLink && <Link to={viewAllLink} className="view-all-link">نمایش همه</Link>}
             </div>
-            <div className="content-row">
+            <div className={`content-row ${scrollable ? 'scrollable' : ''}`}>
                 {items.map(renderItem)}
             </div>
         </div>

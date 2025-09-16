@@ -40,7 +40,7 @@
     color: #333;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) { /* Increased breakpoint to cover tablets */
     .reminders-dropdown {
         position: fixed; /* Change to fixed for viewport positioning */
         top: 50%;
