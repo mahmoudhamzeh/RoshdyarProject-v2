@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import './LoginPage.css';
 
 const LoginPage = () => {
     const history = useHistory();
@@ -21,6 +22,7 @@ const LoginPage = () => {
 
             const data = await response.json();
 
+            // **تغییر اصلی اینجاست**
             if (response.status === 200) {
                 localStorage.setItem('loggedInUser', JSON.stringify(data.user));
                 history.push('/dashboard');
@@ -54,38 +56,15 @@ const LoginPage = () => {
         }
     };
 
+    // The rest of the component remains the same...
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg text-center">
-                <h2 className="text-2xl font-bold text-gray-900">ورود به حساب</h2>
-                <input
-                    type="text"
-                    value={loginInput}
-                    onChange={e => setLoginInput(e.target.value)}
-                    placeholder="ایمیل یا شماره موبایل"
-                    className="w-full px-4 py-2 text-gray-900 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                    type="password"
-                    value={passwordInput}
-                    onChange={e => setPasswordInput(e.target.value)}
-                    placeholder="رمز عبور"
-                    className="w-full px-4 py-2 text-gray-900 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                    onClick={handleLogin}
-                    className="w-full px-4 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                >
-                    ورود
-                </button>
-                <button
-                    onClick={handleSignup}
-                    className="w-full px-4 py-2 font-bold text-white bg-green-500 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                >
-                    ثبت‌نام
-                </button>
-                {loginMessage && <p className="text-red-500">{loginMessage}</p>}
-            </div>
+        <div className="login-container">
+            <h2>ورود به حساب</h2>
+            <input type="text" value={loginInput} onChange={e => setLoginInput(e.target.value)} placeholder="ایمیل یا شماره موبایل" />
+            <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="رمز عبور" />
+            <button onClick={handleLogin}>ورود</button>
+            <button onClick={handleSignup} style={{backgroundColor: '#4CAF50', marginTop: '10px'}}>ثبت‌نام</button>
+            {loginMessage && <p style={{color: 'red'}}>{loginMessage}</p>}
         </div>
     );
 };
