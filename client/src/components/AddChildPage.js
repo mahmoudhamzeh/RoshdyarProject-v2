@@ -139,7 +139,7 @@ const AddChildPage = () => {
 
             // Step 4: Final success message and navigation
             alert('کودک و مدارک با موفقیت اضافه شدند!');
-            history.push('/my-children');
+            window.location.href = '/my-children'; // Force a full page reload to get fresh data
 
         } catch (error) {
             alert(error.message);
