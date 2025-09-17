@@ -25,16 +25,14 @@
 }
 
 .reminders-dropdown {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0; /* Changed from left: 0 */
+    /* Most positioning is now handled by JavaScript */
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.15);
     width: 350px;
     max-height: 450px;
     overflow: hidden;
-    z-index: 1000;
+    z-index: 2010; /* Ensure it's on top of other elements */
     display: flex;
     flex-direction: column;
     color: #333;
@@ -48,6 +46,8 @@
         transform: translate(-50%, -50%); /* Center the modal */
         width: 90%;
         max-width: 400px; /* Ensure it doesn't get too wide */
+        max-height: 80vh; /* Prevent modal from being taller than viewport */
+        overflow-y: auto; /* Allow scrolling within the modal if content overflows */
     }
 }
 
