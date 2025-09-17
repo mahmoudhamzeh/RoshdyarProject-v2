@@ -86,6 +86,14 @@ const AddChildPage = () => {
         setIsSubmitting(true);
 
         try {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (!loggedInUser || !loggedInUser.id) {
+                alert('لطفا برای افزودن کودک ابتدا وارد شوید.');
+                history.push('/login');
+                setIsSubmitting(false);
+                return;
+            }
+
             // Step 1: Upload avatar
             let avatarPath = '';
             if (avatarFile) {
@@ -101,6 +109,7 @@ const AddChildPage = () => {
             const formattedBirthDate = format(birthDate, 'yyyy/MM/dd');
             const childData = {
                 ...formData,
+                userId: loggedInUser.id,
                 birthDate: formattedBirthDate,
                 avatar: avatarPath,
                 documents: [] // Initialize with empty array
