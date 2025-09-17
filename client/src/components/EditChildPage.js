@@ -35,6 +35,13 @@ const EditChildPage = () => {
                 data.special_illnesses = data.special_illnesses || { types: {}, description: '' };
                 data.special_illnesses.types = data.special_illnesses.types || {};
 
+                // If the child object has a 'name' but not 'firstName', parse it
+                if (data.name && !data.firstName) {
+                    const nameParts = data.name.split(' ');
+                    data.firstName = nameParts[0];
+                    data.lastName = nameParts.slice(1).join(' ');
+                }
+
                 setFormData(data);
                 if (data.birthDate) setBirthDate(parseISO(data.birthDate.replace(/\//g, '-')));
                 if (data.avatar) setPreview(data.avatar.startsWith('/uploads') ? `http://localhost:5000${data.avatar}` : data.avatar);
