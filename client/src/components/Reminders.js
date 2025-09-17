@@ -10,8 +10,42 @@ const Reminders = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeChildId, setActiveChildId] = useState(null);
-    const dropdownRef = useRef(null); // Create a ref for the dropdown
-    const location = useLocation(); // Get location object
+    const widgetRef = useRef(null);
+    const bellRef = useRef(null);
+    const dropdownMenuRef = useRef(null);
+    const location = useLocation();
+
+    // This effect handles the dynamic positioning of the dropdown on desktop
+    useEffect(() => {
+        if (isOpen && bellRef.current && dropdownMenuRef.current) {
+            // We only apply JS positioning for screens wider than 1024px
+            if (window.innerWidth > 1024) {
+                const bellRect = bellRef.current.getBoundingClientRect();
+                const menuNode = dropdownMenuRef.current;
+
+                // Position dropdown vertically below the bell icon
+                menuNode.style.top = `${bellRect.bottom + 10}px`;
+
+                // Position dropdown horizontally. Align its right edge with the bell's right edge.
+                const menuWidth = 350; // As defined in CSS
+                menuNode.style.left = `${bellRect.right - menuWidth}px`;
+
+                // Ensure it doesn't go off the left side of the screen
+                if ((bellRect.right - menuWidth) < 10) {
+                    menuNode.style.left = '10px';
+                }
+
+                // We need to use fixed position to escape the navbar's overflow context
+                menuNode.style.position = 'fixed';
+            } else {
+                // On mobile, reset styles to let CSS handle the centered modal
+                const menuNode = dropdownMenuRef.current;
+                menuNode.style.position = '';
+                menuNode.style.top = '';
+                menuNode.style.left = '';
+            }
+        }
+    }, [isOpen]);
 
     const fetchReminders = useCallback(async (childId) => {
         if (!childId) {
@@ -70,7 +104,7 @@ const Reminders = () => {
     // Effect for handling clicks outside the dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            if (widgetRef.current && !widgetRef.current.contains(event.target)) {
                 setIsOpen(false);
             }
         };
@@ -124,13 +158,13 @@ const Reminders = () => {
     };
 
     return (
-        <div className="reminders-widget" ref={dropdownRef}>
-            <button className="reminders-bell" onClick={() => setIsOpen(!isOpen)}>
+        <div className="reminders-widget" ref={widgetRef}>
+            <button className="reminders-bell" onClick={() => setIsOpen(!isOpen)} ref={bellRef}>
                 <FontAwesomeIcon icon={faBell} />
                 {reminders.length > 0 && <span className="reminder-count">{reminders.length}</span>}
             </button>
             {isOpen && (
-                <div className="reminders-dropdown">
+                <div className="reminders-dropdown" ref={dropdownMenuRef}>
                     <div className="reminders-header">
                         <h4>یادآورها</h4>
                         <button className="add-reminder-btn" title="افزودن یادآور جدید" onClick={() => setIsModalOpen(true)}>
