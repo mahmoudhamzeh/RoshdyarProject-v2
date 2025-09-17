@@ -72,7 +72,6 @@ const MyChildrenPage = () => {
                     <span>صفحه اصلی</span>
                 </button>
                 <h1>کودکان من</h1>
-                <div className="nav-placeholder"></div>
             </nav>
             <div className="children-content-final">
                 <button onClick={() => history.push('/add-child')} className="add-child-btn-final">+ افزودن کودک جدید</button>
