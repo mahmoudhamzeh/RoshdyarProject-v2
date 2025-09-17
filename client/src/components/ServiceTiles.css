@@ -14,7 +14,9 @@
 
 .tile {
     background-color: white;
+    width: 150px; /* Set a fixed width */
     flex-basis: 150px; /* Use flex-basis for initial size */
+    flex-shrink: 0; /* Prevent shrinking */
     height: 120px;
     border-radius: 12px;
     display: flex;
