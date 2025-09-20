@@ -1,23 +1,17 @@
 .children-page-final { background-color: #f8f9fa; min-height: 100vh; }
-.page-nav-final {
-    display: flex;
-    justify-content: center; /* Center the title */
-    align-items: center;
-    padding: 0.8rem 1.5rem;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    position: relative; /* Needed for absolute positioning of the button */
-}
-
+.page-nav-final { display: flex; align-items: center; padding: 0.8rem 1.5rem; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 .page-nav-final h1 {
+    flex: 1; /* Allow title to take up available space */
+    text-align: center;
     margin: 0;
     font-size: 1.4rem;
     color: #343a40;
 }
+.nav-placeholder { flex-basis: 120px; /* Match width of the button */ }
 
 .home-btn-final {
-    position: absolute; /* Position it relative to the nav bar */
-    right: 1.5rem; /* Position on the right for RTL layout */
+    flex-basis: 120px; /* Give it a base width */
+    justify-content: flex-start;
     background: none;
     border: none;
     cursor: pointer;

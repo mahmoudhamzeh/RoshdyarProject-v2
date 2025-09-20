@@ -30,8 +30,7 @@
       "gestationalAge": 40,
       "birthPlace": "بیمارستان آرش",
       "apgar1": 9,
-      "apgar5": 10,
-      "vaccinationRecords": {}
+      "apgar5": 10
     },
     {
       "id": 2,
@@ -43,8 +42,7 @@
       "weight": "3",
       "bloodType": "A+",
       "allergies": "",
-      "special_illnesses": "",
-      "vaccinationRecords": {}
+      "special_illnesses": ""
     },
     {
       "id": 3,
@@ -72,8 +70,7 @@
           "سایر": false
         },
         "description": "تست"
-      },
-      "vaccinationRecords": {}
+      }
     },
     {
       "id": 5,
@@ -101,8 +98,7 @@
           "سایر": true
         },
         "description": ""
-      },
-      "vaccinationRecords": {}
+      }
     },
     {
       "id": 6,
@@ -130,336 +126,7 @@
           "سایر": false
         },
         "description": "تست"
-      },
-      "vaccinationRecords": {}
-    },
-    {
-      "id": 7,
-      "userId": 1,
-      "name": "Zoe Test",
-      "gender": "boy",
-      "birthDate": "2025/09/17",
-      "avatar": "https://i.pravatar.cc/100",
-      "nationalId": "",
-      "fatherName": "",
-      "birthWeight": "",
-      "birthHeight": "",
-      "birthHeadCircumference": "",
-      "birthType": "natural",
-      "gestationalAge": "",
-      "birthPlace": "",
-      "apgar1": "",
-      "apgar5": "",
-      "height": "",
-      "weight": "",
-      "bloodType": "A+",
-      "allergies": {
-        "types": {
-          "غذایی": false,
-          "دارویی": false,
-          "محیطی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "special_illnesses": {
-        "types": {
-          "مزمن": false,
-          "ژنتیکی": false,
-          "تکاملی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "documents": [],
-      "vaccinationRecords": {}
-    },
-    {
-      "id": 8,
-      "userId": 1,
-      "name": "Zoe Test",
-      "gender": "boy",
-      "birthDate": "2025/09/17",
-      "avatar": "https://i.pravatar.cc/100",
-      "nationalId": "",
-      "fatherName": "",
-      "birthWeight": "",
-      "birthHeight": "",
-      "birthHeadCircumference": "",
-      "birthType": "natural",
-      "gestationalAge": "",
-      "birthPlace": "",
-      "apgar1": "",
-      "apgar5": "",
-      "height": "",
-      "weight": "",
-      "bloodType": "A+",
-      "allergies": {
-        "types": {
-          "غذایی": false,
-          "دارویی": false,
-          "محیطی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "special_illnesses": {
-        "types": {
-          "مزمن": false,
-          "ژنتیکی": false,
-          "تکاملی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "documents": [],
-      "vaccinationRecords": {}
-    },
-    {
-      "id": 9,
-      "userId": 1,
-      "name": "Final Verification",
-      "gender": "boy",
-      "birthDate": "2025/09/17",
-      "avatar": "https://i.pravatar.cc/100",
-      "nationalId": "",
-      "fatherName": "",
-      "birthWeight": "",
-      "birthHeight": "",
-      "birthHeadCircumference": "",
-      "birthType": "natural",
-      "gestationalAge": "",
-      "birthPlace": "",
-      "apgar1": "",
-      "apgar5": "",
-      "height": "",
-      "weight": "",
-      "bloodType": "A+",
-      "allergies": {
-        "types": {
-          "غذایی": false,
-          "دارویی": false,
-          "محیطی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "special_illnesses": {
-        "types": {
-          "مزمن": false,
-          "ژنتیکی": false,
-          "تکاملی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "documents": [],
-      "vaccinationRecords": {}
-    },
-    {
-      "id": 10,
-      "userId": 1,
-      "name": "Final Verification",
-      "gender": "boy",
-      "birthDate": "2025/09/17",
-      "avatar": "https://i.pravatar.cc/100",
-      "nationalId": "",
-      "fatherName": "",
-      "birthWeight": "",
-      "birthHeight": "",
-      "birthHeadCircumference": "",
-      "birthType": "natural",
-      "gestationalAge": "",
-      "birthPlace": "",
-      "apgar1": "",
-      "apgar5": "",
-      "height": "",
-      "weight": "",
-      "bloodType": "A+",
-      "allergies": {
-        "types": {
-          "غذایی": false,
-          "دارویی": false,
-          "محیطی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "special_illnesses": {
-        "types": {
-          "مزمن": false,
-          "ژنتیکی": false,
-          "تکاملی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "documents": [],
-      "vaccinationRecords": {}
-    },
-    {
-      "id": 11,
-      "userId": 1,
-      "name": "Final Verification",
-      "gender": "boy",
-      "birthDate": "2025/09/17",
-      "avatar": "https://i.pravatar.cc/100",
-      "nationalId": "",
-      "fatherName": "",
-      "birthWeight": "",
-      "birthHeight": "",
-      "birthHeadCircumference": "",
-      "birthType": "natural",
-      "gestationalAge": "",
-      "birthPlace": "",
-      "apgar1": "",
-      "apgar5": "",
-      "height": "",
-      "weight": "",
-      "bloodType": "A+",
-      "allergies": {
-        "types": {
-          "غذایی": false,
-          "دارویی": false,
-          "محیطی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "special_illnesses": {
-        "types": {
-          "مزمن": false,
-          "ژنتیکی": false,
-          "تکاملی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "documents": [],
-      "vaccinationRecords": {}
-    },
-    {
-      "id": 12,
-      "userId": 1,
-      "name": "TestChild1758104483 Last",
-      "gender": "boy",
-      "birthDate": "2025/09/17",
-      "avatar": "https://i.pravatar.cc/100",
-      "nationalId": "",
-      "fatherName": "",
-      "birthWeight": "",
-      "birthHeight": "",
-      "birthHeadCircumference": "",
-      "birthType": "natural",
-      "gestationalAge": "",
-      "birthPlace": "",
-      "apgar1": "",
-      "apgar5": "",
-      "height": "",
-      "weight": "",
-      "bloodType": "A+",
-      "allergies": {
-        "types": {
-          "غذایی": false,
-          "دارویی": false,
-          "محیطی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "special_illnesses": {
-        "types": {
-          "مزمن": false,
-          "ژنتیکی": false,
-          "تکاملی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "documents": [],
-      "vaccinationRecords": {}
-    },
-    {
-      "id": 13,
-      "userId": 1,
-      "name": "TestChild1758104614 Last",
-      "gender": "boy",
-      "birthDate": "2025/09/17",
-      "avatar": "https://i.pravatar.cc/100",
-      "nationalId": "",
-      "fatherName": "",
-      "birthWeight": "",
-      "birthHeight": "",
-      "birthHeadCircumference": "",
-      "birthType": "natural",
-      "gestationalAge": "",
-      "birthPlace": "",
-      "apgar1": "",
-      "apgar5": "",
-      "height": "",
-      "weight": "",
-      "bloodType": "A+",
-      "allergies": {
-        "types": {
-          "غذایی": false,
-          "دارویی": false,
-          "محیطی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "special_illnesses": {
-        "types": {
-          "مزمن": false,
-          "ژنتیکی": false,
-          "تکاملی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "documents": [],
-      "vaccinationRecords": {}
-    },
-    {
-      "id": 14,
-      "userId": 1,
-      "name": "TestChild1758104699 Last",
-      "gender": "boy",
-      "birthDate": "2025/09/17",
-      "avatar": "https://i.pravatar.cc/100",
-      "nationalId": "",
-      "fatherName": "",
-      "birthWeight": "",
-      "birthHeight": "",
-      "birthHeadCircumference": "",
-      "birthType": "natural",
-      "gestationalAge": "",
-      "birthPlace": "",
-      "apgar1": "",
-      "apgar5": "",
-      "height": "",
-      "weight": "",
-      "bloodType": "A+",
-      "allergies": {
-        "types": {
-          "غذایی": false,
-          "دارویی": false,
-          "محیطی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "special_illnesses": {
-        "types": {
-          "مزمن": false,
-          "ژنتیکی": false,
-          "تکاملی": false,
-          "سایر": false
-        },
-        "description": ""
-      },
-      "documents": [],
-      "vaccinationRecords": {}
+      }
     }
   ],
   "growthData": {
@@ -517,15 +184,7 @@
     "2": [],
     "3": [],
     "5": [],
-    "6": [],
-    "7": [],
-    "8": [],
-    "9": [],
-    "10": [],
-    "11": [],
-    "12": [],
-    "13": [],
-    "14": []
+    "6": []
   },
   "medicalDocuments": {
     "1": [],
@@ -533,31 +192,11 @@
     "3": [],
     "4": [],
     "5": [],
-    "6": [],
-    "7": [],
-    "8": [],
-    "9": [],
-    "10": [],
-    "11": [],
-    "12": [],
-    "13": [],
-    "14": []
+    "6": []
   },
-  "checkups": {
-    "7": [],
-    "8": [],
-    "9": [],
-    "10": [],
-    "11": [],
-    "12": [],
-    "13": [],
-    "14": []
-  },
-  "reminders": {},
-  "childIdCounter": 15,
+  "childIdCounter": 7,
   "banners": [],
   "articles": [],
   "news": [],
-  "tickets": [],
-  "videos": []
+  "tickets": []
 }
