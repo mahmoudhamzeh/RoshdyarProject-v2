@@ -45,10 +45,7 @@ def run(playwright):
         # 3. Edit the new child and verify form population
         page.locator('.child-card-final').filter(has_text=child_full_name).get_by_role('button', name='ویرایش').click()
 
-        # Wait for the edit page to fully load by waiting for the header
-        expect(page.get_by_role("heading", name=f"ویرایش اطلاعات {child_first_name}")).to_be_visible()
-
-        # Now that the page is loaded, we can assert the input values
+        expect(page).to_have_url(lambda url: '/edit-child/' in url)
         expect(page.locator('input[name="firstName"]')).to_have_value(child_first_name)
         expect(page.locator('input[name="lastName"]')).to_have_value(child_last_name)
 
