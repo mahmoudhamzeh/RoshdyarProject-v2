@@ -496,7 +496,7 @@ app.post('/api/vaccinate/:childId', (req, res) => {
         child.vaccinationRecords = {};
     }
 
-    const key = `${vaccine.name}-${dose}`;
+    const key = `${vaccineName}-${dose}`;
     child.vaccinationRecords[key] = { done: true, date: date || new Date().toISOString().split('T')[0] };
     saveData();
     res.status(200).json({ message: 'Vaccination record updated' });
@@ -649,6 +649,11 @@ app.post('/api/reminders/manual/:childId', (req, res) => {
     if (!title || !date) {
         return res.status(400).json({ message: 'Title and date are required.' });
     }
+    const childExists = children.some(c => c.id === parseInt(childId));
+    if (!childExists) {
+        return res.status(404).json({ message: 'Child not found' });
+    }
+
 
     if (!reminders[childId]) {
         reminders[childId] = [];
