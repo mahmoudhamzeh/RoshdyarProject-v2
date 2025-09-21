@@ -1,11 +1,18 @@
 # Log files
 *.log
+server.log
+client.log
 
 # Dependencies
 /node_modules/
 /client/node_modules/
 /server/node_modules/
-/client/client/node_modules/
+
+# Cache
+/client/node_modules/.cache/
+
+# Jules scratch
+jules-scratch/
 
 # Uploads
 /uploads/
