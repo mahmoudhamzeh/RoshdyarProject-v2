@@ -7,7 +7,7 @@
     font-size: 1.4rem;
     color: #343a40;
 }
-.nav-placeholder { flex-basis: 120px; /* Match width of the button */ }
+.nav-placeholder { flex-basis: 120px; }
 
 .home-btn-final {
     flex-basis: 120px; /* Give it a base width */
@@ -120,10 +120,11 @@
         display: none; /* Hide text on mobile, icon is enough */
     }
     .home-btn-final {
-        flex-basis: auto; /* Let it shrink */
+        flex: 0 0 50px;
+        justify-content: center; /* Center the icon */
     }
     .nav-placeholder {
-        flex-basis: auto;
+        flex: 0 0 50px;
     }
     .children-content-final {
         margin: 1rem;
