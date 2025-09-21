@@ -38,12 +38,12 @@ const Navbar = () => {
             {/* Center Section: Navigation Links */}
             <div className={`navbar-center ${isMenuOpen ? 'active' : ''}`}>
                 <div className="navbar-links">
-                    <Link to="/dashboard">خانه</Link>
-                    <Link to="/news">اخبار و مقالات</Link>
-                    <Link to="/about">درباره ما</Link>
-                    <Link to="/contact">تماس با ما</Link>
-                    <Link to="/support">پشتیبانی</Link>
-                    <Link to="/profile" className="btn btn-profile mobile-only-profile">پروفایل من</Link>
+                    <Link to={{ pathname: "/news", state: { category: 'بیماری' } }}>بیماری</Link>
+                    <Link to={{ pathname: "/news", state: { category: 'آموزشی' } }}>آموزش</Link>
+                    <Link to={{ pathname: "/news", state: { category: 'تغذیه' } }}>تغذیه</Link>
+                    <Link to={{ pathname: "/news", state: { category: 'مادر و کودک' } }}>مادر و کودک</Link>
+                    <Link to={{ pathname: "/news", state: { category: 'تربیتی' } }}>تربیتی</Link>
+                    <a href="/">رشد یار</a>
                     {isAdmin && <Link to="/admin" className="admin-link">پنل مدیریت</Link>}
                 </div>
             </div>
