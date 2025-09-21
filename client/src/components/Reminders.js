@@ -57,7 +57,12 @@ const Reminders = () => {
             if (res.ok) {
                 const data = await res.json();
                 const seen = getSeenReminders();
-                const freshReminders = data.filter(r => !seen.includes(r.id));
+                const freshReminders = data.filter(r => {
+                    if (r.source === 'auto' && r.type === 'danger') {
+                        return true;
+                    }
+                    return !seen.includes(r.id);
+                });
                 setReminders(freshReminders);
             } else {
                 setReminders([]);
@@ -196,7 +201,7 @@ const Reminders = () => {
 
                                 if (r.link) {
                                     return (
-                                        <Link to={r.link} key={r.id} className="reminder-link" onClick={() => handleDismiss(r)}>
+                                        <Link to={r.link} key={r.id} className="reminder-link">
                                             {reminderContent}
                                         </Link>
                                     );
