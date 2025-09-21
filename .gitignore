@@ -4,6 +4,10 @@
 # Dependencies
 /node_modules/
 /client/node_modules/
+
+# Cache
+.eslintcache
+**/.cache
 /server/node_modules/
 /client/client/node_modules/
 
