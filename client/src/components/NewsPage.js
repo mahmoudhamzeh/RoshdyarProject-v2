@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import './NewsPage.css';
@@ -7,25 +7,37 @@ import './NewsPage.css';
 const NewsPage = () => {
     const [articles, setArticles] = useState([]);
     const [videos, setVideos] = useState([]);
+    const [podcasts, setPodcasts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('همه');
+    const location = useLocation();
 
-    const categories = ['همه', 'بیماری', 'آموزشی', 'تغذیه', 'مادر و کودک', 'تربیتی'];
+    useEffect(() => {
+        if (location.state && location.state.category) {
+            setSelectedCategory(location.state.category);
+        } else {
+            setSelectedCategory('همه');
+        }
+    }, [location]);
 
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
-                const [articlesRes, videosRes] = await Promise.all([
+                const [articlesRes, videosRes, podcastsRes] = await Promise.all([
                     fetch('http://localhost:5000/api/news'),
-                    fetch('http://localhost:5000/api/videos')
+                    fetch('http://localhost:5000/api/videos'),
+                    fetch('http://localhost:5000/api/podcasts')
                 ]);
-                if (!articlesRes.ok || !videosRes.ok) throw new Error('Failed to fetch data');
+                if (!articlesRes.ok || !videosRes.ok || !podcastsRes.ok) throw new Error('Failed to fetch data');
                 const articlesData = await articlesRes.json();
                 const videosData = await videosRes.json();
+                const podcastsData = await podcastsRes.json();
                 setArticles(articlesData);
                 setVideos(videosData);
+                setPodcasts(podcastsData);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -39,9 +51,10 @@ const NewsPage = () => {
         selectedCategory === 'همه' || article.category === selectedCategory
     );
 
-    const featuredArticle = filteredArticles.length > 0 ? filteredArticles[0] : null;
-    const otherArticles = filteredArticles.slice(1);
-    const parentingArticles = articles.filter(article => article.category === 'تربیتی');
+    const puzzleCategories = ['بیماری', 'آموزشی', 'تغذیه', 'مادر و کودک', 'تربیتی'];
+    const puzzleArticles = puzzleCategories.map(category => {
+        return articles.find(article => article.category === category);
+    }).filter(Boolean);
 
     return (
         <div>
@@ -52,89 +65,99 @@ const NewsPage = () => {
                     <p>جدیدترین مقالات، ویدیوها و توصیه‌های تخصصی برای والدین</p>
                 </header>
 
-                <nav className="category-nav">
-                    {categories.map(category => (
-                        <button
-                            key={category}
-                            className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-                            onClick={() => setSelectedCategory(category)}
-                        >
-                            {category}
-                        </button>
-                    ))}
-                     <a href="/" className="category-btn roshdyar-btn">رشد یار</a>
-                </nav>
-
                 {loading && <p>در حال بارگذاری...</p>}
                 {error && <p className="error-message">{error}</p>}
 
-                {featuredArticle && selectedCategory === 'همه' && (
-                    <section className="featured-article-section">
-                        <Link to={`/news/${featuredArticle.id}`} className="featured-article-card">
-                            <img src={featuredArticle.imageUrl ? `http://localhost:5000${featuredArticle.imageUrl}` : 'https://placehold.co/600x400/3498db/FFFFFF?text=مقاله+ویژه'} alt={featuredArticle.title} />
-                            <div className="featured-article-content">
-                                <span className="featured-badge">مقاله ویژه</span>
-                                <h3>{featuredArticle.title}</h3>
-                                <p>{featuredArticle.summary}</p>
-                            </div>
-                        </Link>
-                    </section>
-                )}
-
-                <section className="news-section">
-                     <h2>{selectedCategory === 'همه' ? 'آخرین مقالات' : `مقالات دسته ${selectedCategory}`}</h2>
-                    <div className="articles-grid">
-                        {(selectedCategory === 'همه' ? otherArticles : filteredArticles).map(article => (
-                            <Link to={`/news/${article.id}`} key={article.id} className="article-card">
-                                <img src={article.imageUrl ? `http://localhost:5000${article.imageUrl}` : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
-                                <div className="article-card-content">
-                                    <h3>{article.title}</h3>
-                                     <p className="article-category-badge">{article.category}</p>
-                                    <p className="article-summary">{article.summary}</p>
-                                    <span className="read-more">ادامه مطلب...</span>
+                {!loading && !error && (
+                    <>
+                        {selectedCategory === 'همه' && puzzleArticles.length > 0 && (
+                            <section className="puzzle-section">
+                                <h2>مقالات منتخب</h2>
+                                <div className="puzzle-grid">
+                                    {puzzleArticles.map(article => (
+                                        <Link to={`/news/${article.id}`} key={article.id} className="puzzle-item">
+                                            <img src={article.imageUrl ? `http://localhost:5000${article.imageUrl}` : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
+                                            <div className="puzzle-item-content">
+                                                <span className="puzzle-category-badge">{article.category}</span>
+                                                <h3>{article.title}</h3>
+                                            </div>
+                                        </Link>
+                                    ))}
                                 </div>
-                            </Link>
-                        ))}
-                    </div>
-                </section>
+                            </section>
+                        )}
 
-                {parentingArticles.length > 0 && selectedCategory === 'همه' && (
-                    <section className="news-section">
-                        <h2>موضوعات تربیتی</h2>
-                        <div className="articles-grid">
-                            {parentingArticles.map(article => (
-                                <Link to={`/news/${article.id}`} key={article.id} className="article-card">
-                                    <img src={article.imageUrl ? `http://localhost:5000${article.imageUrl}` : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
-                                    <div className="article-card-content">
-                                        <h3>{article.title}</h3>
-                                        <p className="article-category-badge">{article.category}</p>
-                                        <p className="article-summary">{article.summary}</p>
-                                        <span className="read-more">ادامه مطلب...</span>
+                        {selectedCategory === 'همه' && (
+                            <div className="ad-banner-container">
+                                <div className="ad-banner">بنر تبلیغاتی 1</div>
+                            </div>
+                        )}
+
+                        <div className="main-content-grid">
+                            <div className="main-column">
+                                <section className="news-section">
+                                    <h2>{selectedCategory === 'همه' ? 'جدیدترین مقالات' : `مقالات دسته ${selectedCategory}`}</h2>
+                                    <div className={selectedCategory === 'همه' ? 'articles-list' : 'articles-grid'}>
+                                        {filteredArticles.map(article => (
+                                            <Link to={`/news/${article.id}`} key={article.id} className={selectedCategory === 'همه' ? 'article-list-item' : 'article-card'}>
+                                                <img src={article.imageUrl ? `http://localhost:5000${article.imageUrl}` : 'https://placehold.co/150x100/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
+                                                <div className={selectedCategory === 'همه' ? 'article-list-item-content' : 'article-card-content'}>
+                                                    <h3>{article.title}</h3>
+                                                    {selectedCategory !== 'همه' && <p className="article-category-badge">{article.category}</p>}
+                                                    <p className="article-summary">{article.summary}</p>
+                                                    <span className="read-more">ادامه مطلب...</span>
+                                                </div>
+                                            </Link>
+                                        ))}
                                     </div>
-                                </Link>
-                            ))}
+                                </section>
+                            </div>
+
+                            <aside className="sidebar-column">
+                                {videos.length > 0 && (
+                                    <section className="sidebar-section">
+                                        <h2>ویدیوهای آموزشی</h2>
+                                        <div className="videos-list">
+                                            {videos.map(video => (
+                                                <a href={video.url} key={video.id} target="_blank" rel="noopener noreferrer" className="video-card">
+                                                    <img src={video.thumbnailUrl ? `http://localhost:5000${video.thumbnailUrl}` : 'https://placehold.co/300x200/3498db/FFFFFF?text=ویدیو'} alt={video.title} />
+                                                    <div className="video-play-icon">▶</div>
+                                                    <div className="video-card-content">
+                                                        <h3>{video.title}</h3>
+                                                    </div>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                            </aside>
                         </div>
-                    </section>
+
+                        {selectedCategory === 'همه' && (
+                            <div className="ad-banner-container">
+                                <div className="ad-banner">بنر تبلیغاتی 2</div>
+                            </div>
+                        )}
+
+                        {selectedCategory === 'همه' && podcasts.length > 0 && (
+                            <section className="podcast-section">
+                                <h2>پادکست‌های رشدیار</h2>
+                                <div className="podcasts-grid">
+                                    {podcasts.map(podcast => (
+                                        <a href={podcast.url} key={podcast.id} target="_blank" rel="noopener noreferrer" className="podcast-card">
+                                            <img src={podcast.thumbnailUrl ? `http://localhost:5000${podcast.thumbnailUrl}` : 'https://placehold.co/300x300/1abc9c/FFFFFF?text=پادکست'} alt={podcast.title} />
+                                            <div className="podcast-card-content">
+                                                <h3>{podcast.title}</h3>
+                                                <p>{podcast.summary}</p>
+                                                <span className="podcast-duration">{podcast.duration}</span>
+                                            </div>
+                                        </a>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </>
                 )}
-
-
-                {videos.length > 0 && (
-                    <section className="news-section">
-                        <h2>ویدیوهای آموزشی</h2>
-                        <div className="videos-grid">
-                             {videos.map(video => (
-                                <a href={video.url} key={video.id} target="_blank" rel="noopener noreferrer" className="video-card">
-                                    <div className="video-play-icon">▶</div>
-                                    <div className="video-card-content">
-                                        <h3>{video.title}</h3>
-                                        <p>{video.summary}</p>
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
             </main>
             <Footer />
         </div>

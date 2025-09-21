@@ -22,7 +22,7 @@ const upload = multer({ storage: storage });
 
 const dbPath = path.join(__dirname, 'db.json');
 
-let users, children, growthData, medicalVisits, medicalDocuments, checkups, reminders, childIdCounter, banners, articles, news, tickets, videos;
+let users, children, growthData, medicalVisits, medicalDocuments, checkups, reminders, childIdCounter, banners, articles, news, tickets, videos, podcasts;
 
 const loadData = () => {
     if (fs.existsSync(dbPath)) {
@@ -44,6 +44,7 @@ const loadData = () => {
         news = data.news || [];
         tickets = data.tickets || [];
         videos = data.videos || [];
+        podcasts = data.podcasts || [];
     } else {
         users = {};
         children = [];
@@ -58,6 +59,7 @@ const loadData = () => {
         news = [];
         tickets = [];
         videos = [];
+        podcasts = [];
     }
 };
 
@@ -77,7 +79,8 @@ const saveData = () => {
         articles,
         news,
         tickets,
-        videos
+        videos,
+        podcasts
     }, null, 2);
     fs.writeFileSync(dbPath, data);
 };
@@ -312,6 +315,11 @@ app.delete('/api/admin/videos/:id', isAdmin, (req, res) => {
     } else {
         res.status(404).json({ message: 'ویدیو یافت نشد' });
     }
+});
+
+// Podcasts
+app.get('/api/podcasts', (req, res) => {
+    res.json(podcasts);
 });
 
 
