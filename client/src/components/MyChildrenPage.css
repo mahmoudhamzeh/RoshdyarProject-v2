@@ -1,17 +1,26 @@
 .children-page-final { background-color: #f8f9fa; min-height: 100vh; }
-.page-nav-final { display: flex; align-items: center; padding: 0.8rem 1.5rem; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+/* New Grid-based Navigation Header */
+.page-nav-final {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* Left, Center, Right */
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
 .page-nav-final h1 {
-    flex: 1; /* Allow title to take up available space */
-    text-align: center;
+    grid-column: 2; /* Place in the center column */
+    justify-self: center; /* Center horizontally within the grid area */
     margin: 0;
     font-size: 1.4rem;
     color: #343a40;
 }
-.nav-placeholder { flex-basis: 120px; }
 
 .home-btn-final {
-    flex-basis: 120px; /* Give it a base width */
-    justify-content: flex-start;
+    grid-column: 1; /* Place in the left column */
+    justify-self: start; /* Align to the start of the grid area */
     background: none;
     border: none;
     cursor: pointer;
@@ -23,6 +32,12 @@
     font-weight: 500;
     transition: color 0.2s;
 }
+
+.nav-placeholder {
+    grid-column: 3; /* Place in the right column */
+    justify-self: end;
+}
+
 
 .home-btn-final:hover {
     color: #0056b3;
@@ -119,13 +134,8 @@
     .home-btn-final span {
         display: none; /* Hide text on mobile, icon is enough */
     }
-    .home-btn-final {
-        flex: 0 0 50px;
-        justify-content: center; /* Center the icon */
-    }
-    .nav-placeholder {
-        flex: 0 0 50px;
-    }
+    /* The grid layout handles responsiveness without needing changes here */
+
     .children-content-final {
         margin: 1rem;
         padding: 0;
