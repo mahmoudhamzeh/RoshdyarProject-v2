@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import Navbar from './Navbar';
+import NewsHeader from './NewsHeader';
 import Footer from './Footer';
 import './ArticleDetailPage.css';
 
@@ -32,7 +32,7 @@ const ArticleDetailPage = () => {
 
     return (
         <div>
-            <Navbar />
+            <NewsHeader />
             <main className="article-detail-container">
                 <header className="article-detail-header">
                     <h1>{article.title}</h1>

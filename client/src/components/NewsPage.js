@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import Navbar from './Navbar';
+import NewsHeader from './NewsHeader';
 import Footer from './Footer';
 import './NewsPage.css';
 
@@ -58,7 +58,7 @@ const NewsPage = () => {
 
     return (
         <div>
-            <Navbar />
+            <NewsHeader />
             <main className="news-page-container">
                 <header className="news-page-header">
                     <h1>مجله سلامت رشد‌یار</h1>
