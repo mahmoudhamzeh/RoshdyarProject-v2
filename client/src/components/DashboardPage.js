@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './Navbar';
+import MainNavbar from './MainNavbar';
 import Footer from './Footer';
 import AppCarousel from './Carousel';
 import ServiceTiles from './ServiceTiles';
@@ -58,7 +58,7 @@ const DashboardPage = () => {
 
     return (
         <div>
-            <Navbar />
+            <MainNavbar />
             <main>
                 <AppCarousel slides={banners} />
                 <ServiceTiles />
