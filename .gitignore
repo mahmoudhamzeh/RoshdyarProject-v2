@@ -17,3 +17,5 @@ jules-scratch/
 # Uploads
 /uploads/
 /server/uploads/
+.eslintcache
+
