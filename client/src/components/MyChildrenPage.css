@@ -3,27 +3,23 @@
 /* User-provided absolute positioning layout */
 .page-nav-final {
     display: flex;
-    justify-content: center; /* متن وسط */
+    justify-content: space-between;
     align-items: center;
     padding: 0.8rem 1.5rem;
     background-color: #e6f3ff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    position: relative;
-    min-height: 50px; /* Ensure nav has height */
+    min-height: 50px;
 }
 
 .page-nav-final h1 {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 1.4rem; /* Restored original font-size */
+    font-size: 1.4rem;
     margin: 0;
     color: #343a40;
+    text-align: center;
+    flex-grow: 1;
 }
 
 .page-nav-final .home-btn-final {
-    position: absolute;
-    right: 1.5rem;  /* Consistent with original padding */
     display: flex;
     align-items: center;
     gap: 5px;
@@ -144,6 +140,6 @@
     }
     .child-card-actions {
         flex-direction: column; /* Stack buttons vertically */
-        align-items: stretch; /* Make buttons full-width */
+        align-items: center; /* Center buttons horizontally */
     }
 }
