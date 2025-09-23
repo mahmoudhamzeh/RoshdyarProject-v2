@@ -320,3 +320,7 @@ app.delete('/api/admin/videos/:id', isAdmin, (req, res) => {
 app.get('/api/podcasts', (req, res) => {
     res.json(podcasts);
 });
+
+app.listen(port, () => {
+    console.log(`Roshdyar server is listening on port ${port}`);
+});
