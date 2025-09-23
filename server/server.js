@@ -85,7 +85,51 @@ const saveData = () => {
     fs.writeFileSync(dbPath, data);
 };
 
-function calculateAge(birthDate) { /* ... */ }
+function calculateAge(birthDate) {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+function calculateAgeInMonths(birthDate) {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let months = (today.getFullYear() - birth.getFullYear()) * 12;
+    months -= birth.getMonth();
+    months += today.getMonth();
+    return months <= 0 ? 0 : months;
+}
+
+// --- API Routes ---
+
+// --- Auth Routes ---
+app.post('/api/login', (req, res) => {
+    const { login, password } = req.body;
+    const user = Object.values(users).find(u => (u.username === login || u.email === login) && u.password === password);
+
+    if (user) {
+        // In a real app, never send the password back
+        const { password, ...userToSend } = user;
+        res.status(200).json({ message: 'ورود موفقیت‌آمیز', user: userToSend });
+    } else {
+        res.status(401).json({ message: 'نام کاربری یا رمز عبور نامعتبر است' });
+    }
+});
+
+// --- Children Routes ---
+app.get('/api/children', (req, res) => {
+    const userId = req.headers['x-user-id'];
+    if (!userId) {
+        return res.status(401).json({ message: 'User ID is required' });
+    }
+    const userChildren = children.filter(c => c.userId === parseInt(userId));
+    res.json(userChildren);
+});
 
 // --- Admin Middleware ---
 const isAdmin = (req, res, next) => {
@@ -100,7 +144,6 @@ const isAdmin = (req, res, next) => {
         return res.status(403).json({ message: 'دسترسی غیرمجاز: شما مدیر نیستید' });
     }
 };
-// --- API Routes ---
 
 // --- Admin Routes ---
 app.get('/api/admin/users', isAdmin, (req, res) => {
@@ -319,6 +362,121 @@ app.delete('/api/admin/videos/:id', isAdmin, (req, res) => {
 // Podcasts
 app.get('/api/podcasts', (req, res) => {
     res.json(podcasts);
+});
+
+// --- Reminder Generation ---
+const getOverdueVaccinationReminders = (child) => {
+    const ageInMonths = calculateAgeInMonths(new Date(child.birthDate));
+    const childVaccinations = child.vaccinationRecords || {};
+    const reminders = [];
+
+    vaccinationSchedule.forEach(group => {
+        if (ageInMonths >= group.age) {
+            group.vaccines.forEach(vaccine => {
+                if (!childVaccinations[group.age] || !childVaccinations[group.age][vaccine.name]) {
+                    reminders.push({
+                        id: `vaccine-${child.id}-${group.age}-${vaccine.name}`,
+                        title: `تأخیر در واکسن: ${vaccine.name}`,
+                        message: `واکسن ${vaccine.name} (${group.label}) کودک شما به تأخیر افتاده است.`,
+                        type: 'danger',
+                        link: `/vaccination-status/${child.id}`,
+                        source: 'auto'
+                    });
+                }
+            });
+        }
+    });
+
+    return reminders;
+};
+
+// --- Vaccination Routes ---
+app.get('/api/vaccination-schedule', (req, res) => {
+    res.json(vaccinationSchedule);
+});
+
+app.get('/api/children/:childId', (req, res) => {
+    const { childId } = req.params;
+    const child = children.find(c => c.id === parseInt(childId));
+    if (child) {
+        res.json(child);
+    } else {
+        res.status(404).json({ message: 'کودک یافت نشد' });
+    }
+});
+
+app.put('/api/children/:childId/vaccination-records', (req, res) => {
+    const { childId } = req.params;
+    const { vaccinationRecords } = req.body;
+    const childIndex = children.findIndex(c => c.id === parseInt(childId));
+
+    if (childIndex !== -1) {
+        children[childIndex].vaccinationRecords = vaccinationRecords;
+        saveData();
+        res.status(200).json(children[childIndex]);
+    } else {
+        res.status(404).json({ message: 'کودک یافت نشد' });
+    }
+});
+
+
+// --- Reminder Routes ---
+app.get('/api/reminders/all/:childId', (req, res) => {
+    const { childId } = req.params;
+    const child = children.find(c => c.id === parseInt(childId));
+
+    if (!child) {
+        return res.status(404).json({ message: 'کودک یافت نشد' });
+    }
+
+    const manualReminders = reminders[childId] || [];
+    const autoReminders = getOverdueVaccinationReminders(child);
+
+    res.json([...autoReminders, ...manualReminders]);
+});
+
+app.post('/api/reminders/manual/:childId', (req, res) => {
+    const { childId } = req.params;
+    const { title, date } = req.body;
+
+    if (!title || !date) {
+        return res.status(400).json({ message: 'عنوان و تاریخ الزامی است' });
+    }
+
+    if (!reminders[childId]) {
+        reminders[childId] = [];
+    }
+
+    const newReminder = {
+        id: `manual-${Date.now()}`,
+        title,
+        message: `یادآوری برای تاریخ: ${new Date(date).toLocaleDateString('fa-IR')}`,
+        date,
+        type: 'info',
+        source: 'manual'
+    };
+
+    reminders[childId].push(newReminder);
+    saveData();
+    res.status(201).json(newReminder);
+});
+
+app.delete('/api/reminders/manual/:childId/:reminderId', (req, res) => {
+    const { childId, reminderId } = req.params;
+
+    if (!reminders[childId]) {
+        return res.status(404).json({ message: 'هیچ یادآوری برای این کودک یافت نشد' });
+    }
+
+    const initialLength = reminders[childId].length;
+    reminders[childId] = reminders[childId].filter(r => r.id !== reminderId);
+
+    if (reminders[childId].length < initialLength) {
+        saveData();
+        res.status(200).json({ message: 'یادآوری با موفقیت حذف شد' });
+    } else {
+        res.status(404).json({ message: 'یادآوری مشخص شده یافت نشد' });
+    }
 });
 
 app.listen(port, () => {

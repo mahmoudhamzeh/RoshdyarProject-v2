@@ -1,19 +1,62 @@
 const vaccinationSchedule = [
-    { name: 'BCG', month: 0, dose: 1 },
-    { name: 'Hepatitis B', month: 0, dose: 1 },
-    { name: 'Polio', month: 2, dose: 1 },
-    { name: 'DTP', month: 2, dose: 1 },
-    { name: 'Hib', month: 2, dose: 1 },
-    { name: 'Hepatitis B', month: 2, dose: 2 },
-    { name: 'Polio', month: 4, dose: 2 },
-    { name: 'DTP', month: 4, dose: 2 },
-    { name: 'Hib', month: 4, dose: 2 },
-    { name: 'Polio', month: 6, dose: 3 },
-    { name: 'DTP', month: 6, dose: 3 },
-    { name: 'MMR', month: 12, dose: 1 },
-    { name: 'Varicella', month: 12, dose: 1 },
-    { name: 'DTP', month: 18, dose: 4 },
-    { name: 'Polio', month: 18, dose: 4 },
+    {
+        age: 0,
+        label: 'بدو تولد',
+        vaccines: [
+            { name: 'ب ث ژ', details: 'یک نوبت' },
+            { name: 'هپاتیت ب', details: 'نوبت اول' }
+        ]
+    },
+    {
+        age: 2,
+        label: '۲ ماهگی',
+        vaccines: [
+            { name: 'سه‌گانه', details: 'نوبت اول' },
+            { name: 'فلج اطفال خوراکی', details: 'نوبت اول' },
+            { name: 'هپاتیت ب', details: 'نوبت دوم' }
+        ]
+    },
+    {
+        age: 4,
+        label: '۴ ماهگی',
+        vaccines: [
+            { name: 'سه‌گانه', details: 'نوبت دوم' },
+            { name: 'فلج اطفال خوراکی', details: 'نوبت دوم' }
+        ]
+    },
+    {
+        age: 6,
+        label: '۶ ماهگی',
+        vaccines: [
+            { name: 'سه‌گانه', details: 'نوبت سوم' },
+            { name: 'فلج اطفال خوراکی', details: 'نوبت سوم' },
+            { name: 'هپاتیت ب', details: 'نوبت سوم' }
+        ]
+    },
+    {
+        age: 12,
+        label: '۱۲ ماهگی',
+        vaccines: [
+            { name: 'MMR', details: 'نوبت اول' }
+        ]
+    },
+    {
+        age: 18,
+        label: '۱۸ ماهگی',
+        vaccines: [
+            { name: 'سه‌گانه', details: 'یادآور اول' },
+            { name: 'فلج اطفال خوراکی', details: 'یادآور اول' },
+            { name: 'MMR', details: 'یادآور' }
+        ]
+    },
+    {
+        age: 60, // 4-6 years old
+        label: '۴ تا ۶ سالگی',
+        vaccines: [
+            { name: 'سه‌گانه', details: 'یادآور دوم' },
+            { name: 'فلج اطفال خوراکی', details: 'یادآور دوم' }
+        ]
+    }
 ];
 
 module.exports = { vaccinationSchedule };

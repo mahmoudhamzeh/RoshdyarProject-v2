@@ -13,6 +13,7 @@ import HealthAnalysisPage from './components/HealthAnalysisPage';
 import LabTestsPage from './components/LabTestsPage';
 import ProfilePage from './components/ProfilePage';
 import VaccinationPage from './components/VaccinationPage';
+import VaccinationStatusPage from './components/VaccinationStatusPage';
 import NewsPage from './components/NewsPage';
 import ArticleDetailPage from './components/ArticleDetailPage';
 import './App.css';
@@ -32,6 +33,7 @@ const App = () => {
                 <Route path="/health-profile/:childId" component={HealthProfilePage} />
                 <Route path="/health-analysis/:childId" component={HealthAnalysisPage} />
                 <Route path="/lab-tests/:childId" component={LabTestsPage} />
+                <Route path="/vaccination-status/:childId" component={VaccinationStatusPage} />
                 <Route path="/vaccination/:childId" component={VaccinationPage} />
                 <Route path="/profile" component={ProfilePage} />
                 <Route exact path="/news" component={NewsPage} />
