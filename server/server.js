@@ -22,7 +22,7 @@ const upload = multer({ storage: storage });
 
 const dbPath = path.join(__dirname, 'db.json');
 
-let users, children, growthData, medicalVisits, medicalDocuments, checkups, reminders, childIdCounter, banners, articles, news, tickets, videos, podcasts;
+let users, children, growthData, medicalVisits, medicalDocuments, checkups, reminders, childIdCounter, userIdCounter, banners, articles, news, tickets, videos, podcasts;
 
 const loadData = () => {
     if (fs.existsSync(dbPath)) {
@@ -39,6 +39,8 @@ const loadData = () => {
         checkups = data.checkups || {};
         reminders = data.reminders || {};
         childIdCounter = data.childIdCounter || 1;
+        const userKeys = Object.keys(users).map(Number).filter(k => !isNaN(k));
+        userIdCounter = data.userIdCounter || (userKeys.length > 0 ? Math.max(...userKeys) + 1 : 1);
         banners = data.banners || [];
         articles = data.articles || [];
         news = data.news || [];
@@ -54,6 +56,7 @@ const loadData = () => {
         checkups = {};
         reminders = {};
         childIdCounter = 1;
+        userIdCounter = 1;
         banners = [];
         articles = [];
         news = [];
@@ -75,6 +78,7 @@ const saveData = () => {
         checkups,
         reminders,
         childIdCounter,
+        userIdCounter,
         banners,
         articles,
         news,
@@ -119,6 +123,33 @@ app.post('/api/login', (req, res) => {
     } else {
         res.status(401).json({ message: 'نام کاربری یا رمز عبور نامعتبر است' });
     }
+});
+
+app.post('/api/signup', (req, res) => {
+    const { login, password } = req.body;
+
+    if (!login || !password) {
+        return res.status(400).json({ message: 'نام کاربری و رمز عبور الزامی است' });
+    }
+
+    const existingUser = Object.values(users).find(u => u.username === login || u.email === login);
+    if (existingUser) {
+        return res.status(409).json({ message: 'این نام کاربری قبلاً ثبت شده است' });
+    }
+
+    const newId = userIdCounter++;
+    const newUser = {
+        id: newId,
+        username: login,
+        email: login,
+        password: password, // In a real app, you should hash passwords
+        isAdmin: false
+    };
+
+    users[String(newId)] = newUser;
+    saveData();
+
+    res.status(201).json({ message: 'ثبت‌نام با موفقیت انجام شد. اکنون می‌توانید وارد شوید.' });
 });
 
 // --- Children Routes ---
