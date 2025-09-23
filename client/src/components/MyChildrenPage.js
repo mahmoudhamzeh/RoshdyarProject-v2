@@ -81,7 +81,7 @@ const MyChildrenPage = () => {
                      children.map(child => {
                         const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `http://localhost:5000${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
                         return (
-                            <div key={child.id} className="child-card-final">
+                            <div key={child.id} className="child-card-final" data-id={child.id}>
                                 <img src={avatarUrl} alt={child.name} className="child-avatar-final" />
                                 <div className="child-info-final">
                                     <h3>{child.name || `${child.firstName} ${child.lastName}`}</h3>

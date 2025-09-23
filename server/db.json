@@ -30,7 +30,13 @@
       "gestationalAge": 40,
       "birthPlace": "بیمارستان آرش",
       "apgar1": 9,
-      "apgar5": 10
+      "apgar5": 10,
+      "vaccinationRecords": {
+        "0": {
+          "ب ث ژ": true
+        }
+      },
+      "userId": 1
     },
     {
       "id": 2,
@@ -42,7 +48,9 @@
       "weight": "3",
       "bloodType": "A+",
       "allergies": "",
-      "special_illnesses": ""
+      "special_illnesses": "",
+      "vaccinationRecords": {},
+      "userId": 1
     },
     {
       "id": 3,
@@ -70,7 +78,9 @@
           "سایر": false
         },
         "description": "تست"
-      }
+      },
+      "vaccinationRecords": {},
+      "userId": 1
     },
     {
       "id": 5,
@@ -98,7 +108,9 @@
           "سایر": true
         },
         "description": ""
-      }
+      },
+      "vaccinationRecords": {},
+      "userId": 1
     },
     {
       "id": 6,
@@ -126,7 +138,9 @@
           "سایر": false
         },
         "description": "تست"
-      }
+      },
+      "vaccinationRecords": {},
+      "userId": 1
     }
   ],
   "growthData": {
@@ -194,6 +208,51 @@
     "5": [],
     "6": []
   },
+  "checkups": {},
+  "reminders": {
+    "1": [
+      {
+        "id": "manual-1758616658884",
+        "title": "ملاقات دکتر تست 1758616658",
+        "message": "یادآوری برای تاریخ: ۱۴۰۴/۷/۱",
+        "date": "2025-09-23",
+        "type": "info",
+        "source": "manual"
+      },
+      {
+        "id": "manual-1758616814545",
+        "title": "ملاقات دکتر تست 1758616814",
+        "message": "یادآوری برای تاریخ: ۱۴۰۴/۷/۱",
+        "date": "2025-09-23",
+        "type": "info",
+        "source": "manual"
+      },
+      {
+        "id": "manual-1758616852677",
+        "title": "ملاقات دکتر تست 1758616852",
+        "message": "یادآوری برای تاریخ: ۱۴۰۴/۷/۱",
+        "date": "2025-09-23",
+        "type": "info",
+        "source": "manual"
+      },
+      {
+        "id": "manual-1758617517944",
+        "title": "ملاقات دکتر تست 1758617517",
+        "message": "یادآوری برای تاریخ: ۱۴۰۴/۷/۱",
+        "date": "2025-09-23",
+        "type": "info",
+        "source": "manual"
+      },
+      {
+        "id": "manual-1758622410716",
+        "title": "ملاقات دکتر تست 1758622410",
+        "message": "یادآوری برای تاریخ: ۱۴۰۴/۷/۱",
+        "date": "2025-09-23",
+        "type": "info",
+        "source": "manual"
+      }
+    ]
+  },
   "childIdCounter": 7,
   "banners": [],
   "articles": [],
@@ -217,33 +276,34 @@
       "createdAt": "2023-10-25T11:30:00Z"
     },
     {
-        "id": 3,
-        "title": "مقابله با اضطراب جدایی در کودکان",
-        "summary": "اضطراب جدایی یک مرحله طبیعی در رشد کودکان است. راهکارهای عملی برای والدین جهت مدیریت این چالش.",
-        "content": "متن کامل مقاله در مورد اضطراب جدایی...",
-        "category": "تربیتی",
-        "imageUrl": "/uploads/sample-image-3.jpg",
-        "createdAt": "2023-10-24T09:00:00Z"
-    },
-        {
-        "id": 4,
-        "title": "سرماخوردگی در نوزادان: علائم و درمان",
-        "summary": "شناسایی علائم سرماخوردگی و راهکارهای خانگی برای تسکین نوزادان.",
-        "content": "متن کامل مقاله در مورد سرماخوردگی...",
-        "category": "بیماری",
-        "imageUrl": "/uploads/sample-image-4.jpg",
-        "createdAt": "2023-10-23T14:00:00Z"
+      "id": 3,
+      "title": "مقابله با اضطراب جدایی در کودکان",
+      "summary": "اضطراب جدایی یک مرحله طبیعی در رشد کودکان است. راهکارهای عملی برای والدین جهت مدیریت این چالش.",
+      "content": "متن کامل مقاله در مورد اضطراب جدایی...",
+      "category": "تربیتی",
+      "imageUrl": "/uploads/sample-image-3.jpg",
+      "createdAt": "2023-10-24T09:00:00Z"
     },
     {
-        "id": 5,
-        "title": "نقش بازی در یادگیری کودکان",
-        "summary": "چگونه بازی‌های فکری و حرکتی به تقویت مهارت‌های شناختی و اجتماعی کودکان کمک می‌کنند.",
-        "content": "متن کامل مقاله در مورد نقش بازی...",
-        "category": "آموزشی",
-        "imageUrl": "/uploads/sample-image-5.jpg",
-        "createdAt": "2023-10-22T16:00:00Z"
+      "id": 4,
+      "title": "سرماخوردگی در نوزادان: علائم و درمان",
+      "summary": "شناسایی علائم سرماخوردگی و راهکارهای خانگی برای تسکین نوزادان.",
+      "content": "متن کامل مقاله در مورد سرماخوردگی...",
+      "category": "بیماری",
+      "imageUrl": "/uploads/sample-image-4.jpg",
+      "createdAt": "2023-10-23T14:00:00Z"
+    },
+    {
+      "id": 5,
+      "title": "نقش بازی در یادگیری کودکان",
+      "summary": "چگونه بازی‌های فکری و حرکتی به تقویت مهارت‌های شناختی و اجتماعی کودکان کمک می‌کنند.",
+      "content": "متن کامل مقاله در مورد نقش بازی...",
+      "category": "آموزشی",
+      "imageUrl": "/uploads/sample-image-5.jpg",
+      "createdAt": "2023-10-22T16:00:00Z"
     }
   ],
+  "tickets": [],
   "videos": [
     {
       "id": 1,
@@ -281,6 +341,5 @@
       "duration": "15:10",
       "createdAt": "2023-10-17T09:20:00Z"
     }
-  ],
-  "tickets": []
+  ]
 }

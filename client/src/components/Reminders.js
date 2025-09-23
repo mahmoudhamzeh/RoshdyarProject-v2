@@ -76,7 +76,6 @@ const Reminders = () => {
     // Effect to determine the active child and fetch reminders
     useEffect(() => {
         const pathParts = location.pathname.split('/');
-        // Check for URLs like /health-profile/:childId, /growth-chart/:childId etc.
         const childIdFromUrl = pathParts.length > 2 && !isNaN(pathParts[2]) ? parseInt(pathParts[2], 10) : null;
 
         const determineChildAndFetch = async () => {
@@ -84,26 +83,39 @@ const Reminders = () => {
                 setActiveChildId(childIdFromUrl);
                 fetchReminders(childIdFromUrl);
             } else {
-                // Fallback to first child if on a general page
                 try {
-                    const childrenRes = await fetch(`http://localhost:5000/api/children`);
-                    const childrenData = await childrenRes.json();
-                    if (childrenData && childrenData.length > 0) {
-                        const firstChildId = childrenData[0].id;
-                        setActiveChildId(firstChildId);
-                        fetchReminders(firstChildId);
+                    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+                    if (loggedInUser && loggedInUser.id) {
+                        const childrenRes = await fetch(`http://localhost:5000/api/children`, {
+                            headers: { 'x-user-id': loggedInUser.id }
+                        });
+                        if (childrenRes.ok) {
+                            const childrenData = await childrenRes.json();
+                            if (childrenData && childrenData.length > 0) {
+                                const firstChildId = childrenData[0].id;
+                                setActiveChildId(firstChildId);
+                                fetchReminders(firstChildId);
+                            } else {
+                                setActiveChildId(null);
+                                fetchReminders(null);
+                            }
+                        } else {
+                             setActiveChildId(null);
+                             fetchReminders(null);
+                        }
                     } else {
                         setActiveChildId(null);
                         fetchReminders(null);
                     }
                 } catch (error) {
-                    console.error("Failed to fetch children", error);
+                    console.error("Failed to fetch children for reminders:", error);
+                    setActiveChildId(null);
+                    fetchReminders(null);
                 }
             }
         };
 
         determineChildAndFetch();
-        // Re-run this effect whenever the URL changes
     }, [location, fetchReminders]);
 
     // Effect for handling clicks outside the dropdown
