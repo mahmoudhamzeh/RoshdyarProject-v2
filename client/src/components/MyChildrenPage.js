@@ -88,7 +88,7 @@ const MyChildrenPage = () => {
                                     <p>سن: {calculateAge(child.birthDate)}</p>
                                 </div>
                                 <div className="child-card-actions">
-                                    <button onClick={() => history.push(`/health-profile/${child.id}`)} className="view-profile-btn-final">مشاهده پرونده</button>
+                                    <button onClick={() => window.location.href = `/health-profile/${child.id}`} className="view-profile-btn-final">مشاهده پرونده</button>
                                     <button onClick={() => history.push(`/edit-child/${child.id}`)} className="edit-btn-final">ویرایش</button>
                                     <button onClick={() => handleDelete(child.id)} className="delete-btn-final">حذف</button>
                                 </div>
