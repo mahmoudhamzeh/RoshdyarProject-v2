@@ -121,6 +121,37 @@ app.post('/api/login', (req, res) => {
     }
 });
 
+// --- User Profile Routes ---
+app.get('/api/users/:id', (req, res) => {
+    const { id } = req.params;
+    const user = users[id];
+
+    if (user) {
+        const { password, ...userToSend } = user;
+        res.json(userToSend);
+    } else {
+        res.status(404).json({ message: 'کاربر یافت نشد' });
+    }
+});
+
+app.put('/api/users/:id', (req, res) => {
+    const { id } = req.params;
+    const userData = req.body;
+
+    if (!users[id]) {
+        return res.status(404).json({ message: 'کاربر یافت نشد' });
+    }
+
+    // Ensure password is not updated through this general endpoint
+    delete userData.password;
+
+    users[id] = { ...users[id], ...userData };
+    saveData();
+
+    const { password, ...updatedUser } = users[id];
+    res.json({ message: 'اطلاعات با موفقیت ذخیره شد.', user: updatedUser });
+});
+
 // --- Children Routes ---
 app.get('/api/children', (req, res) => {
     const userId = req.headers['x-user-id'];
