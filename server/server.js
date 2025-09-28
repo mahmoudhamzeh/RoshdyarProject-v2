@@ -110,6 +110,22 @@ function calculateAgeInMonths(birthDate) {
     return months <= 0 ? 0 : months;
 }
 
+// Generic file upload endpoint for avatars, etc.
+app.post('/api/upload', upload.single('avatar'), (req, res) => {
+    const userId = req.headers['x-user-id'];
+    if (!userId) return res.status(401).json({ message: 'User ID is required for upload' });
+    if (!users[String(userId)]) return res.status(403).json({ message: 'Invalid user for upload' });
+
+    if (req.file) {
+        res.status(200).json({
+            message: 'File uploaded successfully',
+            filePath: `/uploads/${req.file.filename}`
+        });
+    } else {
+        res.status(400).json({ message: 'File upload failed' });
+    }
+});
+
 // --- Auth Routes ---
 app.post('/api/login', (req, res) => {
     const { login, password } = req.body;
