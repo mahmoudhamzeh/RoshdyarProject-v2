@@ -1,24 +1,24 @@
 .add-child-page-v2 { background-color: #f0f4f8; min-height: 100vh; }
 
 .add-child-page-v2 .page-nav-final {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    position: relative;
+    display: flex;
     align-items: center;
+    justify-content: flex-start;
     padding: 0.8rem 1.5rem;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .add-child-page-v2 .page-nav-final h1 {
-    grid-column: 2;
-    justify-self: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     margin: 0;
     font-size: 1.4rem;
 }
 
 .back-btn-add-child {
-    grid-column: 1;
-    justify-self: start;
     background: none;
     border: none;
     cursor: pointer;

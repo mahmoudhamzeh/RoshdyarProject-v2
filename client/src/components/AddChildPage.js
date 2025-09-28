@@ -99,7 +99,11 @@ const AddChildPage = () => {
             if (avatarFile) {
                 const avatarUploadData = new FormData();
                 avatarUploadData.append('avatar', avatarFile);
-                const avatarRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: avatarUploadData });
+                const avatarRes = await fetch('http://localhost:5000/api/upload', {
+                    method: 'POST',
+                    headers: { 'x-user-id': loggedInUser.id },
+                    body: avatarUploadData
+                });
                 if (!avatarRes.ok) throw new Error('Failed to upload avatar image');
                 const avatarResult = await avatarRes.json();
                 avatarPath = avatarResult.filePath.replace(/\\/g, "/");
@@ -165,7 +169,6 @@ const AddChildPage = () => {
                     <span>بازگشت</span>
                 </button>
                 <h1>افزودن کودک جدید</h1>
-                <div className="nav-placeholder"></div>
             </nav>
             <div className="add-child-form-container-v2">
                 <form onSubmit={handleSubmit} className="add-child-form">
