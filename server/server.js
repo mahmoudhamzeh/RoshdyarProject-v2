@@ -182,6 +182,21 @@ app.get('/api/children', (req, res) => {
     res.json(userChildren);
 });
 
+app.post('/api/children', (req, res) => {
+    const childData = req.body;
+    if (!childData || !childData.userId) {
+        return res.status(400).json({ message: 'Child data and userId are required' });
+    }
+    const newChild = {
+        ...childData,
+        id: childIdCounter++,
+        vaccinationRecords: {} // Initialize empty vaccination records
+    };
+    children.push(newChild);
+    saveData();
+    res.status(201).json(newChild);
+});
+
 app.get('/api/children/:childId', (req, res) => {
     const { childId } = req.params;
     const child = children.find(c => c.id === parseInt(childId));
