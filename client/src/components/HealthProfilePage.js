@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import Modal from 'react-modal';
 import "react-datepicker/dist/react-datepicker.css";
@@ -16,30 +16,47 @@ const HealthProfilePage = () => {
     const [isDocModalOpen, setIsDocModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchAllData = useCallback(async () => {
-        try {
-            const childRes = await fetch(`http://localhost:5000/api/children/${childId}`);
-            if (!childRes.ok) throw new Error('Child not found');
-            const childData = await childRes.json();
-            setChild(childData);
-
-            const visitsRes = await fetch(`http://localhost:5000/api/visits/${childId}`);
-            const visitsData = await visitsRes.json();
-            setVisits(visitsData);
-
-            const docsRes = await fetch(`http://localhost:5000/api/documents/${childId}`);
-            const docsData = await docsRes.json();
-            setDocuments(docsData);
-        } catch (error) {
-            history.push('/my-children');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [childId, history]);
-
     useEffect(() => {
+        const abortController = new AbortController();
+        const { signal } = abortController;
+
+        const fetchAllData = async () => {
+            try {
+                const [childRes, visitsRes, docsRes] = await Promise.all([
+                    fetch(`http://localhost:5000/api/children/${childId}`, { signal }),
+                    fetch(`http://localhost:5000/api/visits/${childId}`, { signal }),
+                    fetch(`http://localhost:5000/api/documents/${childId}`, { signal })
+                ]);
+
+                if (!childRes.ok) throw new Error('Child not found');
+
+                const childData = await childRes.json();
+                const visitsData = await visitsRes.json();
+                const docsData = await docsRes.json();
+
+                setChild(childData);
+                setVisits(visitsData);
+                setDocuments(docsData);
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Fetch aborted');
+                } else {
+                    history.push('/my-children');
+                }
+            } finally {
+                if (!signal.aborted) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
         fetchAllData();
-    }, [fetchAllData]);
+
+        return () => {
+            abortController.abort();
+        };
+    }, [childId, history]);
 
     const handleNavigateToGrowthChart = () => {
         history.push(`/growth-chart/${childId}`);
@@ -75,7 +92,6 @@ const HealthProfilePage = () => {
                     <span>لیست کودکان</span>
                 </button>
                 <h1>پرونده سلامت</h1>
-                <div className="nav-placeholder"></div>
             </nav>
             <header className="profile-header">
                 <img src={avatarUrl} alt={child.name} className="profile-avatar" />

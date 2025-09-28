@@ -72,7 +72,6 @@ const MyChildrenPage = () => {
                     <span>صفحه اصلی</span>
                 </button>
                 <h1>کودکان من</h1>
-                <div className="nav-placeholder"></div>
             </nav>
             <div className="children-content-final">
                 <button onClick={() => history.push('/add-child')} className="add-child-btn-final">+ افزودن کودک جدید</button>
@@ -88,7 +87,7 @@ const MyChildrenPage = () => {
                                     <p>سن: {calculateAge(child.birthDate)}</p>
                                 </div>
                                 <div className="child-card-actions">
-                                    <button onClick={() => window.location.href = `/health-profile/${child.id}`} className="view-profile-btn-final">مشاهده پرونده</button>
+                                    <button onClick={() => history.push(`/health-profile/${child.id}`)} className="view-profile-btn-final">مشاهده پرونده</button>
                                     <button onClick={() => history.push(`/edit-child/${child.id}`)} className="edit-btn-final">ویرایش</button>
                                     <button onClick={() => handleDelete(child.id)} className="delete-btn-final">حذف</button>
                                 </div>
