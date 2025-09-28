@@ -204,6 +204,41 @@ app.get('/api/children/:childId', (req, res) => {
     else res.status(404).json({ message: 'کودک یافت نشد' });
 });
 
+app.put('/api/children/:childId', (req, res) => {
+    const { childId } = req.params;
+    const updatedData = req.body;
+    const childIndex = children.findIndex(c => c.id === parseInt(childId));
+
+    if (childIndex !== -1) {
+        // Ensure name is consistent if firstName/lastName are provided
+        if (updatedData.firstName) {
+            updatedData.name = `${updatedData.firstName} ${updatedData.lastName || ''}`.trim();
+        }
+        children[childIndex] = { ...children[childIndex], ...updatedData };
+        saveData();
+        res.status(200).json(children[childIndex]);
+    } else {
+        res.status(404).json({ message: 'کودک یافت نشد' });
+    }
+});
+
+app.delete('/api/children/:childId', (req, res) => {
+    const { childId } = req.params;
+    const initialLength = children.length;
+    children = children.filter(c => c.id !== parseInt(childId));
+    if (children.length < initialLength) {
+        // Also delete associated data
+        delete growthData[childId];
+        delete medicalVisits[childId];
+        delete medicalDocuments[childId];
+        delete reminders[childId];
+        saveData();
+        res.status(200).json({ message: 'کودک و تمام اطلاعات مربوطه با موفقیت حذف شدند' });
+    } else {
+        res.status(404).json({ message: 'کودک یافت نشد' });
+    }
+});
+
 app.put('/api/children/:childId/vaccination-records', (req, res) => {
     const { childId } = req.params;
     const { vaccinationRecords } = req.body;
@@ -213,6 +248,38 @@ app.put('/api/children/:childId/vaccination-records', (req, res) => {
         saveData();
         res.status(200).json(children[childIndex]);
     } else res.status(404).json({ message: 'کودک یافت نشد' });
+});
+
+// --- Medical Data Routes ---
+app.get('/api/visits/:childId', (req, res) => {
+    const { childId } = req.params;
+    const visits = medicalVisits[childId] || [];
+    res.json(visits);
+});
+
+app.get('/api/documents/:childId', (req, res) => {
+    const { childId } = req.params;
+    const documents = medicalDocuments[childId] || [];
+    res.json(documents);
+});
+
+app.post('/api/documents/:childId', upload.single('document'), (req, res) => {
+    const { childId } = req.params;
+    if (!req.file) {
+        return res.status(400).json({ message: 'فایل مدرک الزامی است' });
+    }
+    if (!medicalDocuments[childId]) {
+        medicalDocuments[childId] = [];
+    }
+    const newDocument = {
+        id: Date.now(),
+        title: req.body.title || req.file.originalname,
+        url: `/uploads/${req.file.filename}`,
+        uploadedAt: new Date().toISOString()
+    };
+    medicalDocuments[childId].push(newDocument);
+    saveData();
+    res.status(201).json(newDocument);
 });
 
 // --- Admin Middleware ---

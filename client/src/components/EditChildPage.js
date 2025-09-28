@@ -102,12 +102,19 @@ const EditChildPage = () => {
         setIsSubmitting(true);
 
         try {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (!loggedInUser || !loggedInUser.id) {
+                alert('برای انجام این عملیات باید وارد شده باشید.');
+                history.push('/login');
+                return;
+            }
+
             // Step 1: Handle new avatar upload
             let newAvatarPath = formData.avatar;
             if (avatarFile) {
                 const avatarUploadData = new FormData();
                 avatarUploadData.append('avatar', avatarFile);
-                const avatarRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: avatarUploadData });
+                const avatarRes = await fetch('http://localhost:5000/api/upload', { method: 'POST', headers: { 'x-user-id': loggedInUser.id }, body: avatarUploadData });
                 if (!avatarRes.ok) throw new Error('Failed to upload new avatar image');
                 const avatarResult = await avatarRes.json();
                 newAvatarPath = avatarResult.filePath.replace(/\\/g, "/");
