@@ -26,7 +26,12 @@ const ServiceTiles = () => {
     const handleServiceClick = async (serviceId) => {
         console.log(`handleServiceClick triggered for service: ${serviceId}`);
         try {
-            const response = await fetch('http://localhost:5000/api/children');
+            const userId = localStorage.getItem('userId');
+            const response = await fetch('http://localhost:5000/api/children', {
+                headers: {
+                    'x-user-id': userId,
+                },
+            });
             const data = await response.json();
             console.log(`Found ${data.length} children.`);
 
