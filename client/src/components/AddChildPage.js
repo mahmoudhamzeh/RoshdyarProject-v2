@@ -197,13 +197,23 @@ const AddChildPage = () => {
                                     </div>
                                     <div className="form-row">
                                         <div className="form-group"><label>جنسیت</label><select name="gender" value={formData.gender} onChange={handleChange}><option value="boy">پسر</option><option value="girl">دختر</option></select></div>
-                                        <div className="form-group"><label>تاریخ تولد</label><DatePicker
-                                            value={birthDate}
-                                            onChange={setBirthDate}
-                                            shouldHighlightWeekends
-                                            locale="fa"
-                                            calendarClassName="responsive-calendar"
-                                        /></div>
+                                        <div className="form-group"><label>تاریخ تولد</label>
+                                            <DatePicker
+                                                value={birthDate}
+                                                onChange={setBirthDate}
+                                                shouldHighlightWeekends
+                                                locale="fa"
+                                                calendarClassName="responsive-calendar"
+                                                renderInput={({ ref }) => (
+                                                    <input
+                                                        readOnly
+                                                        ref={ref}
+                                                        value={birthDate ? `${birthDate.year}/${birthDate.month}/${birthDate.day}` : ''}
+                                                        className="custom-form-input"
+                                                    />
+                                                )}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
