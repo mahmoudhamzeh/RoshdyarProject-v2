@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import DatePicker from "react-datepicker";
-import { format } from 'date-fns';
+import DatePicker from 'react-modern-calendar-datepicker';
+import 'react-modern-calendar-datepicker/lib/DatePicker.css';
+import { fromShamsi, getCurrentShamsiDate } from '../utils/dateConverter';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import "react-datepicker/dist/react-datepicker.css";
 import './AddChildPage.css';
 
 const AddChildPage = () => {
@@ -38,7 +38,7 @@ const AddChildPage = () => {
             description: ''
         }
     });
-    const [birthDate, setBirthDate] = useState(new Date());
+    const [birthDate, setBirthDate] = useState(getCurrentShamsiDate());
     const [avatarFile, setAvatarFile] = useState(null);
     const [preview, setPreview] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,7 +110,7 @@ const AddChildPage = () => {
             }
 
             // Step 2: Create the child with all data except documents
-            const formattedBirthDate = format(birthDate, 'yyyy/MM/dd');
+            const formattedBirthDate = fromShamsi(birthDate);
             const childData = {
                 ...formData,
                 userId: loggedInUser.id,
@@ -197,7 +197,13 @@ const AddChildPage = () => {
                                     </div>
                                     <div className="form-row">
                                         <div className="form-group"><label>جنسیت</label><select name="gender" value={formData.gender} onChange={handleChange}><option value="boy">پسر</option><option value="girl">دختر</option></select></div>
-                                        <div className="form-group"><label>تاریخ تولد</label><DatePicker selected={birthDate} onChange={(date) => setBirthDate(date)} dateFormat="yyyy/MM/dd" showYearDropdown scrollableYearDropdown yearDropdownItemNumber={40} /></div>
+                                        <div className="form-group"><label>تاریخ تولد</label><DatePicker
+                                            value={birthDate}
+                                            onChange={setBirthDate}
+                                            shouldHighlightWeekends
+                                            locale="fa"
+                                            calendarClassName="responsive-calendar"
+                                        /></div>
                                     </div>
                                 </div>
                             </div>

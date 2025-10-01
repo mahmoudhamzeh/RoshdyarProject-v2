@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { addMonths, format } from 'date-fns';
+import moment from 'jalali-moment';
+import { toShamsi } from '../utils/dateConverter';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { faCheckCircle, faTimesCircle, faExclamationTriangle, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
@@ -86,7 +87,7 @@ const VaccinationPage = () => {
     };
 
     const handleMarkAsDone = (vaccineName) => {
-        const today = format(new Date(), 'yyyy/MM/dd');
+        const today = moment().format('YYYY/MM/DD');
         setVaccinationRecords(prev => ({
             ...prev,
             [vaccineName]: today
@@ -181,7 +182,7 @@ const VaccinationPage = () => {
                     <div className="info-grid">
                         <div className="info-item"><strong>نام:</strong> {child.firstName}</div>
                         <div className="info-item"><strong>نام خانوادگی:</strong> {child.lastName}</div>
-                        <div className="info-item"><strong>تاریخ تولد:</strong> {child.birthDate}</div>
+                        <div className="info-item"><strong>تاریخ تولد:</strong> {toShamsi(child.birthDate)}</div>
                         <div className="info-item"><strong>کد ملی:</strong> {child.nationalId}</div>
                         <div className="info-item"><strong>جنسیت:</strong> {child.gender}</div>
                         <div className="info-item"><strong>نام پدر:</strong> {child.fatherName}</div>
@@ -216,21 +217,21 @@ const VaccinationPage = () => {
                             </thead>
                             <tbody>
                                 {vaccineSchedule.map((vaccine, index) => {
-                                    const dueDate = addMonths(new Date(child.birthDate), vaccine.dueAgeMonths);
-                                    const today = new Date();
+                                    const dueDate = moment(child.birthDate, 'YYYY/MM/DD').add(vaccine.dueAgeMonths, 'months');
+                                    const today = moment();
                                     const isDone = !!vaccinationRecords[vaccine.name];
                                     let status = 'آینده';
                                     let statusIcon = faTimesCircle;
 
                                     if (isDone) {
-                                        status = `تزریق شده در ${vaccinationRecords[vaccine.name]}`;
+                                        status = `تزریق شده در ${toShamsi(vaccinationRecords[vaccine.name])}`;
                                         statusIcon = faCheckCircle;
-                                    } else if (dueDate < today) {
+                                    } else if (dueDate.isBefore(today)) {
                                         status = 'دیر شده';
                                         statusIcon = faExclamationTriangle;
                                     }
 
-                                    const diffDays = (dueDate - today) / (1000 * 60 * 60 * 24);
+                                    const diffDays = dueDate.diff(today, 'days');
                                     if (!isDone && diffDays > 0 && diffDays <= 30) {
                                         status = 'نزدیک';
                                         statusIcon = faExclamationTriangle;
@@ -251,7 +252,7 @@ const VaccinationPage = () => {
                                             </td>
                                             <td>{vaccine.dose}</td>
                                             <td>{vaccine.dueAgeMonths === 0 ? 'بدو تولد' : `${vaccine.dueAgeMonths} ماهگی`}</td>
-                                            <td>{format(dueDate, 'yyyy/MM/dd')}</td>
+                                            <td>{dueDate.locale('fa').format('YYYY/MM/DD')}</td>
                                             <td className={`status-${statusIcon.iconName}`}>
                                                 <FontAwesomeIcon icon={statusIcon} />
                                                 <span>{status}</span>

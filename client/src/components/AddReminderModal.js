@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from 'react-modern-calendar-datepicker';
+import 'react-modern-calendar-datepicker/lib/DatePicker.css';
+import { fromShamsi, getCurrentShamsiDate } from '../utils/dateConverter';
 import './AddReminderModal.css';
 
 const AddReminderModal = ({ isOpen, onRequestClose, childId, onReminderAdded }) => {
     const [title, setTitle] = useState('');
-    const [date, setDate] = useState(new Date());
+    const [date, setDate] = useState(getCurrentShamsiDate());
     const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
@@ -18,10 +19,11 @@ const AddReminderModal = ({ isOpen, onRequestClose, childId, onReminderAdded }) 
         setError('');
 
         try {
+            const gregorianDate = fromShamsi(date);
             const res = await fetch(`http://localhost:5000/api/reminders/manual/${childId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, date: date.toISOString().split('T')[0] }),
+                body: JSON.stringify({ title, date: gregorianDate }),
             });
 
             if (res.ok) {
@@ -57,11 +59,11 @@ const AddReminderModal = ({ isOpen, onRequestClose, childId, onReminderAdded }) 
                 <div className="form-group">
                     <label htmlFor="reminder-date">تاریخ</label>
                     <DatePicker
-                        id="reminder-date"
-                        selected={date}
-                        onChange={(d) => setDate(d)}
-                        dateFormat="yyyy/MM/dd"
-                        className="date-picker-full-width"
+                        value={date}
+                        onChange={setDate}
+                        shouldHighlightWeekends
+                        locale="fa"
+                        calendarClassName="responsive-calendar"
                     />
                 </div>
                 {error && <p className="error-message">{error}</p>}

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'; // Import useRef
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faTimes, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import AddReminderModal from './AddReminderModal';
+import { formatToShamsi } from '../utils/dateConverter';
 import './Reminders.css';
 
 const Reminders = () => {
@@ -197,7 +198,7 @@ const Reminders = () => {
                                     <li key={r.id} className={`reminder-item type-${r.type}`}>
                                         <div className="reminder-content">
                                             <strong>{r.title}</strong>
-                                            <p>{r.message}</p>
+                                            <p>{r.source === 'manual' && r.date ? `تاریخ: ${formatToShamsi(r.date)}` : r.message}</p>
                                         </div>
                                         {r.source === 'manual' && (
                                             <button className="dismiss-btn" onClick={(e) => {
