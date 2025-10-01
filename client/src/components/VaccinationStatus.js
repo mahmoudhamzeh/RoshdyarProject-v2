@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamationTriangle, faClock } from '@fortawesome/free-solid-svg-icons';
+import { formatToShamsi } from '../utils/dateConverter';
 import './VaccinationStatus.css';
 
 const VaccinationStatus = () => {
@@ -47,7 +48,7 @@ const VaccinationStatus = () => {
                         <li key={`${v.name}-${v.dose}`}>
                             <span>{v.name} (Dose {v.dose}) - due at {v.month} months</span>
                             {v.status !== 'done' && <button onClick={() => handleMarkAsDone(v.name, v.dose)}>Mark as Done</button>}
-                            {v.status === 'done' && <span className="done-date">Done on: {new Date(v.administeredDate).toLocaleDateString('fa-IR')}</span>}
+                            {v.status === 'done' && <span className="done-date">Done on: {formatToShamsi(v.administeredDate)}</span>}
                         </li>
                     ))}
                 </ul>

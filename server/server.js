@@ -456,7 +456,8 @@ app.post('/api/reminders/manual/:childId', (req, res) => {
     if (!title || !date) return res.status(400).json({ message: 'عنوان و تاریخ الزامی است' });
 
     if (!reminders[childId]) reminders[childId] = [];
-    const newReminder = { id: `manual-${Date.now()}`, title, message: `یادآوری برای تاریخ: ${new Date(date).toLocaleDateString('fa-IR')}`, date, type: 'info', source: 'manual' };
+    // The message will be constructed on the client-side to ensure consistent date formatting.
+    const newReminder = { id: `manual-${Date.now()}`, title, date, type: 'info', source: 'manual' };
     reminders[childId].push(newReminder);
     saveData();
     res.status(201).json(newReminder);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { formatToShamsi } from '../utils/dateConverter';
 import NewsHeader from './NewsHeader';
 import Footer from './Footer';
 import './ArticleDetailPage.css';
@@ -37,7 +38,7 @@ const ArticleDetailPage = () => {
                 <header className="article-detail-header">
                     <h1>{article.title}</h1>
                     <p className="article-meta">
-                        منتشر شده در: {new Date(article.createdAt).toLocaleDateString('fa-IR')}
+                        منتشر شده در: {formatToShamsi(article.createdAt)}
                     </p>
                 </header>
                 {article.imageUrl && (
