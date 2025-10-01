@@ -32,6 +32,12 @@ const ServiceTiles = () => {
                     'x-user-id': userId,
                 },
             });
+
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => 'Could not read error body');
+                throw new Error(`خطا در دریافت اطلاعات کودکان. سرور پاسخ داد: ${errorText || response.statusText}`);
+            }
+
             const data = await response.json();
             console.log(`Found ${data.length} children.`);
 
@@ -39,10 +45,6 @@ const ServiceTiles = () => {
                 console.log('Navigating to /add-child');
                 alert('ابتدا باید حداقل یک کودک اضافه کنید.');
                 history.push('/add-child');
-            } else if (data.length === 1) {
-                const url = `/${serviceId}/${data[0].id}`;
-                console.log(`Navigating to: ${url}`);
-                history.push(url);
             } else {
                 console.log('Opening child selection modal.');
                 setChildren(data);
@@ -51,7 +53,7 @@ const ServiceTiles = () => {
             }
         } catch (error) {
             console.error('Failed to fetch children:', error);
-            alert('خطا در دریافت اطلاعات کودکان.');
+            alert(error.message || 'خطا در دریافت اطلاعات کودکان.');
         }
     };
 
