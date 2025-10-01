@@ -209,7 +209,7 @@ const AddChildPage = () => {
                                                         readOnly
                                                         ref={ref}
                                                         value={birthDate ? `${birthDate.year}/${birthDate.month}/${birthDate.day}` : ''}
-                                                        className="custom-form-input"
+                                                        // By removing the className, the input will inherit the default form input styles
                                                     />
                                                 )}
                                             />

@@ -69,7 +69,7 @@ const AddReminderModal = ({ isOpen, onRequestClose, childId, onReminderAdded }) 
                                 readOnly
                                 ref={ref}
                                 value={date ? `${date.year}/${date.month}/${date.day}` : ''}
-                                className="date-picker-full-width"
+                                // The input will be styled by the parent .form-group selector
                             />
                         )}
                     />
