@@ -178,7 +178,7 @@ app.put('/api/users/:id', (req, res) => {
 app.get('/api/children', (req, res) => {
     const userId = req.headers['x-user-id'];
     if (!userId) return res.status(401).json({ message: 'User ID is required' });
-    const userChildren = children.filter(c => c.userId === parseInt(userId));
+    const userChildren = children.filter(c => c.userId === Number(userId));
     res.json(userChildren);
 });
 
