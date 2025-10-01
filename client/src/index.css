@@ -57,3 +57,14 @@ body {
 .react-datepicker__year-dropdown {
     background-color: #fff !important;
 }
+
+/*
+  Global fix for the react-modern-calendar-datepicker.
+  The calendar was being clipped by parent elements with `overflow: hidden`.
+  Using `position: fixed` ensures the calendar always renders on top of the viewport.
+  A high z-index is required to make sure it appears above modal overlays.
+*/
+.responsive-calendar {
+    position: fixed !important;
+    z-index: 2000 !important;
+}
