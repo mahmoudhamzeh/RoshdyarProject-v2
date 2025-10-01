@@ -26,7 +26,15 @@ const ServiceTiles = () => {
     const handleServiceClick = async (serviceId) => {
         console.log(`handleServiceClick triggered for service: ${serviceId}`);
         try {
-            const userId = localStorage.getItem('userId');
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            const userId = loggedInUser ? loggedInUser.id : null;
+
+            if (!userId) {
+                alert('لطفا برای مشاهده این بخش ابتدا وارد شوید.');
+                history.push('/login');
+                return;
+            }
+
             const response = await fetch('http://localhost:5000/api/children', {
                 headers: {
                     'x-user-id': userId,
@@ -39,14 +47,14 @@ const ServiceTiles = () => {
             }
 
             const data = await response.json();
-            console.log(`Found ${data.length} children.`);
+            console.log(`Found ${data.length} children for user ${userId}.`);
 
             if (data.length === 0) {
-                console.log('Navigating to /add-child');
+                console.log('No children found, navigating to /add-child');
                 alert('ابتدا باید حداقل یک کودک اضافه کنید.');
                 history.push('/add-child');
             } else {
-                console.log('Opening child selection modal.');
+                console.log(`Found ${data.length} children. Opening child selection modal.`);
                 setChildren(data);
                 setSelectedService(serviceId);
                 setModalIsOpen(true);
