@@ -64,6 +64,14 @@ const AddReminderModal = ({ isOpen, onRequestClose, childId, onReminderAdded }) 
                         shouldHighlightWeekends
                         locale="fa"
                         calendarClassName="responsive-calendar"
+                        renderInput={({ ref }) => (
+                            <input
+                                readOnly
+                                ref={ref}
+                                value={date ? `${date.year}/${date.month}/${date.day}` : ''}
+                                className="date-picker-full-width"
+                            />
+                        )}
                     />
                 </div>
                 {error && <p className="error-message">{error}</p>}
