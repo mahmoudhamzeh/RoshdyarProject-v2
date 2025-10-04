@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { fromShamsi } from '../utils/dateConverter';
+import DatePicker from 'react-multi-date-picker';
+import persian from 'react-date-object/calendars/persian';
+import persian_fa from 'react-date-object/locales/persian_fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import './AddChildPage.css';
@@ -91,7 +91,6 @@ const AddChildPage = () => {
                 setIsSubmitting(false);
                 return;
             }
-
             const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
             if (!loggedInUser || !loggedInUser.id) {
                 alert('لطفا برای افزودن کودک ابتدا وارد شوید.');
@@ -116,7 +115,8 @@ const AddChildPage = () => {
             }
 
             // Step 2: Create the child with all data except documents
-            const formattedBirthDate = birthDate.toISOString().split('T')[0]; // YYYY-MM-DD
+            const gregorianDate = birthDate.toDate();
+            const formattedBirthDate = gregorianDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
             const childData = {
                 ...formData,
                 userId: loggedInUser.id,
@@ -205,11 +205,14 @@ const AddChildPage = () => {
                                         <div className="form-group"><label>جنسیت</label><select name="gender" value={formData.gender} onChange={handleChange}><option value="boy">پسر</option><option value="girl">دختر</option></select></div>
                                         <div className="form-group"><label>تاریخ تولد</label>
                                             <DatePicker
-                                                selected={birthDate}
-                                                onChange={date => setBirthDate(date)}
-                                                dateFormat="yyyy/MM/dd"
-                                                placeholderText="برای انتخاب تاریخ کلیک کنید"
-                                                className="form-control"
+                                                value={birthDate}
+                                                onChange={setBirthDate}
+                                                calendar={persian}
+                                                locale={persian_fa}
+                                                format="YYYY/MM/DD"
+                                                placeholder="تاریخ تولد را انتخاب کنید"
+                                                inputClass="form-control"
+                                                style={{ textAlign: 'center' }}
                                             />
                                         </div>
                                     </div>
