@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import DatePicker from 'react-modern-calendar-datepicker';
-import 'react-modern-calendar-datepicker/lib/DatePicker.css';
-import { fromShamsi, getCurrentShamsiDate } from '../utils/dateConverter';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { fromShamsi } from '../utils/dateConverter';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import './AddChildPage.css';
@@ -91,6 +91,7 @@ const AddChildPage = () => {
                 setIsSubmitting(false);
                 return;
             }
+
             const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
             if (!loggedInUser || !loggedInUser.id) {
                 alert('لطفا برای افزودن کودک ابتدا وارد شوید.');
@@ -115,7 +116,7 @@ const AddChildPage = () => {
             }
 
             // Step 2: Create the child with all data except documents
-            const formattedBirthDate = fromShamsi(birthDate);
+            const formattedBirthDate = birthDate.toISOString().split('T')[0]; // YYYY-MM-DD
             const childData = {
                 ...formData,
                 userId: loggedInUser.id,
@@ -204,20 +205,11 @@ const AddChildPage = () => {
                                         <div className="form-group"><label>جنسیت</label><select name="gender" value={formData.gender} onChange={handleChange}><option value="boy">پسر</option><option value="girl">دختر</option></select></div>
                                         <div className="form-group"><label>تاریخ تولد</label>
                                             <DatePicker
-                                                value={birthDate}
-                                                onChange={setBirthDate}
-                                                shouldHighlightWeekends
-                                                locale="fa"
-                                                calendarClassName="responsive-calendar"
-                                                renderInput={inputProps => (
-                                                    <input
-                                                        {...inputProps}
-                                                        readOnly
-                                                        placeholder="برای انتخاب تاریخ کلیک کنید"
-                                                        value={birthDate ? `${birthDate.year}/${birthDate.month}/${birthDate.day}` : ''}
-                                                        className="form-control"
-                                                    />
-                                                )}
+                                                selected={birthDate}
+                                                onChange={date => setBirthDate(date)}
+                                                dateFormat="yyyy/MM/dd"
+                                                placeholderText="برای انتخاب تاریخ کلیک کنید"
+                                                className="form-control"
                                             />
                                         </div>
                                     </div>
