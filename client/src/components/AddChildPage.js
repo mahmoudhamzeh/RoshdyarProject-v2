@@ -99,41 +99,44 @@ const AddChildPage = () => {
                 return;
             }
 
-            // Step 1: Upload avatar
-            let avatarPath = '';
-            if (avatarFile) {
-                const avatarUploadData = new FormData();
-                avatarUploadData.append('avatar', avatarFile);
-                const avatarRes = await fetch('http://localhost:5000/api/upload', {
-                    method: 'POST',
-                    headers: { 'x-user-id': loggedInUser.id },
-                    body: avatarUploadData
-                });
-                if (!avatarRes.ok) throw new Error('Failed to upload avatar image');
-                const avatarResult = await avatarRes.json();
-                avatarPath = avatarResult.filePath.replace(/\\/g, "/");
-            }
-
-            // Step 2: Create the child with all data except documents
+            // Step 1: Create the child record first (without avatar)
             const gregorianDate = birthDate.toDate();
-            const formattedBirthDate = gregorianDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+            const formattedBirthDate = gregorianDate.toISOString().split('T')[0];
             const childData = {
                 ...formData,
                 userId: loggedInUser.id,
                 birthDate: formattedBirthDate,
-                avatar: avatarPath,
-                documents: [] // Initialize with empty array
+                avatar: '', // Will be updated in the next step
+                documents: []
             };
 
             const createChildRes = await fetch('http://localhost:5000/api/children', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-id': loggedInUser.id
+                },
                 body: JSON.stringify(childData)
             });
 
             if (!createChildRes.ok) throw new Error('Failed to add child');
             const newChild = await createChildRes.json();
             const newChildId = newChild.id;
+
+            // Step 2: Upload avatar for the newly created child
+            if (avatarFile) {
+                const avatarUploadData = new FormData();
+                avatarUploadData.append('avatar', avatarFile);
+                const avatarRes = await fetch(`http://localhost:5000/api/children/${newChildId}/avatar`, {
+                    method: 'POST',
+                    headers: { 'x-user-id': loggedInUser.id },
+                    body: avatarUploadData
+                });
+                if (!avatarRes.ok) {
+                    // Even if avatar fails, the child was created.
+                    alert('کودک با موفقیت اضافه شد، اما آپلود عکس پروفایل با مشکل مواجه شد. می‌توانید بعداً آن را ویرایش کنید.');
+                }
+            }
 
             // Step 3: Upload documents for the newly created child
             if (documentFiles.length > 0) {
