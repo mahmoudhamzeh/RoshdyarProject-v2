@@ -38,7 +38,7 @@ const AddChildPage = () => {
             description: ''
         }
     });
-    const [birthDate, setBirthDate] = useState(getCurrentShamsiDate());
+    const [birthDate, setBirthDate] = useState(null);
     const [avatarFile, setAvatarFile] = useState(null);
     const [preview, setPreview] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,6 +86,11 @@ const AddChildPage = () => {
         setIsSubmitting(true);
 
         try {
+            if (!birthDate) {
+                alert('لطفا تاریخ تولد کودک را انتخاب کنید.');
+                setIsSubmitting(false);
+                return;
+            }
             const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
             if (!loggedInUser || !loggedInUser.id) {
                 alert('لطفا برای افزودن کودک ابتدا وارد شوید.');
@@ -204,12 +209,13 @@ const AddChildPage = () => {
                                                 shouldHighlightWeekends
                                                 locale="fa"
                                                 calendarClassName="responsive-calendar"
-                                                renderInput={({ ref }) => (
+                                                renderInput={inputProps => (
                                                     <input
+                                                        {...inputProps}
                                                         readOnly
-                                                        ref={ref}
+                                                        placeholder="برای انتخاب تاریخ کلیک کنید"
                                                         value={birthDate ? `${birthDate.year}/${birthDate.month}/${birthDate.day}` : ''}
-                                                        // By removing the className, the input will inherit the default form input styles
+                                                        className="form-control"
                                                     />
                                                 )}
                                             />
