@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { Pool, types } = require('pg');
 const shopStore = require('./shop-store');
+const magazineStore = require('./magazine-store');
 const { buildCategoryTree } = require('./shop-model');
 
 types.setTypeParser(20, (val) => Number(val));
@@ -914,6 +915,7 @@ async function connect() {
             const schemaSql = fs.readFileSync(SCHEMA_PATH, 'utf8');
             await pool.query(schemaSql);
             await shopStore.ensureShopSchemaPg(q, one, many);
+            await magazineStore.ensureMagazineSchemaPg(q, one, many);
             await seedShopCategories();
             const version = await getSchemaVersion();
             if (version < SCHEMA_VERSION) {
@@ -922,6 +924,7 @@ async function connect() {
                 await setSchemaVersion(SCHEMA_VERSION);
             }
             await shopStore.ensureShopSchemaPg(q, one, many);
+            await magazineStore.ensureMagazineSchemaPg(q, one, many);
             await pool.query('DELETE FROM otp_codes WHERE expires_at < $1', [Date.now()]);
             console.log(`Connected to PostgreSQL schema v${SCHEMA_VERSION}`);
             return pool;
@@ -2448,6 +2451,13 @@ module.exports = {
         ageBands: shopStore.AGE_BANDS,
         skills: shopStore.SKILLS
     },
+    magazine: new Proxy({}, {
+        get(_target, prop) {
+            const api = magazineStore.pgApi(q, one, many);
+            const value = api[prop];
+            return typeof value === 'function' ? (...args) => Promise.resolve(connect()).then(() => value.apply(api, args)) : value;
+        }
+    }),
     orders,
     otp,
     normalizePhone

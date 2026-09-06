@@ -1,0 +1,242 @@
+import React, { useEffect, useState } from 'react';
+import './ArticleManagement.css';
+import '../magazine/Magazine.css';
+
+export const MagazineTaxonomy = () => {
+    const [categories, setCategories] = useState([]);
+    const [tags, setTags] = useState([]);
+    const [catForm, setCatForm] = useState({ name: '', parentId: '', slug: '' });
+    const [tagName, setTagName] = useState('');
+
+    const flatten = (nodes, acc = []) => {
+        nodes.forEach((node) => {
+            acc.push(node);
+            if (node.children) flatten(node.children, acc);
+        });
+        return acc;
+    };
+
+    const load = async () => {
+        const [c, t] = await Promise.all([fetch('/api/magazine/categories'), fetch('/api/magazine/tags')]);
+        if (c.ok) setCategories(await c.json());
+        if (t.ok) setTags(await t.json());
+    };
+    useEffect(() => { load(); }, []);
+
+    const saveCategory = async (e) => {
+        e.preventDefault();
+        await fetch('/api/admin/magazine/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(catForm)
+        });
+        setCatForm({ name: '', parentId: '', slug: '' });
+        load();
+    };
+
+    const saveTag = async (e) => {
+        e.preventDefault();
+        await fetch('/api/admin/magazine/tags', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: tagName })
+        });
+        setTagName('');
+        load();
+    };
+
+    const flatCats = flatten(categories);
+
+    return (
+        <div className="article-management">
+            <h2>دسته‌بندی و برچسب‌های مجله</h2>
+            <form className="article-form" onSubmit={saveCategory}>
+                <h3>دسته جدید</h3>
+                <input required placeholder="نام دسته" value={catForm.name} onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} />
+                <input placeholder="نامک (اختیاری)" value={catForm.slug} onChange={(e) => setCatForm({ ...catForm, slug: e.target.value })} />
+                <select value={catForm.parentId} onChange={(e) => setCatForm({ ...catForm, parentId: e.target.value })}>
+                    <option value="">دسته اصلی</option>
+                    {flatCats.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                </select>
+                <button type="submit">افزودن دسته</button>
+            </form>
+            <ul>
+                {flatCats.map((item) => (
+                    <li key={item.id}>
+                        {item.parentId ? '— ' : ''}{item.name}
+                        <button type="button" className="btn-delete" onClick={async () => {
+                            await fetch(`/api/admin/magazine/categories/${item.id}`, { method: 'DELETE' });
+                            load();
+                        }}>حذف</button>
+                    </li>
+                ))}
+            </ul>
+            <form className="article-form" onSubmit={saveTag}>
+                <h3>برچسب جدید</h3>
+                <input required placeholder="نام برچسب" value={tagName} onChange={(e) => setTagName(e.target.value)} />
+                <button type="submit">افزودن برچسب</button>
+            </form>
+            <div className="magazine-tags">
+                {tags.map((tag) => (
+                    <span key={tag.id}>
+                        #{tag.name}
+                        <button type="button" onClick={async () => {
+                            await fetch(`/api/admin/magazine/tags/${tag.id}`, { method: 'DELETE' });
+                            load();
+                        }}>×</button>
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export const MagazineAuthors = () => {
+    const [authors, setAuthors] = useState([]);
+    const [form, setForm] = useState({ firstName: '', lastName: '', specialty: '', bio: '', photo: null });
+    const load = async () => {
+        const res = await fetch('/api/magazine/authors');
+        if (res.ok) setAuthors(await res.json());
+    };
+    useEffect(() => { load(); }, []);
+    const submit = async (e) => {
+        e.preventDefault();
+        const body = new FormData();
+        body.append('firstName', form.firstName);
+        body.append('lastName', form.lastName);
+        body.append('specialty', form.specialty);
+        body.append('bio', form.bio);
+        if (form.photo) body.append('photo', form.photo);
+        await fetch('/api/admin/magazine/authors', { method: 'POST', body });
+        setForm({ firstName: '', lastName: '', specialty: '', bio: '', photo: null });
+        load();
+    };
+    return (
+        <div className="article-management">
+            <h2>نویسندگان و متخصصان</h2>
+            <form className="article-form" onSubmit={submit}>
+                <input required placeholder="نام" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+                <input required placeholder="نام خانوادگی" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+                <input placeholder="تخصص / سمت" value={form.specialty} onChange={(e) => setForm({ ...form, specialty: e.target.value })} />
+                <textarea placeholder="بیوگرافی کوتاه" rows="4" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                <input type="file" accept="image/*" onChange={(e) => setForm({ ...form, photo: e.target.files[0] })} />
+                <button type="submit">افزودن نویسنده</button>
+            </form>
+            {authors.map((author) => (
+                <div key={author.id} className="article-item">
+                    <div className="article-item-info">
+                        <h3>{author.fullName}</h3>
+                        <p>{author.specialty}</p>
+                    </div>
+                    <button type="button" className="btn-delete" onClick={async () => {
+                        await fetch(`/api/admin/magazine/authors/${author.id}`, { method: 'DELETE' });
+                        load();
+                    }}>حذف</button>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+export const MagazineComments = () => {
+    const [comments, setComments] = useState([]);
+    const [status, setStatus] = useState('pending');
+    const load = async (next = status) => {
+        const res = await fetch(`/api/admin/magazine/comments?status=${next}`);
+        if (res.ok) setComments(await res.json());
+    };
+    useEffect(() => { load(status); }, [status]);
+    const update = async (id, nextStatus) => {
+        await fetch(`/api/admin/magazine/comments/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: nextStatus })
+        });
+        load(status);
+    };
+    return (
+        <div className="article-management">
+            <h2>تأیید نظرات مجله</h2>
+            <div className="magazine-filters">
+                {['pending', 'approved', 'rejected', 'all'].map((item) => (
+                    <button key={item} type="button" className={status === item ? 'is-active' : ''} onClick={() => setStatus(item)}>
+                        {item === 'pending' ? 'در انتظار' : item === 'approved' ? 'تأیید شده' : item === 'rejected' ? 'رد شده' : 'همه'}
+                    </button>
+                ))}
+            </div>
+            {comments.map((comment) => (
+                <div key={comment.id} className="article-item">
+                    <div className="article-item-info">
+                        <h3>{comment.postTitle}</h3>
+                        <p>{comment.authorName}{comment.badge ? ` · ${comment.badge}` : ''} · {comment.status}</p>
+                        <small>{comment.body}</small>
+                    </div>
+                    <div className="article-item-actions">
+                        <button type="button" className="btn-edit" onClick={() => update(comment.id, 'approved')}>تأیید</button>
+                        <button type="button" className="btn-delete" onClick={() => update(comment.id, 'rejected')}>رد</button>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+export const MagazineBanners = () => {
+    const [banners, setBanners] = useState([]);
+    const [form, setForm] = useState({
+        placement: 'hero', title: '', subtitle: '', category: '', link: '', sortOrder: 0, expiresAt: '', image: null
+    });
+    const load = async () => {
+        const res = await fetch('/api/magazine/banners?placement=all');
+        if (res.ok) setBanners(await res.json());
+    };
+    useEffect(() => { load(); }, []);
+    const submit = async (e) => {
+        e.preventDefault();
+        if (!form.image) {
+            alert('تصویر بنر لازم است');
+            return;
+        }
+        const body = new FormData();
+        Object.entries(form).forEach(([key, value]) => {
+            if (key === 'image') body.append('image', value);
+            else body.append(key, value);
+        });
+        await fetch('/api/admin/magazine/banners', { method: 'POST', body });
+        setForm({ placement: 'hero', title: '', subtitle: '', category: '', link: '', sortOrder: 0, expiresAt: '', image: null });
+        load();
+    };
+    return (
+        <div className="article-management">
+            <h2>بنرهای مجله سلامت</h2>
+            <form className="article-form" onSubmit={submit}>
+                <select value={form.placement} onChange={(e) => setForm({ ...form, placement: e.target.value })}>
+                    <option value="hero">اسلایدر صفحه اصلی</option>
+                    <option value="sidebar-300x250">سایدبار ۳۰۰×۲۵۰</option>
+                    <option value="sidebar-300x600">سایدبار ۳۰۰×۶۰۰</option>
+                </select>
+                <input placeholder="عنوان" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+                <input placeholder="زیرعنوان" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
+                <input placeholder="دسته‌بندی نمایشی" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+                <input placeholder="لینک خروجی" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
+                <input type="number" placeholder="ترتیب" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: e.target.value })} />
+                <label>تاریخ انقضا</label>
+                <input type="datetime-local" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} />
+                <input type="file" accept="image/*,.webp,.avif" onChange={(e) => setForm({ ...form, image: e.target.files[0] })} />
+                <button type="submit">افزودن بنر</button>
+            </form>
+            {banners.map((banner) => (
+                <div key={banner.id} className="article-item">
+                    <div className="article-item-info">
+                        <h3>{banner.title || banner.placement}</h3>
+                        <p>{banner.placement} · کلیک {banner.clicks} · نمایش {banner.impressions}</p>
+                    </div>
+                    <button type="button" className="btn-delete" onClick={async () => {
+                        await fetch(`/api/admin/magazine/banners/${banner.id}`, { method: 'DELETE' });
+                        load();
+                    }}>حذف</button>
+                </div>
+            ))}
+        </div>
+    );
+};

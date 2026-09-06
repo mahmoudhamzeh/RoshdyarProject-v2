@@ -1,13 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './NewsHeader.css';
 
-const NewsHeader = () => {
+const NewsHeader = ({ categories }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [tree, setTree] = useState(categories || []);
 
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    };
+    useEffect(() => {
+        if (categories && categories.length) {
+            setTree(categories);
+            return undefined;
+        }
+        let cancelled = false;
+        fetch('/api/magazine/categories')
+            .then((res) => (res.ok ? res.json() : []))
+            .then((data) => {
+                if (!cancelled) setTree(Array.isArray(data) ? data : []);
+            })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [categories]);
 
     const isLoggedIn = (() => {
         try {
@@ -28,15 +40,18 @@ const NewsHeader = () => {
                         <Link to="/news">مجله سلامت تات کیدز</Link>
                     </div>
                 </div>
-
                 <div className={`navbar-center ${isMenuOpen ? 'active' : ''}`}>
                     <div className="navbar-links">
-                        <Link to={{ pathname: "/news", state: { category: 'همه' } }} onClick={() => setIsMenuOpen(false)}>همه</Link>
-                        <Link to={{ pathname: "/news", state: { category: 'بیماری' } }} onClick={() => setIsMenuOpen(false)}>بیماری</Link>
-                        <Link to={{ pathname: "/news", state: { category: 'آموزشی' } }} onClick={() => setIsMenuOpen(false)}>آموزش</Link>
-                        <Link to={{ pathname: "/news", state: { category: 'تغذیه' } }} onClick={() => setIsMenuOpen(false)}>تغذیه</Link>
-                        <Link to={{ pathname: "/news", state: { category: 'مادر و کودک' } }} onClick={() => setIsMenuOpen(false)}>مادر و کودک</Link>
-                        <Link to={{ pathname: "/news", state: { category: 'تربیتی' } }} onClick={() => setIsMenuOpen(false)}>تربیتی</Link>
+                        <Link to="/news" onClick={() => setIsMenuOpen(false)}>همه</Link>
+                        {tree.map((category) => (
+                            <Link
+                                key={category.id}
+                                to={`/news/category/${category.slug}`}
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                {category.name}
+                            </Link>
+                        ))}
                         {isLoggedIn ? (
                             <Link to="/dashboard" className="news-login-cta" onClick={() => setIsMenuOpen(false)}>
                                 داشبورد
@@ -48,22 +63,17 @@ const NewsHeader = () => {
                         )}
                     </div>
                 </div>
-
                 <div className="navbar-right">
                     {!isLoggedIn && (
-                        <Link to="/register" className="news-login-cta news-login-cta--desktop">
-                            ورود
-                        </Link>
+                        <Link to="/register" className="news-login-cta news-login-cta--desktop">ورود</Link>
                     )}
                     {isLoggedIn && (
-                        <Link to="/dashboard" className="news-login-cta news-login-cta--desktop">
-                            داشبورد
-                        </Link>
+                        <Link to="/dashboard" className="news-login-cta news-login-cta--desktop">داشبورد</Link>
                     )}
                     <button
                         className="navbar-toggler"
                         type="button"
-                        onClick={toggleMenu}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
                         aria-label="منو"
                         aria-expanded={isMenuOpen}
                     >
@@ -71,7 +81,7 @@ const NewsHeader = () => {
                     </button>
                 </div>
             </nav>
-            {isMenuOpen && <div className="menu-backdrop" onClick={toggleMenu} />}
+            {isMenuOpen && <div className="menu-backdrop" onClick={() => setIsMenuOpen(false)} />}
         </>
     );
 };
