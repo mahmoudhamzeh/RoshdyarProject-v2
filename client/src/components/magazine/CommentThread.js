@@ -51,7 +51,7 @@ const CommentThread = ({ postId, comments = [], onSubmitted }) => {
         setForm({ body: '', authorName: '', authorEmail: '', authorPhone: '' });
         setParent(null);
         setMessage(data.status === 'approved' ? 'دیدگاه شما ثبت شد.' : 'دیدگاه شما پس از تأیید مدیر نمایش داده می‌شود.');
-        if (onSubmitted) onSubmitted();
+        if (onSubmitted) window.setTimeout(onSubmitted, 1200);
     };
 
     return (

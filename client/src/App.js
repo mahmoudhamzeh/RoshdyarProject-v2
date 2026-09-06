@@ -60,6 +60,7 @@ const App = () => {
                 <PrivateRoute path="/cart" component={CartPage} />
                 <PrivateRoute path="/orders" component={OrdersPage} />
                 <Route exact path="/news" component={NewsPage} />
+                <Route exact path="/news/" render={() => <Redirect to="/news" />} />
                 <Route path="/news/category/:slug" component={NewsPage} />
                 <Route path="/news/tag/:slug" component={NewsPage} />
                 <Route path="/news/author/:slug" component={AuthorPage} />
