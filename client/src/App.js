@@ -18,6 +18,7 @@ import VaccinationPage from './components/VaccinationPage';
 import VaccinationStatusPage from './components/VaccinationStatusPage';
 import NewsPage from './components/NewsPage';
 import ArticleDetailPage from './components/ArticleDetailPage';
+import AuthorPage from './components/AuthorPage';
 import ShopPage from './components/ShopPage';
 import ShopCategoriesPage from './components/ShopCategoriesPage';
 import ShopSkillsPage from './components/ShopSkillsPage';
@@ -27,10 +28,13 @@ import CartPage from './components/CartPage';
 import OrdersPage from './components/OrdersPage';
 import ChildGrowthPage from './components/ChildGrowthPage';
 import MobileBottomNav from './components/MobileBottomNav';
+import { MagazineAudioProvider } from './components/magazine/AudioProvider';
 import './App.css';
+import './components/magazine/Magazine.css';
 
 const App = () => {
     return (
+        <MagazineAudioProvider>
         <Router>
             <Switch>
                 <Route path="/login" component={LoginPage} />
@@ -56,6 +60,10 @@ const App = () => {
                 <PrivateRoute path="/cart" component={CartPage} />
                 <PrivateRoute path="/orders" component={OrdersPage} />
                 <Route exact path="/news" component={NewsPage} />
+                <Route exact path="/news/" render={() => <Redirect to="/news" />} />
+                <Route path="/news/category/:slug" component={NewsPage} />
+                <Route path="/news/tag/:slug" component={NewsPage} />
+                <Route path="/news/author/:slug" component={AuthorPage} />
                 <Route path="/news/:id" component={ArticleDetailPage} />
                 <AdminRoute path="/admin" component={AdminPage} />
 
@@ -66,6 +74,7 @@ const App = () => {
             </Switch>
             <MobileBottomNav />
         </Router>
+        </MagazineAudioProvider>
     );
 };
 

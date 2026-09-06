@@ -33,6 +33,7 @@ const {
 } = require('./child-growth-data');
 const { deliverOtp } = require('./sms');
 const { analyzeConcernWithModel, chatGrowthAssistant } = require('./child-growth-ai');
+const { registerMagazineRoutes, overlayLegacyContent } = require('./magazine-routes');
 
 const app = express();
 app.set('trust proxy', Number(process.env.TRUST_PROXY || 1));
@@ -137,7 +138,16 @@ const API_CATALOG = {
             'GET /api/videos',
             'GET /api/videos/:id',
             'GET /api/podcasts',
-            'GET /api/podcasts/:id'
+            'GET /api/podcasts/:id',
+            'GET /api/magazine/home',
+            'GET /api/magazine/categories',
+            'GET /api/magazine/tags',
+            'GET /api/magazine/authors',
+            'GET /api/magazine/posts',
+            'GET /api/magazine/posts/:idOrSlug',
+            'GET /api/magazine/posts/:id/comments',
+            'POST /api/magazine/posts/:id/comments',
+            'GET /api/magazine/banners'
         ],
         shop: [
             'GET /api/shop/products/:id/comments',
@@ -213,6 +223,12 @@ const API_CATALOG = {
             'PUT /api/admin/orders/:id',
             'GET /api/admin/shop/comments',
             'PATCH /api/admin/shop/comments/:id',
+            'POST /api/admin/magazine/posts',
+            'PUT /api/admin/magazine/posts/:id',
+            'DELETE /api/admin/magazine/posts/:id',
+            'GET /api/admin/magazine/comments',
+            'PATCH /api/admin/magazine/comments/:id',
+            'POST /api/admin/magazine/banners',
             'GET /api/admin/messages',
             'POST /api/admin/messages',
             'DELETE /api/admin/messages/:id'
@@ -1738,6 +1754,9 @@ app.delete('/api/admin/podcasts/:id', isAdmin, async (req, res) => {
     if (removed) return res.json({ message: 'پادکست حذف شد' });
     res.status(404).json({ message: 'پادکست یافت نشد' });
 });
+
+overlayLegacyContent(store);
+registerMagazineRoutes(app, { store, upload, isAdmin, resolveAuthUser });
 
 // --- Shop / Products / Orders ---
 const SHOP_CATEGORIES = ['تغذیه', 'اسباب‌بازی', 'پوشاک', 'کتاب', 'بهداشت'];

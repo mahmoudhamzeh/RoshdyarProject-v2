@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 const shopStore = require('./shop-store');
+const magazineStore = require('./magazine-store');
 const { buildCategoryTree } = require('./shop-model');
 
 const SCHEMA_VERSION = 3;
@@ -935,6 +936,7 @@ function connect() {
     applyPragmas();
     db.exec(fs.readFileSync(SCHEMA_PATH, 'utf8'));
     shopStore.ensureShopSchemaSqlite(db);
+    magazineStore.ensureMagazineSchemaSqlite(db);
     prepareStatements();
     seedShopCategories();
 
@@ -945,6 +947,7 @@ function connect() {
         setSchemaVersion(SCHEMA_VERSION);
     }
     shopStore.ensureShopSchemaSqlite(db);
+    magazineStore.ensureMagazineSchemaSqlite(db);
 
     stmts.purgeOtp.run(Date.now());
     console.log(`Connected to relational SQLite (${DB_FILE}) schema v${SCHEMA_VERSION}`);
@@ -2583,6 +2586,14 @@ module.exports = {
         ageBands: shopStore.AGE_BANDS,
         skills: shopStore.SKILLS
     },
+    magazine: new Proxy({}, {
+        get(_target, prop) {
+            connect();
+            const api = magazineStore.sqliteApi(db);
+            const value = api[prop];
+            return typeof value === 'function' ? value.bind(api) : value;
+        }
+    }),
     orders,
     otp,
     normalizePhone
