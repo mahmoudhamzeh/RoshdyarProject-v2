@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import Reminders from './Reminders';
 import BrandLogo from './BrandLogo';
 import { isLoggedIn, getLoggedInUser } from '../api';
+import { getCartCount } from '../utils/cart';
 import './MainNavbar.css';
 
 const MainNavbar = () => {
@@ -23,6 +24,7 @@ const MainNavbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchQ, setSearchQ] = useState('');
+    const [cartCount, setCartCount] = useState(getCartCount());
 
     useEffect(() => {
         const syncAuth = () => {
@@ -36,6 +38,17 @@ const MainNavbar = () => {
         return () => {
             window.removeEventListener('auth-changed', syncAuth);
             window.removeEventListener('storage', syncAuth);
+        };
+    }, []);
+
+    useEffect(() => {
+        const syncCart = () => setCartCount(getCartCount());
+        syncCart();
+        window.addEventListener('cart-updated', syncCart);
+        window.addEventListener('storage', syncCart);
+        return () => {
+            window.removeEventListener('cart-updated', syncCart);
+            window.removeEventListener('storage', syncCart);
         };
     }, []);
 
@@ -119,6 +132,24 @@ const MainNavbar = () => {
                         >
                             <FontAwesomeIcon icon={faSearch} />
                         </button>
+                        <Link
+                            to="/cart"
+                            className="navbar-cart-link"
+                            aria-label={cartCount ? `سبد خرید، ${cartCount} کالا` : 'سبد خرید'}
+                            onClick={closeMenu}
+                        >
+                            <FontAwesomeIcon icon={faShoppingCart} />
+                            {cartCount > 0 && (
+                                <span className="navbar-cart-badge">
+                                    {cartCount > 99 ? '۹۹+' : cartCount.toLocaleString('fa-IR')}
+                                </span>
+                            )}
+                        </Link>
+                        {signedIn ? (
+                            <Link to="/profile" className="navbar-account-link">پروفایل</Link>
+                        ) : (
+                            <Link to="/register" className="navbar-account-link">ورود</Link>
+                        )}
                         {signedIn && <Reminders />}
                     </div>
                     <button
@@ -156,13 +187,8 @@ const MainNavbar = () => {
             )}
             {isMenuOpen && <div className="menu-backdrop" onClick={closeMenu} />}
             <div className="navbar-subbar">
-                <nav className="navbar-subbar-links" aria-label="حساب و فروشنده">
+                <nav className="navbar-subbar-links" aria-label="فروشندگان">
                     <Link to="/vendor">فروشنده شوید</Link>
-                    {signedIn ? (
-                        <Link to="/profile">پروفایل من</Link>
-                    ) : (
-                        <Link to="/register">ورود</Link>
-                    )}
                 </nav>
                 {showShopFilter && (
                     <button

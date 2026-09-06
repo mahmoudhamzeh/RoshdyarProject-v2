@@ -2058,7 +2058,7 @@ app.post('/api/shop/orders', async (req, res) => {
     if (!user) return;
     const userId = Number(user.id);
 
-    const { items, shippingAddress, phone, notes } = req.body;
+    const { items, shippingAddress, phone, notes, deliverySlot } = req.body;
     if (!Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ message: 'سبد خرید خالی است' });
     }
@@ -2067,6 +2067,9 @@ app.post('/api/shop/orders', async (req, res) => {
     }
     if (!phone || !String(phone).trim()) {
         return res.status(400).json({ message: 'شماره تماس الزامی است' });
+    }
+    if (!deliverySlot || !String(deliverySlot).trim()) {
+        return res.status(400).json({ message: 'زمان تحویل الزامی است' });
     }
 
     const orderItems = [];
@@ -2112,13 +2115,15 @@ app.post('/api/shop/orders', async (req, res) => {
     }
 
     try {
+        const deliveryNote = `زمان تحویل: ${String(deliverySlot).trim()}`;
+        const extraNotes = notes ? String(notes).trim() : '';
         const newOrder = await store.orders.create({
             userId,
             items: orderItems,
             total,
             shippingAddress: String(shippingAddress).trim(),
             phone: String(phone).trim(),
-            notes: notes ? String(notes).trim() : ''
+            notes: extraNotes ? `${deliveryNote}\n${extraNotes}` : deliveryNote
         });
         res.status(201).json(newOrder);
     } catch (err) {

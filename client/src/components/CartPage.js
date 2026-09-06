@@ -19,11 +19,28 @@ import './CartPage.css';
 
 const API = '';
 
+const todayISO = () => {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${now.getFullYear()}-${month}-${day}`;
+};
+
+const DELIVERY_SLOTS = [
+    { id: 'asap', label: 'هرچه زودتر' },
+    { id: '9-12', label: '۹ تا ۱۲' },
+    { id: '12-16', label: '۱۲ تا ۱۶' },
+    { id: '16-20', label: '۱۶ تا ۲۰' }
+];
+
 const CartPage = () => {
     const history = useHistory();
+    const signedIn = isLoggedIn();
     const [cart, setCart] = useState(getCart());
     const [shippingAddress, setShippingAddress] = useState('');
     const [phone, setPhone] = useState('');
+    const [deliveryDate, setDeliveryDate] = useState(todayISO());
+    const [deliverySlot, setDeliverySlot] = useState('asap');
     const [notes, setNotes] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -67,13 +84,17 @@ const CartPage = () => {
             return;
         }
 
+        const slotLabel = (DELIVERY_SLOTS.find((slot) => slot.id === deliverySlot) || {}).label || deliverySlot;
+        const deliveryLabel = deliverySlot === 'asap'
+            ? slotLabel
+            : `${deliveryDate}، ${slotLabel}`;
+
         setSubmitting(true);
         try {
             const res = await fetch(`${API}/api/shop/orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-user-id': user.id,
                 },
                 body: JSON.stringify({
                     items: cart.map((item) => ({
@@ -84,6 +105,7 @@ const CartPage = () => {
                     })),
                     shippingAddress,
                     phone,
+                    deliverySlot: deliveryLabel,
                     notes,
                 }),
             });
@@ -179,16 +201,15 @@ const CartPage = () => {
 
                         <aside className="cart-checkout animate-fade-up">
                             <h2>ثبت سفارش</h2>
-                            {!isLoggedIn() && (
-                                <p className="cart-shipping-note">
-                                    سبد را بدون ورود می‌چینید.
-                                    {' '}
-                                    <Link to={loginUrl('/cart')}>برای ثبت سفارش وارد شوید</Link>.
-                                </p>
-                            )}
                             <p className="cart-total">جمع کالاها: <strong>{formatPrice(total)}</strong></p>
                             <p className="cart-shipping-note">هزینه ارسال این مرحله ۰ تومان است و هر فروشنده جداگانه آماده‌سازی می‌کند.</p>
                             <p className="cart-total">قابل پرداخت: <strong>{formatPrice(total)}</strong></p>
+                            {!signedIn ? (
+                                <div className="cart-login-gate">
+                                    <p>برای انتخاب آدرس و زمان تحویل ابتدا وارد شوید یا ثبت‌نام کنید. سبدتان بعد از ورود همین‌جا می‌ماند.</p>
+                                    <Link to={loginUrl('/cart')} className="cart-login-btn">ورود / ثبت‌نام</Link>
+                                </div>
+                            ) : (
                             <form onSubmit={handleCheckout}>
                                 <label>
                                     شماره تماس
@@ -211,6 +232,28 @@ const CartPage = () => {
                                     />
                                 </label>
                                 <label>
+                                    تاریخ تحویل
+                                    <input
+                                        type="date"
+                                        value={deliveryDate}
+                                        min={todayISO()}
+                                        onChange={(e) => setDeliveryDate(e.target.value)}
+                                        required
+                                    />
+                                </label>
+                                <label>
+                                    بازه زمانی تحویل
+                                    <select
+                                        value={deliverySlot}
+                                        onChange={(e) => setDeliverySlot(e.target.value)}
+                                        required
+                                    >
+                                        {DELIVERY_SLOTS.map((slot) => (
+                                            <option key={slot.id} value={slot.id}>{slot.label}</option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <label>
                                     توضیحات (اختیاری)
                                     <textarea
                                         value={notes}
@@ -224,6 +267,7 @@ const CartPage = () => {
                                     {submitting ? 'در حال ثبت...' : 'ثبت سفارش'}
                                 </button>
                             </form>
+                            )}
                         </aside>
                     </div>
                 )}

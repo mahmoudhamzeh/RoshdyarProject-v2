@@ -189,7 +189,8 @@ async function run() {
             body: {
                 items: [{ productId: product.id, quantity: 1 }],
                 shippingAddress: 'تهران، خیابان تست',
-                phone: '09120000000'
+                phone: '09120000000',
+                deliverySlot: 'هرچه زودتر'
             }
         });
         assert.strictEqual(order.status, 201, JSON.stringify(order.data));

@@ -103,7 +103,8 @@
   gap: 0.55rem;
 }
 
-.navbar-search-btn {
+.navbar-search-btn,
+.navbar-cart-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -114,6 +115,43 @@
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   cursor: pointer;
+  text-decoration: none;
+  position: relative;
+}
+
+.navbar-cart-link:hover,
+.navbar-search-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.navbar-cart-badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  background: #e11d48;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+.navbar-account-link {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  padding: 0.25rem 0.15rem;
+  white-space: nowrap;
+}
+
+.navbar-account-link:hover {
+  color: #fde68a;
 }
 
 .navbar-search-overlay {
