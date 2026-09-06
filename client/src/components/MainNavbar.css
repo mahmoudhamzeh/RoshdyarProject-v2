@@ -103,6 +103,137 @@
   gap: 0.55rem;
 }
 
+.navbar-search-btn,
+.navbar-cart-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+}
+
+.navbar-cart-link:hover,
+.navbar-search-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.navbar-cart-badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  background: #e11d48;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+.navbar-account-link {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  padding: 0.25rem 0.15rem;
+  white-space: nowrap;
+}
+
+.navbar-account-link:hover {
+  color: #fde68a;
+}
+
+.navbar-search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 61, 58, 0.35);
+  z-index: 2200;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 4.5rem;
+}
+
+.navbar-search-panel {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: min(640px, 92vw);
+  padding: 0.75rem;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+}
+
+.navbar-search-panel input {
+  flex: 1;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+}
+
+.navbar-search-panel button {
+  border: 0;
+  border-radius: 10px;
+  background: #fde68a;
+  color: #134e4a;
+  font-weight: 800;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.navbar-subbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.4rem clamp(1rem, 3vw, 1.75rem);
+  background: #fffdf6;
+  border-bottom: 1px solid #eadfbf;
+}
+
+.navbar-filter-btn {
+  border: 0;
+  background: #0f766e;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.navbar-subbar-links {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.navbar-subbar-links a {
+  color: #0f766e;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
+.navbar-subbar-links a:hover {
+  color: #115e59;
+  text-decoration: underline;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

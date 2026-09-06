@@ -18,14 +18,56 @@ export function getLoggedInUser() {
     }
 }
 
+export function isLoggedIn() {
+    const user = getLoggedInUser();
+    return !!(user && user.id);
+}
+
+export function safeNextPath(value, fallback = '/') {
+    const next = String(value || '').trim();
+    return next.startsWith('/') && !next.startsWith('//') ? next : fallback;
+}
+
+export function loginUrl(next) {
+    const path = safeNextPath(next);
+    if (!path || path === '/dashboard' || path === '/') return '/register';
+    return `/register?next=${encodeURIComponent(path)}`;
+}
+
 export function setAuthSession(user, token) {
     if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
     if (token) localStorage.setItem(TOKEN_KEY, token);
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth-changed'));
+    }
 }
 
 export function clearAuthSession() {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(TOKEN_KEY);
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth-changed'));
+    }
+}
+
+export async function parseApiJson(response) {
+    const text = await response.text();
+    if (!text) return {};
+    try {
+        return JSON.parse(text);
+    } catch (_) {
+        const error = new Error('INVALID_JSON');
+        error.status = response.status;
+        throw error;
+    }
+}
+
+export function apiConnectionMessage(error) {
+    const status = error && error.status;
+    if (status === 502 || status === 503 || status === 504) {
+        return 'سرور در دسترس نیست. چند لحظه بعد دوباره تلاش کنید.';
+    }
+    return 'خطا در ارتباط با سرور.';
 }
 
 export function installAuthFetch() {

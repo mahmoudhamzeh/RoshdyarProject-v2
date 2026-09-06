@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import moment from 'jalali-moment';
 import { getChildDisplayName } from '../utils/childName';
 import { toShamsi } from '../utils/dateConverter';
@@ -156,7 +158,7 @@ const VaccinationStatusPage = () => {
             <div className="vax-status-page">
                 <nav className="vax-nav">
                     <button type="button" onClick={() => history.goBack()} className="vax-back-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        <FontAwesomeIcon icon={faArrowRight} />
                         <span>بازگشت</span>
                     </button>
                     <h1>وضعیت واکسیناسیون</h1>
@@ -171,7 +173,7 @@ const VaccinationStatusPage = () => {
         <div className="vax-status-page">
             <nav className="vax-nav">
                 <button type="button" onClick={() => history.goBack()} className="vax-back-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    <FontAwesomeIcon icon={faArrowRight} />
                     <span>بازگشت</span>
                 </button>
                 <h1>وضعیت واکسیناسیون</h1>

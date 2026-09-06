@@ -74,7 +74,8 @@
   margin: 0;
 }
 
-.footer-section ul li a {
+.footer-section ul li a,
+.footer-section ul li a:visited {
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   line-height: 2.1;

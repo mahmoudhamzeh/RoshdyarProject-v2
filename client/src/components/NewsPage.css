@@ -390,3 +390,24 @@
   font-weight: 700;
   text-decoration: none;
 }
+
+.news-media-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  width: 100%;
+  background: linear-gradient(135deg, #0f766e, #134e4a);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.news-media-fallback--video {
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+}
+
+.news-media-fallback--podcast {
+  background: linear-gradient(135deg, #14b8a6, #0f766e);
+  min-height: 160px;
+}

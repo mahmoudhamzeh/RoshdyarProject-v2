@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
-import { setAuthSession } from '../api';
+import { setAuthSession, parseApiJson, apiConnectionMessage, safeNextPath } from '../api';
 import './LoginPage.css';
 import './RegisterPage.css';
 
@@ -28,11 +28,6 @@ const formatTimer = (totalSec) => {
     const m = Math.floor(totalSec / 60);
     const s = totalSec % 60;
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-};
-
-const safeNextPath = (value) => {
-    const next = String(value || '').trim();
-    return next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
 };
 
 const LoginPage = () => {
@@ -97,7 +92,7 @@ const LoginPage = () => {
                 body: JSON.stringify({ login: loginInput, password: passwordInput }),
             });
 
-            const data = await response.json();
+            const data = await parseApiJson(response);
 
             if (response.status === 200) {
                 setAuthSession(data.user, data.token);
@@ -106,7 +101,7 @@ const LoginPage = () => {
                 showError(data.message || 'اطلاعات ورود نادرست است.');
             }
         } catch (error) {
-            showError('خطا در ارتباط با سرور.');
+            showError(apiConnectionMessage(error));
         } finally {
             setLoading(false);
         }
@@ -155,7 +150,7 @@ const LoginPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone }),
             });
-            const data = await response.json();
+            const data = await parseApiJson(response);
 
             if (response.status === 429 && (data.codeAlreadySent || data.expiresAt || data.expiresInSec)) {
                 enterForgotOtpStep(phone, data, { alreadySent: true });
@@ -169,7 +164,7 @@ const LoginPage = () => {
 
             enterForgotOtpStep(phone, data);
         } catch (error) {
-            showError('خطا در ارتباط با سرور.');
+            showError(apiConnectionMessage(error));
         } finally {
             sendingRef.current = false;
             setLoading(false);
@@ -196,7 +191,7 @@ const LoginPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone, code }),
             });
-            const data = await response.json();
+            const data = await parseApiJson(response);
             if (!response.ok) {
                 showError(data.message || 'اعتبارسنجی کد ناموفق بود.');
                 return;
@@ -214,7 +209,7 @@ const LoginPage = () => {
             setMode('forgot-password');
             showSuccess('کد پذیرفته شد. رمز عبور جدید را وارد کنید.');
         } catch (error) {
-            showError('خطا در ارتباط با سرور.');
+            showError(apiConnectionMessage(error));
         } finally {
             setLoading(false);
         }
@@ -251,7 +246,7 @@ const LoginPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone, code, newPassword }),
             });
-            const data = await response.json();
+            const data = await parseApiJson(response);
             if (!response.ok) {
                 showError(data.message || 'ثبت رمز عبور ناموفق بود.');
                 if (response.status === 401 || response.status === 410 || response.status === 400) {
@@ -269,7 +264,7 @@ const LoginPage = () => {
             setMode('login');
             showSuccess(data.message || 'رمز عبور ثبت شد. اکنون وارد شوید.');
         } catch (error) {
-            showError('خطا در ارتباط با سرور.');
+            showError(apiConnectionMessage(error));
         } finally {
             setLoading(false);
         }

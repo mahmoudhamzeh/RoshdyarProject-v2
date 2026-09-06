@@ -1,5 +1,6 @@
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
+import { loginUrl } from '../api';
 
 const AdminRoute = ({ component: Component, ...rest }) => {
     const getAdminUser = () => {
@@ -23,7 +24,7 @@ const AdminRoute = ({ component: Component, ...rest }) => {
                 adminUser ? (
                     <Component {...props} />
                 ) : (
-                    <Redirect to="/login" />
+                    <Redirect to={loginUrl(props.location.pathname)} />
                 )
             }
         />
