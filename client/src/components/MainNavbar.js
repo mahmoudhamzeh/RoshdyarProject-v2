@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import Reminders from './Reminders';
@@ -9,6 +9,15 @@ import './MainNavbar.css';
 
 const MainNavbar = () => {
     const history = useHistory();
+    const location = useLocation();
+    const shopParams = new URLSearchParams(location.search);
+    const showShopFilter = location.pathname === '/shop';
+    const shopFiltersActive = Boolean(
+        shopParams.get('q')
+        || shopParams.get('skill')
+        || shopParams.get('age')
+        || (shopParams.get('category') && shopParams.get('category') !== 'همه')
+    );
     const [isAdmin, setIsAdmin] = useState(false);
     const [signedIn, setSignedIn] = useState(isLoggedIn());
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -139,6 +148,15 @@ const MainNavbar = () => {
                         <Link to="/register">ورود</Link>
                     )}
                 </nav>
+                {showShopFilter && (
+                    <button
+                        type="button"
+                        className="navbar-filter-btn"
+                        onClick={() => window.dispatchEvent(new Event('shop-open-filter'))}
+                    >
+                        {shopFiltersActive ? 'فیلتر · فعال' : 'فیلتر'}
+                    </button>
+                )}
             </div>
         </>
     );

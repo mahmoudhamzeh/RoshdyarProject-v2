@@ -4,10 +4,10 @@
   gap: 0.55rem;
   align-items: stretch;
   margin: 0 0 1.25rem;
-  padding: 1rem 0.85rem 1.15rem;
+  padding: 1.05rem 0.95rem 1.35rem;
   border-radius: 16px;
   background: linear-gradient(135deg, #e11d48 0%, #fb7185 70%);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .amazing-rail__intro {
@@ -48,8 +48,9 @@
   align-items: stretch;
   gap: 0.65rem;
   overflow-x: auto;
+  overflow-y: hidden;
   min-width: 0;
-  padding: 0.1rem 0.1rem 0.15rem;
+  padding: 0.15rem 0.15rem 0.4rem;
   scrollbar-width: thin;
 }
 

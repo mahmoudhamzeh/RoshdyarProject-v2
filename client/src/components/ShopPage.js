@@ -39,6 +39,12 @@ const ShopPage = () => {
     };
 
     useEffect(() => {
+        const open = () => setFilterOpen(true);
+        window.addEventListener('shop-open-filter', open);
+        return () => window.removeEventListener('shop-open-filter', open);
+    }, []);
+
+    useEffect(() => {
         if (!filterOpen) return undefined;
         const onKey = (event) => {
             if (event.key === 'Escape') setFilterOpen(false);
@@ -96,12 +102,6 @@ const ShopPage = () => {
     return (
         <div className="shop-page shop-world">
             <MainNavbar />
-            <div className="shop-subhead">
-                <button type="button" className="shop-filter-toggle" onClick={() => setFilterOpen(true)}>
-                    فیلتر
-                    {hasFilters ? ' · فعال' : ''}
-                </button>
-            </div>
             <main className="shop-main">
                 <ShopHeroSlider
                     banners={

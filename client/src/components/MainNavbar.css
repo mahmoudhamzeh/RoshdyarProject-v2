@@ -158,12 +158,24 @@
 
 .navbar-subbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   width: 100%;
   padding: 0.4rem clamp(1rem, 3vw, 1.75rem);
   background: #fffdf6;
   border-bottom: 1px solid #eadfbf;
+}
+
+.navbar-filter-btn {
+  border: 0;
+  background: #0f766e;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 .navbar-subbar-links {
