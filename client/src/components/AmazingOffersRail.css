@@ -4,7 +4,7 @@
   gap: 0.55rem;
   align-items: stretch;
   margin: 0 0 1.25rem;
-  padding: 1.05rem 0.95rem 1.35rem;
+  padding: 1.15rem 1rem 1.55rem;
   border-radius: 16px;
   background: linear-gradient(135deg, #e11d48 0%, #fb7185 70%);
   overflow: visible;
@@ -74,7 +74,8 @@
 }
 
 .amazing-rail__media {
-  height: 86px;
+  height: 72px;
+  flex: 0 0 72px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,14 +93,14 @@
 }
 
 .amazing-rail__card h3 {
-  margin: 0.5rem 0 0.4rem;
-  font-size: 0.82rem;
-  line-height: 1.45;
+  margin: 0.4rem 0 0.3rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.4em;
+  min-height: 0;
 }
 
 .amazing-rail__price {
