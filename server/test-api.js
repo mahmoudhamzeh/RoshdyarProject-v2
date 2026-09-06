@@ -160,6 +160,12 @@ async function run() {
         assert.strictEqual(growth.status, 200);
         assert.ok(Array.isArray(growth.data));
 
+        const unauthGrowthDelete = await request('DELETE', `/api/growth/${childId}/record/1`);
+        assert.strictEqual(unauthGrowthDelete.status, 401);
+
+        const unauthReminderDelete = await request('DELETE', `/api/reminders/manual/${childId}/1`);
+        assert.strictEqual(unauthReminderDelete.status, 401);
+
         const createdChild = await request('POST', '/api/children', {
             headers: auth,
             body: {

@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { useHistory, useLocation } from 'react-router-dom';
 import MainNavbar from './MainNavbar';
 import Footer from './Footer';
 import ShopProductCard from './ShopProductCard';
@@ -12,7 +10,6 @@ import CategoryCascade from './CategoryCascade';
 import { AGE_BANDS, SORT_OPTIONS, ageBandFromBirthDate } from '../utils/shop';
 import './ShopPage.css';
 import './ShopWorld.css';
-import './VendorPanelPage.css';
 
 const API = '';
 
@@ -30,8 +27,8 @@ const ShopPage = () => {
     const [home, setHome] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [search, setSearch] = useState(query);
     const [childBands, setChildBands] = useState([]);
+    const [filterOpen, setFilterOpen] = useState(false);
     const hasFilters = category !== 'همه' || Boolean(skill || age || query);
 
     const setParam = (key, value) => {
@@ -42,8 +39,19 @@ const ShopPage = () => {
     };
 
     useEffect(() => {
-        setSearch(query);
-    }, [query]);
+        const open = () => setFilterOpen(true);
+        window.addEventListener('shop-open-filter', open);
+        return () => window.removeEventListener('shop-open-filter', open);
+    }, []);
+
+    useEffect(() => {
+        if (!filterOpen) return undefined;
+        const onKey = (event) => {
+            if (event.key === 'Escape') setFilterOpen(false);
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [filterOpen]);
 
     useEffect(() => {
         fetch(`${API}/api/shop/home`)
@@ -120,25 +128,16 @@ const ShopPage = () => {
                     <AmazingOffersRail products={home.onSale} campaign={home.campaign} />
                 )}
 
-                <section className="shop-toolbar animate-fade-up">
-                    <form
-                        className="shop-search"
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            setParam('q', search.trim());
-                        }}
+                {filterOpen && (
+                <div className="shop-filter-overlay" onClick={() => setFilterOpen(false)} role="presentation">
+                    <div
+                        className="shop-filter-modal"
+                        role="dialog"
+                        aria-label="فیلتر محصولات"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        <FontAwesomeIcon icon={faSearch} />
-                        <input
-                            type="search"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="جستجوی محصول..."
-                            aria-label="جستجوی محصول"
-                        />
-                        <button type="submit">جستجو</button>
-                    </form>
-                    <div className="shop-filter-panel shop-filter-selects">
+                    <h2>فیلتر محصولات</h2>
+                    <div className="shop-filter-selects">
                         <CategoryCascade
                             tree={home?.categories || []}
                             value={category === 'همه' ? '' : category}
@@ -185,7 +184,12 @@ const ShopPage = () => {
                             </select>
                         </label>
                     </div>
-                </section>
+                    <div className="shop-filter-modal-actions">
+                        <button type="button" onClick={() => setFilterOpen(false)}>اعمال فیلتر</button>
+                    </div>
+                    </div>
+                </div>
+                )}
 
                 {loading && <p className="shop-status">در حال بارگذاری محصولات...</p>}
                 {error && <p className="shop-status shop-error">{error}</p>}
@@ -220,18 +224,6 @@ const ShopPage = () => {
                     </section>
                 )}
 
-                <section className="shop-seller-cta animate-fade-up">
-                    <article className="shop-seller-card">
-                        <h2>فروشنده شوید</h2>
-                        <p>اگر فروشگاه یا شرکت دارید، ثبت‌نام حقیقی/حقوقی کنید، مدارک و شبا بفرستید و روی ویترین مشترک تات کیدز بفروشید.</p>
-                        <Link to="/vendor">شروع ثبت‌نام فروشنده</Link>
-                    </article>
-                    <article className="shop-seller-card is-login">
-                        <h2>ورود فروشندگان</h2>
-                        <p>اگر قبلاً درخواست داده‌اید یا فروشگاهتان تأیید شده، از اینجا وارد پنل محصول، سفارش و مالی شوید.</p>
-                        <Link to="/vendor">ورود به پنل فروشنده</Link>
-                    </article>
-                </section>
             </main>
             <Footer />
         </div>
