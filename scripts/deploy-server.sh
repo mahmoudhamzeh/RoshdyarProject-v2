@@ -84,8 +84,17 @@ else
 fi
 
 echo "==> Health"
-curl -sS --max-time 8 http://127.0.0.1:5000/api/health || true
-echo
+if curl -sfS --max-time 8 http://127.0.0.1:5000/api/health; then
+  echo
+else
+  echo
+  echo "Health check failed — Node is not answering on :5000 (nginx will show 502)." >&2
+  if command -v pm2 >/dev/null 2>&1; then
+    pm2 list || true
+    pm2 logs roshdyar --lines 80 --nostream || pm2 logs --lines 80 --nostream || true
+  fi
+  exit 1
+fi
 echo "Put JWT_SECRET, DATABASE_URL, and Idekavan SMS_* values in $APP_DIR/server/.env."
 echo "SMS check: node $APP_DIR/server/sms-check.js"
 echo "Postgres migrate: bash $APP_DIR/scripts/migrate-postgres.sh"

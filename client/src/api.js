@@ -28,6 +28,26 @@ export function clearAuthSession() {
     localStorage.removeItem(TOKEN_KEY);
 }
 
+export async function parseApiJson(response) {
+    const text = await response.text();
+    if (!text) return {};
+    try {
+        return JSON.parse(text);
+    } catch (_) {
+        const error = new Error('INVALID_JSON');
+        error.status = response.status;
+        throw error;
+    }
+}
+
+export function apiConnectionMessage(error) {
+    const status = error && error.status;
+    if (status === 502 || status === 503 || status === 504) {
+        return 'سرور در دسترس نیست. چند لحظه بعد دوباره تلاش کنید.';
+    }
+    return 'خطا در ارتباط با سرور.';
+}
+
 export function installAuthFetch() {
     if (typeof window === 'undefined' || window.__tatkidsAuthFetch) return;
     window.__tatkidsAuthFetch = true;

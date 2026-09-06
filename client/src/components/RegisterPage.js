@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import Modal from 'react-modal';
 import BrandLogo from './BrandLogo';
-import { setAuthSession } from '../api';
+import { setAuthSession, parseApiJson, apiConnectionMessage } from '../api';
 import './LoginPage.css';
 import './RegisterPage.css';
 
@@ -123,7 +123,7 @@ const RegisterPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone }),
             });
-            const data = await response.json();
+            const data = await parseApiJson(response);
 
             // Code was already sent recently — take user to OTP entry instead of leaving them stuck.
             if (response.status === 429 && (data.codeAlreadySent || data.expiresAt || data.expiresInSec)) {
@@ -138,7 +138,7 @@ const RegisterPage = () => {
 
             enterOtpStep(phone, data);
         } catch (error) {
-            showError('خطا در ارتباط با سرور.');
+            showError(apiConnectionMessage(error));
         } finally {
             sendingRef.current = false;
             setLoading(false);
@@ -166,7 +166,7 @@ const RegisterPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone, code }),
             });
-            const data = await response.json();
+            const data = await parseApiJson(response);
             if (!response.ok) {
                 showError(data.message || 'اعتبارسنجی کد ناموفق بود.');
                 return;
@@ -180,7 +180,7 @@ const RegisterPage = () => {
                 history.push('/dashboard');
             }
         } catch (error) {
-            showError('خطا در ارتباط با سرور.');
+            showError(apiConnectionMessage(error));
         } finally {
             setLoading(false);
         }
