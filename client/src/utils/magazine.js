@@ -42,7 +42,7 @@ export function absoluteUrl(path) {
 
 export function postHref(post) {
     if (!post) return '/news';
-    return `/news/${post.slug || post.id}`;
+    return `/news/${post.id}`;
 }
 
 export function typeLabel(type) {

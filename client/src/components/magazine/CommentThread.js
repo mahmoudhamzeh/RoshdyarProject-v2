@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getLoggedInUser } from '../../api';
+import { getAuthToken, getLoggedInUser } from '../../api';
 
 const CommentItem = ({ comment, onReply, depth = 0 }) => (
     <article className={`magazine-comment ${comment.isStaff ? 'is-staff' : ''}`}>
@@ -25,7 +25,7 @@ const CommentItem = ({ comment, onReply, depth = 0 }) => (
 );
 
 const CommentThread = ({ postId, comments = [], onSubmitted }) => {
-    const user = getLoggedInUser();
+    const user = getAuthToken() ? getLoggedInUser() : null;
     const [form, setForm] = useState({ body: '', authorName: '', authorEmail: '', authorPhone: '' });
     const [parent, setParent] = useState(null);
     const [message, setMessage] = useState('');

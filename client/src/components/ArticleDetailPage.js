@@ -26,7 +26,7 @@ const ArticleDetailPage = () => {
         setLoading(true);
         try {
             const [postRes, bannerRes] = await Promise.all([
-                fetch(`/api/magazine/posts/${id}`),
+                fetch(`/api/magazine/posts/${encodeURIComponent(id)}`),
                 fetch('/api/magazine/banners?placement=all')
             ]);
             if (!postRes.ok) throw new Error('محتوا یافت نشد');

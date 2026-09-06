@@ -718,7 +718,7 @@ function seedBannersSqlite(db) {
                 'مقاله منتخب مجله سلامت',
                 cat ? cat.name : '',
                 placeholderImage(`magazine-hero-${post.id}.svg`, post.title, '#0f766e'),
-                `/news/${post.slug}`,
+                `/news/${post.id}`,
                 index + 1,
                 null,
                 nowIso()
@@ -1744,10 +1744,23 @@ function pgApi(q, one, many) {
     };
 }
 
+function rewriteHeroLinksSqlite(db) {
+    const banners = db.prepare("SELECT id, link FROM magazine_banners WHERE link LIKE '/news/%'").all();
+    banners.forEach((banner) => {
+        const slug = String(banner.link || '').replace(/^\/news\//, '');
+        if (!slug || /^\d+$/.test(slug)) return;
+        const post = db.prepare('SELECT id FROM magazine_posts WHERE slug = ?').get(slug);
+        if (post) {
+            db.prepare('UPDATE magazine_banners SET link = ? WHERE id = ?').run(`/news/${post.id}`, banner.id);
+        }
+    });
+}
+
 function ensureMagazineSchemaSqlite(db) {
     db.exec(TABLES_SQLITE);
     seedTaxonomySqlite(db);
     migrateLegacySqlite(db);
+    rewriteHeroLinksSqlite(db);
 }
 
 async function ensureMagazineSchemaPg(q, one, many) {
