@@ -41,6 +41,7 @@ const MainNavbar = () => {
                 <div className={`navbar-center ${isMenuOpen ? 'active' : ''}`}>
                     <div className="navbar-links">
                         <Link to="/" onClick={closeMenu}>خانه</Link>
+                        <Link to="/about" onClick={closeMenu}>درباره ما</Link>
                         <Link to="/news" onClick={closeMenu}>مجله سلامت</Link>
                         <Link to="/shop" onClick={closeMenu}>فروشگاه</Link>
                         {isAdmin && (

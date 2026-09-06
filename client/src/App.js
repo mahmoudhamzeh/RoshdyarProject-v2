@@ -6,6 +6,7 @@ import AdminPage from './components/AdminPage';
 import AdminRoute from './components/AdminRoute';
 import PrivateRoute from './components/PrivateRoute';
 import DashboardPage from './components/DashboardPage';
+import AboutPage from './components/AboutPage';
 import MyChildrenPage from './components/MyChildrenPage';
 import AddChildPage from './components/AddChildPage';
 import EditChildPage from './components/EditChildPage';
@@ -36,6 +37,7 @@ const App = () => {
                 <Route path="/login" component={LoginPage} />
                 <Route path="/register" component={RegisterPage} />
                 <Route exact path="/" component={DashboardPage} />
+                <Route exact path="/about" component={AboutPage} />
                 <Redirect exact from="/dashboard" to="/" />
                 <Route exact path="/shop" component={ShopPage} />
                 <Route exact path="/shop/categories" component={ShopCategoriesPage} />
