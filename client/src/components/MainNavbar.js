@@ -26,6 +26,15 @@ const MainNavbar = () => {
         return () => document.body.classList.remove('nav-drawer-open');
     }, [isMenuOpen]);
 
+    useEffect(() => {
+        if (!searchOpen) return undefined;
+        const onKey = (event) => {
+            if (event.key === 'Escape') setSearchOpen(false);
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [searchOpen]);
+
     const closeMenu = () => setIsMenuOpen(false);
 
     const submitSearch = (e) => {
@@ -93,11 +102,6 @@ const MainNavbar = () => {
                             <FontAwesomeIcon icon={faSearch} />
                         </button>
                         {signedIn && <Reminders />}
-                        {signedIn ? (
-                            <Link to="/profile" className="btn btn-profile desktop-only-profile">پروفایل من</Link>
-                        ) : (
-                            <Link to="/register" className="btn btn-profile desktop-only-profile">ورود</Link>
-                        )}
                     </div>
                     <button
                         className="navbar-toggler"
@@ -111,19 +115,31 @@ const MainNavbar = () => {
                 </div>
             </nav>
             {searchOpen && (
-                <form className="navbar-search-panel" onSubmit={submitSearch}>
-                    <input
-                        type="search"
-                        value={searchQ}
-                        onChange={(e) => setSearchQ(e.target.value)}
-                        placeholder="جستجوی محصول..."
-                        aria-label="جستجوی محصول"
-                        autoFocus
-                    />
-                    <button type="submit">جستجو</button>
-                </form>
+                <div className="navbar-search-overlay" onClick={() => setSearchOpen(false)} role="presentation">
+                    <form className="navbar-search-panel" onSubmit={submitSearch} onClick={(e) => e.stopPropagation()}>
+                        <input
+                            type="search"
+                            value={searchQ}
+                            onChange={(e) => setSearchQ(e.target.value)}
+                            placeholder="جستجوی محصول..."
+                            aria-label="جستجوی محصول"
+                            autoFocus
+                        />
+                        <button type="submit">جستجو</button>
+                    </form>
+                </div>
             )}
             {isMenuOpen && <div className="menu-backdrop" onClick={closeMenu} />}
+            <div className="navbar-subbar">
+                <nav className="navbar-subbar-links" aria-label="حساب و فروشنده">
+                    <Link to="/vendor">فروشنده شوید</Link>
+                    {signedIn ? (
+                        <Link to="/profile">پروفایل من</Link>
+                    ) : (
+                        <Link to="/register">ورود</Link>
+                    )}
+                </nav>
+            </div>
         </>
     );
 };

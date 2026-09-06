@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
-import Modal from 'react-modal';
+import { useHistory, useLocation } from 'react-router-dom';
 import MainNavbar from './MainNavbar';
 import Footer from './Footer';
 import ShopProductCard from './ShopProductCard';
@@ -38,6 +37,15 @@ const ShopPage = () => {
         else next.set(key, value);
         history.replace(`/shop${next.toString() ? `?${next.toString()}` : ''}`);
     };
+
+    useEffect(() => {
+        if (!filterOpen) return undefined;
+        const onKey = (event) => {
+            if (event.key === 'Escape') setFilterOpen(false);
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [filterOpen]);
 
     useEffect(() => {
         fetch(`${API}/api/shop/home`)
@@ -89,10 +97,6 @@ const ShopPage = () => {
         <div className="shop-page shop-world">
             <MainNavbar />
             <div className="shop-subhead">
-                <nav className="shop-subhead-links" aria-label="فروشندگان">
-                    <Link to="/vendor">فروشنده شوید</Link>
-                    <Link to="/vendor">ورود</Link>
-                </nav>
                 <button type="button" className="shop-filter-toggle" onClick={() => setFilterOpen(true)}>
                     فیلتر
                     {hasFilters ? ' · فعال' : ''}
@@ -124,13 +128,14 @@ const ShopPage = () => {
                     <AmazingOffersRail products={home.onSale} campaign={home.campaign} />
                 )}
 
-                <Modal
-                    isOpen={filterOpen}
-                    onRequestClose={() => setFilterOpen(false)}
-                    contentLabel="فیلتر محصولات"
-                    className="shop-filter-modal"
-                    overlayClassName="shop-filter-overlay"
-                >
+                {filterOpen && (
+                <div className="shop-filter-overlay" onClick={() => setFilterOpen(false)} role="presentation">
+                    <div
+                        className="shop-filter-modal"
+                        role="dialog"
+                        aria-label="فیلتر محصولات"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                     <h2>فیلتر محصولات</h2>
                     <div className="shop-filter-selects">
                         <CategoryCascade
@@ -182,7 +187,9 @@ const ShopPage = () => {
                     <div className="shop-filter-modal-actions">
                         <button type="button" onClick={() => setFilterOpen(false)}>اعمال فیلتر</button>
                     </div>
-                </Modal>
+                    </div>
+                </div>
+                )}
 
                 {loading && <p className="shop-status">در حال بارگذاری محصولات...</p>}
                 {error && <p className="shop-status shop-error">{error}</p>}
