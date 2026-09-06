@@ -475,6 +475,7 @@
 @media (min-width: 992px) {
   .magazine-mobile-ad { display: none; }
 }
+@media (max-width: 768px) {
   .magazine-hero-slide img { height: 210px; }
   .magazine-ad { margin: 1rem 0; }
   .article-list-item { flex-direction: column; }
