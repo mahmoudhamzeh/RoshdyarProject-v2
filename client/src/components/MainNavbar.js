@@ -25,9 +25,18 @@ const MainNavbar = () => {
     const [searchQ, setSearchQ] = useState('');
 
     useEffect(() => {
-        const user = getLoggedInUser();
-        setSignedIn(!!(user && user.id));
-        setIsAdmin(!!(user && user.isAdmin));
+        const syncAuth = () => {
+            const user = getLoggedInUser();
+            setSignedIn(!!(user && user.id));
+            setIsAdmin(!!(user && user.isAdmin));
+        };
+        syncAuth();
+        window.addEventListener('auth-changed', syncAuth);
+        window.addEventListener('storage', syncAuth);
+        return () => {
+            window.removeEventListener('auth-changed', syncAuth);
+            window.removeEventListener('storage', syncAuth);
+        };
     }, []);
 
     useEffect(() => {
@@ -125,7 +134,14 @@ const MainNavbar = () => {
             </nav>
             {searchOpen && (
                 <div className="navbar-search-overlay" onClick={() => setSearchOpen(false)} role="presentation">
-                    <form className="navbar-search-panel" onSubmit={submitSearch} onClick={(e) => e.stopPropagation()}>
+                    <form
+                        className="navbar-search-panel"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="جستجوی محصول"
+                        onSubmit={submitSearch}
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <input
                             type="search"
                             value={searchQ}

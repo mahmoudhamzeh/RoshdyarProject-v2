@@ -37,11 +37,17 @@ export function loginUrl(next) {
 export function setAuthSession(user, token) {
     if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
     if (token) localStorage.setItem(TOKEN_KEY, token);
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth-changed'));
+    }
 }
 
 export function clearAuthSession() {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(TOKEN_KEY);
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth-changed'));
+    }
 }
 
 export function installAuthFetch() {

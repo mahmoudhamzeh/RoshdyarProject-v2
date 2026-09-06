@@ -11,4 +11,5 @@ test('loginUrl keeps next for services and omits it for home', () => {
     expect(loginUrl('/dashboard')).toBe('/register');
     expect(loginUrl('/my-children')).toBe('/register?next=%2Fmy-children');
     expect(loginUrl('/cart')).toBe('/register?next=%2Fcart');
+    expect(loginUrl('/admin')).toBe('/register?next=%2Fadmin');
 });
