@@ -18,14 +18,36 @@ export function getLoggedInUser() {
     }
 }
 
+export function isLoggedIn() {
+    const user = getLoggedInUser();
+    return !!(user && user.id);
+}
+
+export function safeNextPath(value, fallback = '/') {
+    const next = String(value || '').trim();
+    return next.startsWith('/') && !next.startsWith('//') ? next : fallback;
+}
+
+export function loginUrl(next) {
+    const path = safeNextPath(next);
+    if (!path || path === '/dashboard' || path === '/') return '/register';
+    return `/register?next=${encodeURIComponent(path)}`;
+}
+
 export function setAuthSession(user, token) {
     if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
     if (token) localStorage.setItem(TOKEN_KEY, token);
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth-changed'));
+    }
 }
 
 export function clearAuthSession() {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(TOKEN_KEY);
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth-changed'));
+    }
 }
 
 export function installAuthFetch() {

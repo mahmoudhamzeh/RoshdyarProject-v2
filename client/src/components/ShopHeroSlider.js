@@ -46,11 +46,7 @@ const ShopHeroSlider = ({ banners = [] }) => {
                 ) : (
                     <div className="shop-hero-slider__fallback" />
                 )}
-                <div className="shop-hero-slider__copy">
-                    {current.title && <h2>{current.title}</h2>}
-                    {current.subtitle && <p>{current.subtitle}</p>}
-                    <span>مشاهده و خرید</span>
-                </div>
+                <span className="visually-hidden">{current.title || 'مشاهده بنر'}</span>
             </button>
             {slides.length > 1 && (
                 <div className="shop-hero-slider__dots">

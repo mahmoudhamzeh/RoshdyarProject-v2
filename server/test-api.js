@@ -160,6 +160,12 @@ async function run() {
         assert.strictEqual(growth.status, 200);
         assert.ok(Array.isArray(growth.data));
 
+        const unauthGrowthDelete = await request('DELETE', `/api/growth/${childId}/record/1`);
+        assert.strictEqual(unauthGrowthDelete.status, 401);
+
+        const unauthReminderDelete = await request('DELETE', `/api/reminders/manual/${childId}/1`);
+        assert.strictEqual(unauthReminderDelete.status, 401);
+
         const createdChild = await request('POST', '/api/children', {
             headers: auth,
             body: {
@@ -183,7 +189,8 @@ async function run() {
             body: {
                 items: [{ productId: product.id, quantity: 1 }],
                 shippingAddress: 'تهران، خیابان تست',
-                phone: '09120000000'
+                phone: '09120000000',
+                deliverySlot: 'هرچه زودتر'
             }
         });
         assert.strictEqual(order.status, 201, JSON.stringify(order.data));

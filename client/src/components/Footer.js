@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
 import './Footer.css';
 
@@ -19,10 +20,11 @@ const Footer = () => {
                 <div className="footer-section">
                     <h4>دسترسی سریع</h4>
                     <ul>
-                        <li><a href="/dashboard">صفحه اصلی</a></li>
-                        <li><a href="/register">ورود / ثبت‌نام</a></li>
-                        <li><a href="/news">مجله سلامت</a></li>
-                        <li><a href="/shop">فروشگاه</a></li>
+                        <li><Link to="/">صفحه اصلی</Link></li>
+                        <li><Link to="/about">درباره ما</Link></li>
+                        <li><Link to="/register">ورود / ثبت‌نام</Link></li>
+                        <li><Link to="/news">مجله سلامت</Link></li>
+                        <li><Link to="/shop">فروشگاه</Link></li>
                     </ul>
                 </div>
                 <div className="footer-section">

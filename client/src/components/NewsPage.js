@@ -88,7 +88,11 @@ const NewsPage = () => {
                                 <div className="puzzle-grid">
                                     {puzzleArticles.map(article => (
                                         <Link to={`/news/${article.id}`} key={article.id} className="puzzle-item">
-                                            <img src={article.imageUrl ? `${article.imageUrl}` : 'https://placehold.co/300x200/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
+                                            {article.imageUrl ? (
+                                                <img src={article.imageUrl} alt={article.title} />
+                                            ) : (
+                                                <div className="news-media-fallback" aria-hidden="true">مقاله</div>
+                                            )}
                                             <div className="puzzle-item-content">
                                                 <span className="puzzle-category-badge">{article.category}</span>
                                                 <h3>{article.title}</h3>
@@ -112,7 +116,11 @@ const NewsPage = () => {
                                     <div className={selectedCategory === 'همه' ? 'articles-list' : 'articles-grid'}>
                                         {filteredArticles.map(article => (
                                             <Link to={`/news/${article.id}`} key={article.id} className={selectedCategory === 'همه' ? 'article-list-item' : 'article-card'}>
-                                                <img src={article.imageUrl ? `${article.imageUrl}` : 'https://placehold.co/150x100/2c3e50/FFFFFF?text=مقاله'} alt={article.title} />
+                                                {article.imageUrl ? (
+                                                    <img src={article.imageUrl} alt={article.title} />
+                                                ) : (
+                                                    <div className="news-media-fallback" aria-hidden="true">مقاله</div>
+                                                )}
                                                 <div className={selectedCategory === 'همه' ? 'article-list-item-content' : 'article-card-content'}>
                                                     <h3>{article.title}</h3>
                                                     {selectedCategory !== 'همه' && <p className="article-category-badge">{article.category}</p>}
@@ -132,7 +140,11 @@ const NewsPage = () => {
                                         <div className="videos-list">
                                             {videos.map(video => (
                                                 <a href={video.url} key={video.id} target="_blank" rel="noopener noreferrer" className="video-card">
-                                                    <img src={video.thumbnailUrl ? `${video.thumbnailUrl}` : 'https://placehold.co/300x200/3498db/FFFFFF?text=ویدیو'} alt={video.title} />
+                                                    {video.thumbnailUrl ? (
+                                                        <img src={video.thumbnailUrl} alt={video.title} />
+                                                    ) : (
+                                                        <div className="news-media-fallback news-media-fallback--video" aria-hidden="true">ویدیو</div>
+                                                    )}
                                                     <div className="video-play-icon">▶</div>
                                                     <div className="video-card-content">
                                                         <h3>{video.title}</h3>
@@ -157,7 +169,11 @@ const NewsPage = () => {
                                 <div className="podcasts-grid">
                                     {podcasts.map(podcast => (
                                         <a href={podcast.url} key={podcast.id} target="_blank" rel="noopener noreferrer" className="podcast-card">
-                                            <img src={podcast.thumbnailUrl ? `${podcast.thumbnailUrl}` : 'https://placehold.co/300x300/1abc9c/FFFFFF?text=پادکست'} alt={podcast.title} />
+                                            {podcast.thumbnailUrl ? (
+                                                <img src={podcast.thumbnailUrl} alt={podcast.title} />
+                                            ) : (
+                                                <div className="news-media-fallback news-media-fallback--podcast" aria-hidden="true">پادکست</div>
+                                            )}
                                             <div className="podcast-card-content">
                                                 <h3>{podcast.title}</h3>
                                                 <p>{podcast.summary}</p>
