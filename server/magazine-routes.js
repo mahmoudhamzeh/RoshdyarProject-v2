@@ -288,33 +288,57 @@ function overlayLegacyContent(store) {
     const origPodcastsGet = store.podcasts.getById.bind(store.podcasts);
 
     store.news.list = async () => {
-        const posts = await store.magazine.listPosts({ type: 'article' });
-        if (posts.length) return posts.map(magazineStore.toLegacyNews);
+        try {
+            const posts = await store.magazine.listPosts({ type: 'article' });
+            if (posts.length) return posts.map(magazineStore.toLegacyNews);
+        } catch (err) {
+            console.error('magazine overlay news.list failed:', err.message);
+        }
         return origNewsList();
     };
     store.news.getById = async (id) => {
-        const post = await store.magazine.getPost(id);
-        if (post && post.type === 'article') return magazineStore.toLegacyNews(post);
+        try {
+            const post = await store.magazine.getPost(id);
+            if (post && post.type === 'article') return magazineStore.toLegacyNews(post);
+        } catch (err) {
+            console.error('magazine overlay news.getById failed:', err.message);
+        }
         return origNewsGet(id);
     };
     store.videos.list = async () => {
-        const posts = await store.magazine.listPosts({ type: 'video' });
-        if (posts.length) return posts.map(magazineStore.toLegacyVideo);
+        try {
+            const posts = await store.magazine.listPosts({ type: 'video' });
+            if (posts.length) return posts.map(magazineStore.toLegacyVideo);
+        } catch (err) {
+            console.error('magazine overlay videos.list failed:', err.message);
+        }
         return origVideosList();
     };
     store.videos.getById = async (id) => {
-        const post = await store.magazine.getPost(id);
-        if (post && post.type === 'video') return magazineStore.toLegacyVideo(post);
+        try {
+            const post = await store.magazine.getPost(id);
+            if (post && post.type === 'video') return magazineStore.toLegacyVideo(post);
+        } catch (err) {
+            console.error('magazine overlay videos.getById failed:', err.message);
+        }
         return origVideosGet(id);
     };
     store.podcasts.list = async () => {
-        const posts = await store.magazine.listPosts({ type: 'podcast' });
-        if (posts.length) return posts.map(magazineStore.toLegacyPodcast);
+        try {
+            const posts = await store.magazine.listPosts({ type: 'podcast' });
+            if (posts.length) return posts.map(magazineStore.toLegacyPodcast);
+        } catch (err) {
+            console.error('magazine overlay podcasts.list failed:', err.message);
+        }
         return origPodcastsList();
     };
     store.podcasts.getById = async (id) => {
-        const post = await store.magazine.getPost(id);
-        if (post && post.type === 'podcast') return magazineStore.toLegacyPodcast(post);
+        try {
+            const post = await store.magazine.getPost(id);
+            if (post && post.type === 'podcast') return magazineStore.toLegacyPodcast(post);
+        } catch (err) {
+            console.error('magazine overlay podcasts.getById failed:', err.message);
+        }
         return origPodcastsGet(id);
     };
 }
