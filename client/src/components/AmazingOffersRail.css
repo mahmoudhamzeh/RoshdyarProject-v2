@@ -2,11 +2,12 @@
   display: grid;
   grid-template-columns: 108px minmax(0, 1fr);
   gap: 0.55rem;
+  align-items: stretch;
   margin: 0 0 1.25rem;
-  padding: 0.55rem;
+  padding: 0.7rem 0.65rem;
   border-radius: 16px;
   background: linear-gradient(135deg, #e11d48 0%, #fb7185 70%);
-  max-height: 230px;
+  overflow: hidden;
 }
 
 .amazing-rail__intro {
@@ -46,12 +47,15 @@
   display: flex;
   gap: 0.65rem;
   overflow-x: auto;
-  padding: 0.15rem 0.15rem 0.35rem;
+  min-width: 0;
+  padding: 0.1rem;
   scrollbar-width: thin;
 }
 
 .amazing-rail__card {
   flex: 0 0 132px;
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border-radius: 12px;
   padding: 0.45rem;
@@ -125,7 +129,6 @@
 @media (max-width: 768px) {
   .amazing-rail {
     grid-template-columns: 1fr;
-    max-height: none;
   }
 
   .amazing-rail__intro {

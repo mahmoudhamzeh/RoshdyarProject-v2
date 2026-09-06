@@ -4,6 +4,67 @@
   flex-direction: column;
 }
 
+.shop-subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.55rem max(1rem, calc((100% - 1120px) / 2 + 1rem));
+  background: #fffdf6;
+  border-bottom: 1px solid #eadfbf;
+}
+
+.shop-subhead-links {
+  display: flex;
+  gap: 1.1rem;
+}
+
+.shop-subhead-links a {
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.shop-filter-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 61, 58, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+}
+
+.shop-filter-modal {
+  width: min(520px, 92vw);
+  background: #fffdf6;
+  border-radius: 16px;
+  padding: 1.1rem 1.15rem 1.2rem;
+  outline: none;
+}
+
+.shop-filter-modal h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1.15rem;
+}
+
+.shop-filter-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.shop-filter-modal-actions button {
+  border: 0;
+  border-radius: 10px;
+  background: #0f766e;
+  color: #fff;
+  font-weight: 800;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+}
+
 .shop-main {
   flex: 1;
   width: min(1120px, 100%);

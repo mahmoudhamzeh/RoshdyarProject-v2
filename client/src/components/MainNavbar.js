@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import Reminders from './Reminders';
 import BrandLogo from './BrandLogo';
 import { isLoggedIn, getLoggedInUser } from '../api';
 import './MainNavbar.css';
 
 const MainNavbar = () => {
+    const history = useHistory();
     const [isAdmin, setIsAdmin] = useState(false);
     const [signedIn, setSignedIn] = useState(isLoggedIn());
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchQ, setSearchQ] = useState('');
 
     useEffect(() => {
         const user = getLoggedInUser();
@@ -22,6 +27,13 @@ const MainNavbar = () => {
     }, [isMenuOpen]);
 
     const closeMenu = () => setIsMenuOpen(false);
+
+    const submitSearch = (e) => {
+        e.preventDefault();
+        const q = searchQ.trim();
+        setSearchOpen(false);
+        history.push(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop');
+    };
 
     return (
         <>
@@ -71,6 +83,15 @@ const MainNavbar = () => {
 
                 <div className="navbar-right">
                     <div className="navbar-profile">
+                        <button
+                            type="button"
+                            className="navbar-search-btn"
+                            aria-label="جستجوی محصول"
+                            aria-expanded={searchOpen}
+                            onClick={() => setSearchOpen((open) => !open)}
+                        >
+                            <FontAwesomeIcon icon={faSearch} />
+                        </button>
                         {signedIn && <Reminders />}
                         {signedIn ? (
                             <Link to="/profile" className="btn btn-profile desktop-only-profile">پروفایل من</Link>
@@ -89,6 +110,19 @@ const MainNavbar = () => {
                     </button>
                 </div>
             </nav>
+            {searchOpen && (
+                <form className="navbar-search-panel" onSubmit={submitSearch}>
+                    <input
+                        type="search"
+                        value={searchQ}
+                        onChange={(e) => setSearchQ(e.target.value)}
+                        placeholder="جستجوی محصول..."
+                        aria-label="جستجوی محصول"
+                        autoFocus
+                    />
+                    <button type="submit">جستجو</button>
+                </form>
+            )}
             {isMenuOpen && <div className="menu-backdrop" onClick={closeMenu} />}
         </>
     );
