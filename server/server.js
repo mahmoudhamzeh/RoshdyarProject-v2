@@ -150,9 +150,6 @@ const API_CATALOG = {
             'GET /api/magazine/banners'
         ],
         shop: [
-            'GET /api/shop/products/:id/comments',
-            'POST /api/shop/products/:id/comments',
-            'POST /api/shop/comments/:id/vote',
             'GET /api/shop/home',
             'GET /api/shop/sale',
             'GET /api/shop/categories',
@@ -192,7 +189,7 @@ const API_CATALOG = {
             'PUT /api/messages/:id/read',
             'DELETE /api/messages/:id'
         ],
-        tickets: ['GET /api/tickets', 'POST /api/tickets', 'GET /api/tickets/:id'],
+        tickets: ['GET /api/tickets', 'GET /api/tickets/groups', 'POST /api/tickets', 'GET /api/tickets/:id'],
         admin: [
             'GET /api/admin/stats',
             'GET /api/admin/users',
@@ -231,7 +228,14 @@ const API_CATALOG = {
             'POST /api/admin/magazine/banners',
             'GET /api/admin/messages',
             'POST /api/admin/messages',
-            'DELETE /api/admin/messages/:id'
+            'DELETE /api/admin/messages/:id',
+            'GET /api/admin/product-categories',
+            'POST /api/admin/product-categories',
+            'PUT /api/admin/product-categories/:id',
+            'DELETE /api/admin/product-categories/:id',
+            'GET /api/admin/vendors',
+            'PUT /api/admin/vendors/:id',
+            'PATCH /api/admin/products/:id/review'
         ]
     }
 };
@@ -525,8 +529,8 @@ async function issueOtp({ phone, purpose, res }) {
         expiresInSec: Math.floor(OTP_TTL_MS / 1000),
         expiresAt: new Date(expiresAt).toISOString()
     };
-    // Help local testing when no SMS provider is configured
-    if (process.env.NODE_ENV !== 'production' || !process.env.SMS_API_KEY) {
+    // Local/test only — never return the code in production responses
+    if (process.env.NODE_ENV !== 'production') {
         payload.devOtp = code;
     }
     return res.status(200).json(payload);
@@ -1244,6 +1248,7 @@ app.put('/api/growth/:childId/record/:recordId', async (req, res) => {
 
 app.delete('/api/growth/:childId/record/:recordId', async (req, res) => {
     const { childId, recordId } = req.params;
+    if (!(await requireOwnedChild(req, res))) return;
     if (!await store.growth.removeById(childId, recordId)) {
         return res.status(404).json({ message: 'رکورد یافت نشد' });
     }
@@ -1252,6 +1257,7 @@ app.delete('/api/growth/:childId/record/:recordId', async (req, res) => {
 
 app.delete('/api/growth/:childId/:date', async (req, res) => {
     const { childId, date } = req.params;
+    if (!(await requireOwnedChild(req, res))) return;
     const normalized = normalizeGrowthDate(decodeURIComponent(date));
     if (!await store.growth.removeByDate(childId, normalized) && !await store.growth.removeByDate(childId, date)) {
         return res.status(404).json({ message: 'رکورد یافت نشد' });
@@ -2071,7 +2077,7 @@ app.post('/api/shop/orders', async (req, res) => {
     if (!user) return;
     const userId = Number(user.id);
 
-    const { items, shippingAddress, phone, notes } = req.body;
+    const { items, shippingAddress, phone, notes, deliverySlot } = req.body;
     if (!Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ message: 'سبد خرید خالی است' });
     }
@@ -2080,6 +2086,9 @@ app.post('/api/shop/orders', async (req, res) => {
     }
     if (!phone || !String(phone).trim()) {
         return res.status(400).json({ message: 'شماره تماس الزامی است' });
+    }
+    if (!deliverySlot || !String(deliverySlot).trim()) {
+        return res.status(400).json({ message: 'زمان تحویل الزامی است' });
     }
 
     const orderItems = [];
@@ -2125,13 +2134,15 @@ app.post('/api/shop/orders', async (req, res) => {
     }
 
     try {
+        const deliveryNote = `زمان تحویل: ${String(deliverySlot).trim()}`;
+        const extraNotes = notes ? String(notes).trim() : '';
         const newOrder = await store.orders.create({
             userId,
             items: orderItems,
             total,
             shippingAddress: String(shippingAddress).trim(),
             phone: String(phone).trim(),
-            notes: notes ? String(notes).trim() : ''
+            notes: extraNotes ? `${deliveryNote}\n${extraNotes}` : deliveryNote
         });
         res.status(201).json(newOrder);
     } catch (err) {
@@ -2277,6 +2288,7 @@ app.post('/api/reminders/manual/:childId', async (req, res) => {
 
 app.delete('/api/reminders/manual/:childId/:reminderId', async (req, res) => {
     const { childId, reminderId } = req.params;
+    if (!(await requireOwnedChild(req, res))) return;
     if (await store.reminders.remove(childId, reminderId)) {
         res.status(200).json({ message: 'یادآوری با موفقیت حذف شد' });
     } else {

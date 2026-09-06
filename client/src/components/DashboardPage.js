@@ -77,8 +77,8 @@ const DashboardPage = () => {
                             image: video.thumbnailUrl
                                 ? `${video.thumbnailUrl}`
                                 : youtubeThumb(video.url),
-                            link: video.slug ? `/news/${video.slug}` : '/news#educational-videos',
-                            externalUrl: video.slug ? undefined : video.url,
+                            link: `/news/${video.id}`,
+                            externalUrl: undefined,
                             isVideo: true,
                         }));
                         setVideos(formattedVideos);

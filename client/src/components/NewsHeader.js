@@ -53,8 +53,8 @@ const NewsHeader = ({ categories }) => {
                             </Link>
                         ))}
                         {isLoggedIn ? (
-                            <Link to="/dashboard" className="news-login-cta" onClick={() => setIsMenuOpen(false)}>
-                                داشبورد
+                            <Link to="/" className="news-login-cta" onClick={() => setIsMenuOpen(false)}>
+                                خانه
                             </Link>
                         ) : (
                             <Link to="/register" className="news-login-cta" onClick={() => setIsMenuOpen(false)}>
@@ -68,7 +68,9 @@ const NewsHeader = ({ categories }) => {
                         <Link to="/register" className="news-login-cta news-login-cta--desktop">ورود</Link>
                     )}
                     {isLoggedIn && (
-                        <Link to="/dashboard" className="news-login-cta news-login-cta--desktop">داشبورد</Link>
+                        <Link to="/" className="news-login-cta news-login-cta--desktop">
+                            خانه
+                        </Link>
                     )}
                     <button
                         className="navbar-toggler"
