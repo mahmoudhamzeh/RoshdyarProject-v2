@@ -12,7 +12,10 @@ const DOC_LABELS = {
 };
 
 const STATUS_LABELS = {
+    draft: 'پیش‌نویس',
     pending: 'در انتظار تأیید',
+    returned: 'برگشت‌خورده',
+    docs_requested: 'نیاز به مدرک تکمیلی',
     active: 'تأییدشده',
     suspended: 'تعلیق‌شده',
     rejected: 'رد شده'
@@ -32,6 +35,7 @@ const VendorDetailPage = () => {
     const history = useHistory();
     const [vendor, setVendor] = useState(null);
     const [commission, setCommission] = useState('');
+    const [adminNote, setAdminNote] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
@@ -48,6 +52,7 @@ const VendorDetailPage = () => {
         setError('');
         setVendor(data);
         setCommission(String(data.commissionPct ?? ''));
+        setAdminNote(data.adminNote || '');
         setLoading(false);
     };
 
@@ -76,6 +81,7 @@ const VendorDetailPage = () => {
         setError('');
         setVendor(data);
         setCommission(String(data.commissionPct ?? ''));
+        setAdminNote(data.adminNote || '');
     };
 
     if (loading) return <p>در حال بارگذاری پرونده فروشنده...</p>;
@@ -160,6 +166,7 @@ const VendorDetailPage = () => {
                     <Field label="استان" value={vendor.province} />
                     <Field label="شهر" value={vendor.city} />
                     <Field label="نشانی" value={vendor.address} />
+                    <Field label="کد پستی" value={vendor.postalCode} />
                     <Field label="سایت" value={vendor.website} />
                     <Field label="اینستاگرام" value={vendor.instagram ? `@${String(vendor.instagram).replace(/^@/, '')}` : ''} />
                 </div>
@@ -199,6 +206,9 @@ const VendorDetailPage = () => {
 
             <section className="vendor-card vendor-review-actions">
                 <h3>{vendor.kind === 'internal' ? 'کمیسیون فروشنده داخلی' : 'بررسی و تأیید'}</h3>
+                {vendor.adminNote ? (
+                    <p className="vendor-note">پیام قبلی به فروشنده: {vendor.adminNote}</p>
+                ) : null}
                 <label>
                     کمیسیون ٪
                     <input
@@ -215,24 +225,51 @@ const VendorDetailPage = () => {
                 </label>
                 {vendor.kind !== 'internal' && (
                     <>
+                        <label className="vendor-admin-note">
+                            پیام به فروشنده
+                            <textarea
+                                value={adminNote}
+                                onChange={(e) => setAdminNote(e.target.value)}
+                                rows="3"
+                                placeholder="برای برگشت یا درخواست مدرک، توضیح بنویسید"
+                            />
+                        </label>
                         <div className="vendor-review-buttons">
                             {vendor.status !== 'active' && (
                                 <button
                                     type="button"
                                     className="btn-edit"
                                     disabled={!vendor.profileComplete}
-                                    onClick={() => update({ status: 'active', commissionPct: commission })}
+                                    onClick={() => update({ status: 'active', commissionPct: commission, adminNote: '' })}
                                 >
-                                    تأیید فروشنده
+                                    تکمیل درخواست
+                                </button>
+                            )}
+                            {vendor.status !== 'returned' && vendor.status !== 'active' && (
+                                <button
+                                    type="button"
+                                    className="btn-return"
+                                    onClick={() => update({ status: 'returned', adminNote })}
+                                >
+                                    برگشت درخواست
+                                </button>
+                            )}
+                            {vendor.status !== 'docs_requested' && vendor.status !== 'active' && (
+                                <button
+                                    type="button"
+                                    className="btn-docs"
+                                    onClick={() => update({ status: 'docs_requested', adminNote })}
+                                >
+                                    درخواست مدرک
                                 </button>
                             )}
                             {vendor.status === 'pending' && (
-                                <button type="button" className="btn-delete" onClick={() => update({ status: 'rejected' })}>
+                                <button type="button" className="btn-delete" onClick={() => update({ status: 'rejected', adminNote })}>
                                     رد درخواست
                                 </button>
                             )}
                             {vendor.status === 'active' && (
-                                <button type="button" className="btn-delete" onClick={() => update({ status: 'suspended' })}>
+                                <button type="button" className="btn-delete" onClick={() => update({ status: 'suspended', adminNote })}>
                                     تعلیق
                                 </button>
                             )}
@@ -248,7 +285,7 @@ const VendorDetailPage = () => {
                             )}
                         </div>
                         {!vendor.profileComplete && vendor.status !== 'active' && (
-                            <p>تا وقتی موارد ناقص تکمیل نشود، تأیید ممکن نیست.</p>
+                            <p>تا وقتی موارد ناقص تکمیل نشود، تکمیل درخواست ممکن نیست.</p>
                         )}
                     </>
                 )}

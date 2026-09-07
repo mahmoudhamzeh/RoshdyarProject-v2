@@ -127,7 +127,9 @@
 }
 
 .vendor-review-buttons .btn-edit,
-.vendor-review-buttons .btn-delete {
+.vendor-review-buttons .btn-delete,
+.vendor-review-buttons .btn-return,
+.vendor-review-buttons .btn-docs {
     border: none;
     color: #fff;
     border-radius: 8px;
@@ -140,6 +142,14 @@
     background: #0f766e;
 }
 
+.vendor-review-buttons .btn-return {
+    background: #c2410c;
+}
+
+.vendor-review-buttons .btn-docs {
+    background: #1d4ed8;
+}
+
 .vendor-review-buttons .btn-edit:disabled {
     opacity: 0.45;
     cursor: not-allowed;
@@ -147,6 +157,18 @@
 
 .vendor-review-buttons .btn-delete {
     background: #e74c3c;
+}
+
+.vendor-admin-note {
+    max-width: none !important;
+    margin-top: 0.85rem;
+}
+
+.vendor-admin-note textarea {
+    padding: 0.65rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
 }
 
 .vendor-back {

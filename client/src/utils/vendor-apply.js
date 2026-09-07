@@ -44,29 +44,31 @@ export function shebaDigits(value) {
     return raw.replace(/\D/g, '').slice(0, 24);
 }
 
-export function identityErrors(form) {
-    const errors = [];
+export function identityFieldErrors(form) {
+    const err = {};
     if (!String(form.displayName || '').trim() || String(form.displayName).trim().length < 3) {
-        errors.push('نام فروشگاه الزامی است');
+        err.displayName = 'نام فروشگاه را وارد کنید';
     }
-    if (!String(form.ownerName || '').trim()) errors.push('نام صاحب / نماینده الزامی است');
+    if (!String(form.ownerName || '').trim()) err.ownerName = 'نام صاحب / نماینده را وارد کنید';
     const nationalDigits = digitsOnly(form.nationalId);
     if (form.personKind === 'company') {
-        if (nationalDigits.length !== 11) errors.push('شناسه ملی شرکت باید ۱۱ رقم باشد');
-        if (!String(form.legalName || '').trim()) errors.push('نام حقوقی الزامی است');
-        if (!String(form.registrationNo || '').trim()) errors.push('شماره ثبت الزامی است');
+        if (nationalDigits.length !== 11) err.nationalId = 'شناسه ملی باید ۱۱ رقم باشد';
+        if (!String(form.legalName || '').trim()) err.legalName = 'نام حقوقی را وارد کنید';
+        if (!String(form.registrationNo || '').trim()) err.registrationNo = 'شماره ثبت را وارد کنید';
     } else if (nationalDigits.length !== 10) {
-        errors.push('کد ملی باید ۱۰ رقم و فقط عدد باشد');
+        err.nationalId = 'کد ملی باید ۱۰ رقم باشد';
     }
     const phone = digitsOnly(form.phone);
-    if (!/^09\d{9}$/.test(phone)) errors.push('شماره تماس معتبر نیست');
+    if (!/^09\d{9}$/.test(phone)) err.phone = 'شماره تماس معتبر نیست';
     if (form.phone2) {
         const phone2 = digitsOnly(form.phone2);
-        if (phone2 && !/^09\d{9}$/.test(phone2)) errors.push('شماره دوم معتبر نیست');
+        if (phone2 && !/^09\d{9}$/.test(phone2)) err.phone2 = 'شماره دوم معتبر نیست';
     }
-    if (!String(form.province || '').trim()) errors.push('استان را انتخاب کنید');
-    if (!String(form.city || '').trim()) errors.push('شهر را انتخاب کنید');
-    if (!String(form.address || '').trim()) errors.push('نشانی کامل الزامی است');
+    if (!String(form.province || '').trim()) err.province = 'استان را انتخاب کنید';
+    if (!String(form.city || '').trim()) err.city = 'شهر را انتخاب کنید';
+    if (!String(form.address || '').trim()) err.address = 'نشانی کامل را وارد کنید';
+    const postal = digitsOnly(form.postalCode);
+    if (postal.length !== 10) err.postalCode = 'کد پستی باید ۱۰ رقم باشد';
     if (String(form.website || '').trim()) {
         const raw = String(form.website).trim();
         const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
@@ -74,7 +76,7 @@ export function identityErrors(form) {
             const url = new URL(withProtocol);
             if (!['http:', 'https:'].includes(url.protocol)) throw new Error('bad');
         } catch (_) {
-            errors.push('آدرس سایت معتبر نیست');
+            err.website = 'آدرس سایت معتبر نیست';
         }
     }
     if (String(form.instagram || '').trim()) {
@@ -82,18 +84,26 @@ export function identityErrors(form) {
             .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
             .replace(/\/.*$/, '')
             .replace(/^@/, '');
-        if (!/^[A-Za-z0-9._]{1,30}$/.test(handle)) errors.push('آدرس اینستاگرام معتبر نیست');
+        if (!/^[A-Za-z0-9._]{1,30}$/.test(handle)) err.instagram = 'آدرس اینستاگرام معتبر نیست';
     }
-    return errors;
+    return err;
+}
+
+export function identityErrors(form) {
+    return Object.values(identityFieldErrors(form));
+}
+
+export function financeFieldErrors(form) {
+    const err = {};
+    if (!IRAN_BANKS.includes(String(form.bankName || '').trim())) {
+        err.bankName = 'بانک را از فهرست انتخاب کنید';
+    }
+    if (shebaDigits(form.bankSheba).length !== 24) {
+        err.bankSheba = 'شماره شبا باید ۲۴ رقم بعد از IR باشد';
+    }
+    return err;
 }
 
 export function financeErrors(form) {
-    const errors = [];
-    if (!IRAN_BANKS.includes(String(form.bankName || '').trim())) {
-        errors.push('بانک را از فهرست انتخاب کنید');
-    }
-    if (shebaDigits(form.bankSheba).length !== 24) {
-        errors.push('شماره شبا باید ۲۴ رقم بعد از IR باشد');
-    }
-    return errors;
+    return Object.values(financeFieldErrors(form));
 }

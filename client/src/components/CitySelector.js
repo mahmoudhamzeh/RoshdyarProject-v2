@@ -34,10 +34,20 @@ export const provinces = {
     "خراسان جنوبی": ["بیرجند", "قائن", "فردوس"]
 };
 
-const CitySelector = ({ selectedProvince, selectedCity, onProvinceChange, onCityChange, required = false }) => {
+const CitySelector = ({
+    selectedProvince,
+    selectedCity,
+    onProvinceChange,
+    onCityChange,
+    required = false,
+    invalidProvince = false,
+    invalidCity = false,
+    provinceError = '',
+    cityError = ''
+}) => {
     return (
         <>
-            <div className="form-group">
+            <div className={`form-group${invalidProvince ? ' is-invalid' : ''}`}>
                 <label>استان{required ? ' *' : ''}</label>
                 <select name="province" value={selectedProvince} onChange={onProvinceChange} required={required}>
                     <option value="">انتخاب استان</option>
@@ -45,8 +55,9 @@ const CitySelector = ({ selectedProvince, selectedCity, onProvinceChange, onCity
                         <option key={province} value={province}>{province}</option>
                     ))}
                 </select>
+                {provinceError ? <span className="vendor-field-error">{provinceError}</span> : null}
             </div>
-            <div className="form-group">
+            <div className={`form-group${invalidCity ? ' is-invalid' : ''}`}>
                 <label>شهر{required ? ' *' : ''}</label>
                 <select name="city" value={selectedCity} onChange={onCityChange} disabled={!selectedProvince} required={required}>
                     <option value="">انتخاب شهر</option>
@@ -54,6 +65,7 @@ const CitySelector = ({ selectedProvince, selectedCity, onProvinceChange, onCity
                         <option key={city} value={city}>{city}</option>
                     ))}
                 </select>
+                {cityError ? <span className="vendor-field-error">{cityError}</span> : null}
             </div>
         </>
     );
