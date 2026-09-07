@@ -258,14 +258,27 @@ function mapVendorDocRow(row) {
     };
 }
 
-function isVendorProfileComplete(vendor) {
-    if (!vendor) return false;
-    const hasCore = vendor.displayName && vendor.phone && vendor.ownerName && vendor.nationalId
-        && vendor.bankName && vendor.bankSheba && vendor.address;
-    if (!hasCore) return false;
-    if (vendor.personKind === 'company' && (!vendor.legalName || !vendor.registrationNo)) return false;
+function vendorMissingFields(vendor) {
+    if (!vendor) return ['پرونده یافت نشد'];
+    const missing = [];
+    if (!vendor.displayName) missing.push('نام فروشگاه');
+    if (!vendor.phone) missing.push('شماره تماس');
+    if (!vendor.ownerName) missing.push('نام صاحب / نماینده');
+    if (!vendor.nationalId) missing.push('کد ملی / شناسه');
+    if (!vendor.address) missing.push('نشانی');
+    if (!vendor.bankName) missing.push('نام بانک');
+    if (!vendor.bankSheba) missing.push('شماره شبا');
+    if (vendor.personKind === 'company') {
+        if (!vendor.legalName) missing.push('نام حقوقی');
+        if (!vendor.registrationNo) missing.push('شماره ثبت');
+    }
     const docs = vendor.docs || [];
-    return docs.length >= 2;
+    if (docs.length < 2) missing.push(`مدارک (حداقل ۲ فایل، الان ${docs.length})`);
+    return missing;
+}
+
+function isVendorProfileComplete(vendor) {
+    return vendorMissingFields(vendor).length === 0;
 }
 
 function slugifyVendor(name) {
@@ -667,7 +680,17 @@ function hydrateVendorSqlite(db, vendor) {
     if (!vendor) return null;
     const docs = listVendorDocsSqlite(db, vendor.id);
     const next = { ...vendor, docs };
-    return { ...next, profileComplete: isVendorProfileComplete(next) };
+    return {
+        ...next,
+        profileComplete: isVendorProfileComplete(next),
+        missingFields: vendorMissingFields(next)
+    };
+}
+
+function getVendorByIdSqlite(db, id) {
+    return hydrateVendorSqlite(db, mapVendorRow(
+        db.prepare('SELECT * FROM shop_vendors WHERE id = ?').get(Number(id))
+    ));
 }
 
 function listVendorsSqlite(db) {
@@ -1083,7 +1106,15 @@ async function hydrateVendorPg(many, vendor) {
     if (!vendor) return null;
     const docs = await listVendorDocsPg(many, vendor.id);
     const next = { ...vendor, docs };
-    return { ...next, profileComplete: isVendorProfileComplete(next) };
+    return {
+        ...next,
+        profileComplete: isVendorProfileComplete(next),
+        missingFields: vendorMissingFields(next)
+    };
+}
+
+async function getVendorByIdPg(one, many, id) {
+    return hydrateVendorPg(many, mapVendorRow(await one('SELECT * FROM shop_vendors WHERE id = $1', [Number(id)])));
 }
 
 async function listVendorsPg(many) {
@@ -1313,6 +1344,7 @@ module.exports = {
     listCampaignSqlite,
     listOffersForProductSqlite,
     listVendorsSqlite,
+    getVendorByIdSqlite,
     getVendorByUserSqlite,
     applyVendorSqlite,
     updateVendorSqlite,
@@ -1333,6 +1365,7 @@ module.exports = {
     listCampaignPg,
     listOffersForProductPg,
     listVendorsPg,
+    getVendorByIdPg,
     getVendorByUserPg,
     applyVendorPg,
     updateVendorPg,

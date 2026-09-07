@@ -234,6 +234,7 @@ const API_CATALOG = {
             'PUT /api/admin/product-categories/:id',
             'DELETE /api/admin/product-categories/:id',
             'GET /api/admin/vendors',
+            'GET /api/admin/vendors/:id',
             'PUT /api/admin/vendors/:id',
             'PATCH /api/admin/products/:id/review'
         ]
@@ -2543,14 +2544,43 @@ app.post('/api/shop/vendors/me/docs', upload.array('docs', 8), async (req, res) 
     res.status(201).json(await store.shop.getVendorByUser(user.id));
 });
 
+function publicApplicant(user) {
+    if (!user) return null;
+    return {
+        id: user.id,
+        username: user.username || '',
+        email: user.email || '',
+        mobile: user.mobile || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || ''
+    };
+}
+
+async function adminVendorPayload(vendor) {
+    if (!vendor) return null;
+    const applicant = vendor.userId ? publicApplicant(await store.users.getById(vendor.userId)) : null;
+    return { ...vendor, applicant };
+}
+
 app.get('/api/admin/vendors', isAdmin, async (req, res) => {
-    res.json(await store.shop.listVendors());
+    const vendors = await store.shop.listVendors();
+    res.json(await Promise.all(vendors.map((vendor) => adminVendorPayload(vendor))));
+});
+
+app.get('/api/admin/vendors/:id', isAdmin, async (req, res) => {
+    const vendor = await store.shop.getVendor(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'فروشنده یافت نشد' });
+    res.json(await adminVendorPayload(vendor));
 });
 
 app.put('/api/admin/vendors/:id', isAdmin, async (req, res) => {
-    const current = (await store.shop.listVendors()).find((item) => Number(item.id) === Number(req.params.id));
-    if (req.body.status === 'active' && current && !current.profileComplete) {
-        return res.status(400).json({ message: 'مدارک و اطلاعات حقیقی/حقوقی و مالی هنوز کامل نیست' });
+    const current = await store.shop.getVendor(req.params.id);
+    if (!current) return res.status(404).json({ message: 'فروشنده یافت نشد' });
+    if (req.body.status === 'active' && !current.profileComplete) {
+        return res.status(400).json({
+            message: 'مدارک و اطلاعات حقیقی/حقوقی و مالی هنوز کامل نیست',
+            missingFields: current.missingFields || []
+        });
     }
     const updated = await store.shop.updateVendor(req.params.id, {
         ...vendorPayloadFromBody(req.body, null),
@@ -2562,7 +2592,7 @@ app.put('/api/admin/vendors/:id', isAdmin, async (req, res) => {
         docsNote: req.body.docsNote
     });
     if (!updated) return res.status(404).json({ message: 'فروشنده یافت نشد' });
-    res.json(updated);
+    res.json(await adminVendorPayload(updated));
 });
 
 app.get('/api/vendor/offers', requireVendor, async (req, res) => {
