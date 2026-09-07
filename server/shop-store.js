@@ -243,7 +243,10 @@ function mapVendorRow(row) {
         address: row.address || '',
         bankName: row.bank_name || '',
         bankSheba: row.bank_sheba || '',
-        bankAccount: row.bank_account || ''
+        bankAccount: row.bank_account || '',
+        website: row.website || '',
+        instagram: row.instagram || '',
+        phone2: row.phone2 || ''
     };
 }
 
@@ -265,6 +268,8 @@ function vendorMissingFields(vendor) {
     if (!vendor.phone) missing.push('شماره تماس');
     if (!vendor.ownerName) missing.push('نام صاحب / نماینده');
     if (!vendor.nationalId) missing.push('کد ملی / شناسه');
+    if (!vendor.province) missing.push('استان');
+    if (!vendor.city) missing.push('شهر');
     if (!vendor.address) missing.push('نشانی');
     if (!vendor.bankName) missing.push('نام بانک');
     if (!vendor.bankSheba) missing.push('شماره شبا');
@@ -292,7 +297,7 @@ function slugifyVendor(name) {
 }
 
 function seedShopExtrasSqlite(db) {
-    ['user_id', 'phone', 'docs_note'].forEach((col) => {
+    ['user_id', 'phone', 'docs_note', 'website', 'instagram', 'phone2'].forEach((col) => {
         const type = col === 'user_id' ? 'INTEGER' : 'TEXT';
         if (!sqliteHasColumn(db, 'shop_vendors', col)) {
             db.exec(`ALTER TABLE shop_vendors ADD COLUMN ${col} ${type}`);
@@ -587,7 +592,10 @@ function ensureShopSchemaSqlite(db) {
         ['address', 'TEXT'],
         ['bank_name', 'TEXT'],
         ['bank_sheba', 'TEXT'],
-        ['bank_account', 'TEXT']
+        ['bank_account', 'TEXT'],
+        ['website', 'TEXT'],
+        ['instagram', 'TEXT'],
+        ['phone2', 'TEXT']
     ].forEach(([col, type]) => {
         if (!sqliteHasColumn(db, 'shop_vendors', col)) {
             db.exec(`ALTER TABLE shop_vendors ADD COLUMN ${col} ${type}`);
@@ -710,7 +718,8 @@ function writeVendorSqlite(db, id, next) {
         UPDATE shop_vendors SET
             display_name = ?, status = ?, commission_pct = ?, settlement_cycle = ?, phone = ?, docs_note = ?,
             person_kind = ?, national_id = ?, legal_name = ?, registration_no = ?, economic_code = ?,
-            owner_name = ?, province = ?, city = ?, address = ?, bank_name = ?, bank_sheba = ?, bank_account = ?
+            owner_name = ?, province = ?, city = ?, address = ?, bank_name = ?, bank_sheba = ?, bank_account = ?,
+            website = ?, instagram = ?, phone2 = ?
         WHERE id = ?
     `).run(
         next.displayName,
@@ -731,6 +740,9 @@ function writeVendorSqlite(db, id, next) {
         next.bankName || null,
         next.bankSheba || null,
         next.bankAccount || null,
+        next.website || null,
+        next.instagram || null,
+        next.phone2 || null,
         Number(id)
     );
     return hydrateVendorSqlite(db, mapVendorRow(db.prepare('SELECT * FROM shop_vendors WHERE id = ?').get(Number(id))));
@@ -927,6 +939,9 @@ async function ensureShopSchemaPg(q, one, many) {
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS bank_name TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS bank_sheba TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS bank_account TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS website TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS instagram TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS phone2 TEXT');
     await q("ALTER TABLE products ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'approved'");
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS user_id BIGINT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS phone TEXT');
@@ -1133,8 +1148,9 @@ async function writeVendorPg(q, one, many, id, next) {
         `UPDATE shop_vendors SET
             display_name=$1, status=$2, commission_pct=$3, settlement_cycle=$4, phone=$5, docs_note=$6,
             person_kind=$7, national_id=$8, legal_name=$9, registration_no=$10, economic_code=$11,
-            owner_name=$12, province=$13, city=$14, address=$15, bank_name=$16, bank_sheba=$17, bank_account=$18
-         WHERE id=$19 RETURNING *`,
+            owner_name=$12, province=$13, city=$14, address=$15, bank_name=$16, bank_sheba=$17, bank_account=$18,
+            website=$19, instagram=$20, phone2=$21
+         WHERE id=$22 RETURNING *`,
         [
             next.displayName,
             next.status,
@@ -1154,6 +1170,9 @@ async function writeVendorPg(q, one, many, id, next) {
             next.bankName || null,
             next.bankSheba || null,
             next.bankAccount || null,
+            next.website || null,
+            next.instagram || null,
+            next.phone2 || null,
             Number(id)
         ]
     );

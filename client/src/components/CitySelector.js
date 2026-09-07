@@ -34,12 +34,12 @@ export const provinces = {
     "خراسان جنوبی": ["بیرجند", "قائن", "فردوس"]
 };
 
-const CitySelector = ({ selectedProvince, selectedCity, onProvinceChange, onCityChange }) => {
+const CitySelector = ({ selectedProvince, selectedCity, onProvinceChange, onCityChange, required = false }) => {
     return (
         <>
             <div className="form-group">
-                <label>استان</label>
-                <select name="province" value={selectedProvince} onChange={onProvinceChange}>
+                <label>استان{required ? ' *' : ''}</label>
+                <select name="province" value={selectedProvince} onChange={onProvinceChange} required={required}>
                     <option value="">انتخاب استان</option>
                     {Object.keys(provinces).map(province => (
                         <option key={province} value={province}>{province}</option>
@@ -47,8 +47,8 @@ const CitySelector = ({ selectedProvince, selectedCity, onProvinceChange, onCity
                 </select>
             </div>
             <div className="form-group">
-                <label>شهر</label>
-                <select name="city" value={selectedCity} onChange={onCityChange} disabled={!selectedProvince}>
+                <label>شهر{required ? ' *' : ''}</label>
+                <select name="city" value={selectedCity} onChange={onCityChange} disabled={!selectedProvince} required={required}>
                     <option value="">انتخاب شهر</option>
                     {selectedProvince && provinces[selectedProvince] && provinces[selectedProvince].map(city => (
                         <option key={city} value={city}>{city}</option>

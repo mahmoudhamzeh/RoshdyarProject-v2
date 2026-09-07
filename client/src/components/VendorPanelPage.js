@@ -12,7 +12,9 @@ import MainNavbar from './MainNavbar';
 import Footer from './Footer';
 import { formatPrice } from '../utils/cart';
 import { findCategoryPath } from '../utils/shop';
+import { IRAN_BANKS, digitsOnly, shebaDigits, identityErrors, financeErrors } from '../utils/vendor-apply';
 import CategoryCascade from './CategoryCascade';
+import CitySelector from './CitySelector';
 import './ShopWorld.css';
 import './VendorPanelPage.css';
 import './admin/ProductManagement.css';
@@ -48,6 +50,9 @@ const emptyApply = {
     bankName: '',
     bankSheba: '',
     bankAccount: '',
+    website: '',
+    instagram: '',
+    phone2: '',
     docsNote: ''
 };
 
@@ -87,6 +92,9 @@ const VendorPanelPage = () => {
                 bankName: vendor.bankName || '',
                 bankSheba: vendor.bankSheba || '',
                 bankAccount: vendor.bankAccount || '',
+                website: vendor.website || '',
+                instagram: vendor.instagram || '',
+                phone2: vendor.phone2 || '',
                 docsNote: vendor.docsNote || ''
             }));
         }
@@ -110,12 +118,30 @@ const VendorPanelPage = () => {
 
     const setField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
+    const goFinance = () => {
+        const errors = identityErrors(form);
+        if (errors.length) {
+            setMessage(errors[0]);
+            return;
+        }
+        setMessage('');
+        setStep(2);
+    };
+
     const saveProfile = async (e) => {
         e.preventDefault();
+        const errors = [...identityErrors(form), ...financeErrors(form)];
+        if (errors.length) {
+            setMessage(errors[0]);
+            return;
+        }
         const res = await fetch('/api/shop/vendors/apply', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form)
+            body: JSON.stringify({
+                ...form,
+                bankSheba: `IR${shebaDigits(form.bankSheba)}`
+            })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
@@ -223,6 +249,7 @@ const VendorPanelPage = () => {
                                 {step === 1 && (
                                     <>
                                         <h3>۱. اطلاعات حقیقی یا حقوقی</h3>
+                                        <p className="vendor-required-hint">موارد ستاره‌دار اجباری هستند.</p>
                                         <div className="vendor-kind">
                                             <label className={form.personKind === 'individual' ? 'is-on' : ''}>
                                                 <input type="radio" checked={form.personKind === 'individual'} onChange={() => setField('personKind', 'individual')} />
@@ -233,32 +260,124 @@ const VendorPanelPage = () => {
                                                 حقوقی
                                             </label>
                                         </div>
-                                        <input value={form.displayName} onChange={(e) => setField('displayName', e.target.value)} placeholder="نام فروشگاه روی ویترین" required />
-                                        <input value={form.ownerName} onChange={(e) => setField('ownerName', e.target.value)} placeholder="نام صاحب حساب / مدیرعامل" required />
-                                        <input value={form.nationalId} onChange={(e) => setField('nationalId', e.target.value)} placeholder={form.personKind === 'company' ? 'شناسه ملی شرکت' : 'کد ملی'} required />
+                                        <label className="vendor-label">
+                                            نام فروشگاه *
+                                            <input value={form.displayName} onChange={(e) => setField('displayName', e.target.value)} placeholder="نام فروشگاه روی ویترین" required />
+                                        </label>
+                                        <label className="vendor-label">
+                                            نام صاحب حساب / مدیرعامل *
+                                            <input value={form.ownerName} onChange={(e) => setField('ownerName', e.target.value)} placeholder="نام و نام خانوادگی" required />
+                                        </label>
+                                        <label className="vendor-label">
+                                            {form.personKind === 'company' ? 'شناسه ملی شرکت *' : 'کد ملی *'}
+                                            <input
+                                                value={form.nationalId}
+                                                onChange={(e) => setField('nationalId', digitsOnly(e.target.value).slice(0, form.personKind === 'company' ? 11 : 10))}
+                                                inputMode="numeric"
+                                                pattern={form.personKind === 'company' ? '\\d{11}' : '\\d{10}'}
+                                                maxLength={form.personKind === 'company' ? 11 : 10}
+                                                placeholder={form.personKind === 'company' ? '۱۱ رقم' : '۱۰ رقم'}
+                                                required
+                                            />
+                                        </label>
                                         {form.personKind === 'company' && (
                                             <>
-                                                <input value={form.legalName} onChange={(e) => setField('legalName', e.target.value)} placeholder="نام حقوقی شرکت" required />
-                                                <input value={form.registrationNo} onChange={(e) => setField('registrationNo', e.target.value)} placeholder="شماره ثبت" required />
-                                                <input value={form.economicCode} onChange={(e) => setField('economicCode', e.target.value)} placeholder="کد اقتصادی" />
+                                                <label className="vendor-label">
+                                                    نام حقوقی *
+                                                    <input value={form.legalName} onChange={(e) => setField('legalName', e.target.value)} placeholder="نام حقوقی شرکت" required />
+                                                </label>
+                                                <label className="vendor-label">
+                                                    شماره ثبت *
+                                                    <input value={form.registrationNo} onChange={(e) => setField('registrationNo', e.target.value)} placeholder="شماره ثبت" required />
+                                                </label>
+                                                <label className="vendor-label">
+                                                    کد اقتصادی
+                                                    <input value={form.economicCode} onChange={(e) => setField('economicCode', e.target.value)} placeholder="اختیاری" />
+                                                </label>
                                             </>
                                         )}
-                                        <input value={form.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="شماره تماس" required />
-                                        <div className="product-form-row">
-                                            <input value={form.province} onChange={(e) => setField('province', e.target.value)} placeholder="استان" />
-                                            <input value={form.city} onChange={(e) => setField('city', e.target.value)} placeholder="شهر" />
+                                        <label className="vendor-label">
+                                            شماره تماس *
+                                            <input
+                                                value={form.phone}
+                                                onChange={(e) => setField('phone', digitsOnly(e.target.value).slice(0, 11))}
+                                                inputMode="numeric"
+                                                placeholder="0912xxxxxxx"
+                                                required
+                                            />
+                                        </label>
+                                        <label className="vendor-label">
+                                            شماره دوم
+                                            <input
+                                                value={form.phone2}
+                                                onChange={(e) => setField('phone2', digitsOnly(e.target.value).slice(0, 11))}
+                                                inputMode="numeric"
+                                                placeholder="اختیاری"
+                                            />
+                                        </label>
+                                        <div className="vendor-city-row">
+                                            <CitySelector
+                                                required
+                                                selectedProvince={form.province}
+                                                selectedCity={form.city}
+                                                onProvinceChange={(e) => {
+                                                    setForm((prev) => ({ ...prev, province: e.target.value, city: '' }));
+                                                }}
+                                                onCityChange={(e) => setField('city', e.target.value)}
+                                            />
                                         </div>
-                                        <textarea value={form.address} onChange={(e) => setField('address', e.target.value)} placeholder="نشانی کامل" rows="3" required />
-                                        <button type="button" onClick={() => setStep(2)}>ادامه اطلاعات مالی</button>
+                                        <label className="vendor-label">
+                                            نشانی کامل *
+                                            <textarea value={form.address} onChange={(e) => setField('address', e.target.value)} placeholder="خیابان، پلاک، واحد" rows="3" required />
+                                        </label>
+                                        <label className="vendor-label">
+                                            آدرس سایت
+                                            <input value={form.website} onChange={(e) => setField('website', e.target.value)} placeholder="https://example.com" dir="ltr" />
+                                        </label>
+                                        <label className="vendor-label">
+                                            اینستاگرام
+                                            <input value={form.instagram} onChange={(e) => setField('instagram', e.target.value)} placeholder="@username" dir="ltr" />
+                                        </label>
+                                        <button type="button" onClick={goFinance}>ادامه اطلاعات مالی</button>
                                     </>
                                 )}
                                 {step === 2 && (
                                     <>
                                         <h3>۲. اطلاعات مالی و تسویه</h3>
-                                        <input value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} placeholder="نام بانک" required />
-                                        <input value={form.bankSheba} onChange={(e) => setField('bankSheba', e.target.value)} placeholder="شماره شبا IR..." required />
-                                        <input value={form.bankAccount} onChange={(e) => setField('bankAccount', e.target.value)} placeholder="شماره حساب" />
-                                        <textarea value={form.docsNote} onChange={(e) => setField('docsNote', e.target.value)} placeholder="توضیح مجوزها و نوع کالا" rows="3" />
+                                        <label className="vendor-label">
+                                            بانک *
+                                            <select value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} required>
+                                                <option value="">انتخاب بانک</option>
+                                                {form.bankName && !IRAN_BANKS.includes(form.bankName) && (
+                                                    <option value={form.bankName}>{form.bankName}</option>
+                                                )}
+                                                {IRAN_BANKS.map((bank) => (
+                                                    <option key={bank} value={bank}>{bank}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <label className="vendor-label">
+                                            شماره شبا *
+                                            <div className="vendor-sheba">
+                                                <span className="vendor-sheba-prefix">IR</span>
+                                                <input
+                                                    value={shebaDigits(form.bankSheba)}
+                                                    onChange={(e) => setField('bankSheba', shebaDigits(e.target.value))}
+                                                    inputMode="numeric"
+                                                    maxLength={24}
+                                                    placeholder="۲۴ رقم"
+                                                    required
+                                                />
+                                            </div>
+                                        </label>
+                                        <label className="vendor-label">
+                                            شماره حساب
+                                            <input value={form.bankAccount} onChange={(e) => setField('bankAccount', e.target.value)} placeholder="اختیاری" />
+                                        </label>
+                                        <label className="vendor-label">
+                                            توضیح مجوزها و نوع کالا
+                                            <textarea value={form.docsNote} onChange={(e) => setField('docsNote', e.target.value)} placeholder="اختیاری" rows="3" />
+                                        </label>
                                         <div className="product-form-actions">
                                             <button type="button" className="btn-cancel" onClick={() => setStep(1)}>بازگشت</button>
                                             <button type="submit">ذخیره و رفتن به مدارک</button>

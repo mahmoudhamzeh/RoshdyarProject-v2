@@ -327,14 +327,40 @@ async function run() {
                 ownerName: 'علی فروشنده',
                 nationalId: '0012345678',
                 phone: '09121112233',
+                phone2: '09123334455',
+                province: 'تهران',
+                city: 'تهران',
                 address: 'تهران، خیابان تست',
                 bankName: 'ملی',
-                bankSheba: 'IR120170000000123456789001'
+                bankSheba: 'IR120170000000123456789001',
+                website: 'example.com',
+                instagram: '@tatkids_shop'
             }
         });
         assert.strictEqual(vendorApply.status, 201, JSON.stringify(vendorApply.data));
         assert.strictEqual(vendorApply.data.status, 'pending');
         assert.strictEqual(vendorApply.data.profileComplete, false);
+        assert.strictEqual(vendorApply.data.phone2, '09123334455');
+        assert.strictEqual(vendorApply.data.instagram, 'tatkids_shop');
+        assert.ok(String(vendorApply.data.website).includes('example.com'));
+        assert.strictEqual(vendorApply.data.bankSheba, 'IR120170000000123456789001');
+
+        const badNational = await request('POST', '/api/shop/vendors/apply', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            body: {
+                displayName: 'فروشگاه بازی‌کده تست',
+                personKind: 'individual',
+                ownerName: 'علی فروشنده',
+                nationalId: '12345',
+                phone: '09121112233',
+                province: 'تهران',
+                city: 'تهران',
+                address: 'تهران، خیابان تست',
+                bankName: 'ملی',
+                bankSheba: 'IR120170000000123456789001'
+            }
+        });
+        assert.strictEqual(badNational.status, 400);
 
         const missingVendor = await request('GET', '/api/admin/vendors/999999', { headers: auth });
         assert.strictEqual(missingVendor.status, 404);
