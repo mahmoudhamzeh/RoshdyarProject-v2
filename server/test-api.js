@@ -336,11 +336,21 @@ async function run() {
         assert.strictEqual(vendorApply.data.status, 'pending');
         assert.strictEqual(vendorApply.data.profileComplete, false);
 
+        const missingVendor = await request('GET', '/api/admin/vendors/999999', { headers: auth });
+        assert.strictEqual(missingVendor.status, 404);
+
+        const pendingFile = await request('GET', `/api/admin/vendors/${vendorApply.data.id}`, { headers: auth });
+        assert.strictEqual(pendingFile.status, 200, JSON.stringify(pendingFile.data));
+        assert.ok(pendingFile.data.applicant && pendingFile.data.applicant.id);
+        assert.ok(Array.isArray(pendingFile.data.missingFields));
+        assert.ok(pendingFile.data.missingFields.some((item) => String(item).includes('مدارک')));
+
         const blockApprove = await request('PUT', `/api/admin/vendors/${vendorApply.data.id}`, {
             headers: auth,
             body: { status: 'active' }
         });
         assert.strictEqual(blockApprove.status, 400);
+        assert.ok(Array.isArray(blockApprove.data.missingFields));
 
         const boundary = `----tatkids${Date.now()}`;
         const fileBody = Buffer.concat([
@@ -375,6 +385,14 @@ async function run() {
         });
         assert.strictEqual(docs.status, 201, JSON.stringify(docs.data));
         assert.ok(docs.data.profileComplete);
+
+        const vendorFile = await request('GET', `/api/admin/vendors/${vendorApply.data.id}`, { headers: auth });
+        assert.strictEqual(vendorFile.status, 200, JSON.stringify(vendorFile.data));
+        assert.ok(Array.isArray(vendorFile.data.docs) && vendorFile.data.docs.length >= 2);
+        assert.strictEqual(vendorFile.data.ownerName, 'علی فروشنده');
+        assert.ok(vendorFile.data.applicant && vendorFile.data.applicant.id);
+        assert.ok(vendorFile.data.profileComplete);
+        assert.deepStrictEqual(vendorFile.data.missingFields, []);
 
         const approveVendor = await request('PUT', `/api/admin/vendors/${vendorApply.data.id}`, {
             headers: auth,
