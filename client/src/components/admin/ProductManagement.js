@@ -155,9 +155,13 @@ const ProductManagement = () => {
             alert('برای رد یا درخواست اصلاح، توضیح بنویسید. مثلاً: عکس با کیفیت ارسال کنید.');
             return;
         }
+        const admin = getAdmin();
         const res = await fetch(`${API}/api/admin/products/${product.id}/review`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': admin && admin.id
+            },
             body: JSON.stringify({ status, note })
         });
         const data = await res.json().catch(() => ({}));

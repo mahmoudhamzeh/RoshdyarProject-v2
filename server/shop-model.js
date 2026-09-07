@@ -185,7 +185,9 @@ function buildCatalogSql(filters = {}, { activeOnly = true } = {}) {
         LEFT JOIN shop_product_meta m ON m.product_id = p.id
         WHERE 1 = 1
     `;
-    if (activeOnly) sql += ' AND p.active = 1';
+    if (activeOnly) {
+        sql += " AND p.active = 1 AND COALESCE(p.review_status, 'approved') = 'approved'";
+    }
     if (f.categoryNames.length === 1) {
         sql += ' AND p.category = ?';
         params.push(f.categoryNames[0]);

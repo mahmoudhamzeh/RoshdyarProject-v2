@@ -563,6 +563,15 @@ async function run() {
         assert.strictEqual(vendorProduct.data.reviewStatus, 'pending');
         assert.strictEqual(vendorProduct.data.active, false);
 
+        const vendorListings = await request('GET', '/api/vendor/offers', {
+            headers: { Authorization: `Bearer ${verify.data.token}` }
+        });
+        assert.strictEqual(vendorListings.status, 200, JSON.stringify(vendorListings.data));
+        assert.ok(
+            (vendorListings.data || []).some((item) => Number(item.productId) === Number(vendorProduct.data.id)),
+            'pending vendor product should appear in store listings'
+        );
+
         const hiddenVendorProduct = await request('GET', `/api/shop/products/${vendorProduct.data.id}`);
         assert.strictEqual(hiddenVendorProduct.status, 404);
 

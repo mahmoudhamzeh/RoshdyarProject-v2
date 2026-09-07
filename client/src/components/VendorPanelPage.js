@@ -61,6 +61,8 @@ const PRODUCT_REVIEW_LABELS = {
     rejected: 'رد شده',
     needs_revision: 'نیاز به اصلاح'
 };
+
+const emptyApply = {
     displayName: '',
     personKind: 'individual',
     ownerName: '',

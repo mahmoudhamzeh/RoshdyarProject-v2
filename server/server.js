@@ -1958,7 +1958,7 @@ app.get('/api/shop/products', async (req, res) => {
 
 app.get('/api/shop/products/:id', async (req, res) => {
     const product = await store.products.getById(req.params.id);
-    if (!product || product.active === false) {
+    if (!product || product.active === false || (product.reviewStatus && product.reviewStatus !== 'approved')) {
         return res.status(404).json({ message: 'محصول یافت نشد' });
     }
     const offers = await store.shop.listOffers(product.id);
