@@ -86,6 +86,14 @@ function normalizeBankName(value) {
     return { ok: true, value: name };
 }
 
+function normalizePostalCode(value) {
+    const digits = digitsOnly(value);
+    if (digits.length !== 10) {
+        return { ok: false, message: 'کد پستی باید ۱۰ رقم و فقط عدد باشد' };
+    }
+    return { ok: true, value: digits };
+}
+
 function normalizeWebsite(value) {
     const raw = String(value || '').trim();
     if (!raw) return { ok: true, value: '' };
@@ -134,6 +142,8 @@ function validateVendorApply(body, user) {
     if (!city.ok) return city;
     const address = requiredText(body && body.address, 'نشانی');
     if (!address.ok) return address;
+    const postalCode = normalizePostalCode(body && body.postalCode);
+    if (!postalCode.ok) return postalCode;
 
     let legalName = '';
     let registrationNo = '';
@@ -172,6 +182,7 @@ function validateVendorApply(body, user) {
             province: province.value,
             city: city.value,
             address: address.value,
+            postalCode: postalCode.value,
             bankName: bankName.value,
             bankSheba: bankSheba.value,
             bankAccount: String((body && body.bankAccount) || '').trim(),
@@ -191,5 +202,6 @@ module.exports = {
     normalizeSheba,
     normalizeWebsite,
     normalizeInstagram,
+    normalizePostalCode,
     validateVendorApply
 };

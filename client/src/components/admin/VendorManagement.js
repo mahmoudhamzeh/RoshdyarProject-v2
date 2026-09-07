@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import './ProductManagement.css';
 
 const STATUS_LABELS = {
+    draft: 'پیش‌نویس',
     pending: 'در انتظار تأیید',
+    returned: 'برگشت‌خورده',
+    docs_requested: 'نیاز به مدرک تکمیلی',
     active: 'تأییدشده',
     suspended: 'تعلیق‌شده',
     rejected: 'رد شده'
@@ -30,7 +33,7 @@ const VendorManagement = () => {
     return (
         <div className="product-management">
             <h2>فروشندگان مارکت‌پلیس</h2>
-            <p>برای دیدن مدارک، هویت و اطلاعات مالی هر درخواست‌دهنده، پرونده را باز کنید و بعد تأیید یا رد کنید.</p>
+            <p>برای دیدن مدارک، هویت و اطلاعات مالی هر درخواست‌دهنده، پرونده را باز کنید. می‌توانید درخواست را برگردانید، مدرک بخواهید یا تکمیل کنید.</p>
             {error && <p className="error-message">{error}</p>}
             <div className="products-admin-list">
                 {vendors.map((vendor) => (

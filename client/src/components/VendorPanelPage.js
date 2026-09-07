@@ -3,16 +3,25 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faBoxOpen,
+    faBuilding,
     faChartLine,
     faClipboardList,
     faStore,
+    faUser,
     faWallet
 } from '@fortawesome/free-solid-svg-icons';
 import MainNavbar from './MainNavbar';
 import Footer from './Footer';
 import { formatPrice } from '../utils/cart';
 import { findCategoryPath } from '../utils/shop';
-import { IRAN_BANKS, digitsOnly, shebaDigits, identityErrors, financeErrors } from '../utils/vendor-apply';
+import {
+    IRAN_BANKS,
+    digitsOnly,
+    shebaDigits,
+    identityFieldErrors,
+    financeFieldErrors
+} from '../utils/vendor-apply';
+import { VENDOR_TERMS } from '../utils/vendor-terms';
 import CategoryCascade from './CategoryCascade';
 import CitySelector from './CitySelector';
 import './ShopWorld.css';
@@ -35,6 +44,16 @@ const LINE_STATUSES = [
     { id: 'cancelled', label: 'لغو' }
 ];
 
+const STATUS_LABELS = {
+    draft: 'پیش‌نویس',
+    pending: 'در انتظار تأیید',
+    returned: 'برگشت‌خورده',
+    docs_requested: 'نیاز به مدرک تکمیلی',
+    active: 'تأییدشده',
+    suspended: 'تعلیق‌شده',
+    rejected: 'رد شده'
+};
+
 const emptyApply = {
     displayName: '',
     personKind: 'individual',
@@ -47,6 +66,7 @@ const emptyApply = {
     province: '',
     city: '',
     address: '',
+    postalCode: '',
     bankName: '',
     bankSheba: '',
     bankAccount: '',
@@ -55,6 +75,14 @@ const emptyApply = {
     phone2: '',
     docsNote: ''
 };
+
+const Field = ({ label, error, required, children }) => (
+    <label className={`vendor-label${error ? ' is-invalid' : ''}`}>
+        {label}{required ? ' *' : ''}
+        {children}
+        {error ? <span className="vendor-field-error">{error}</span> : null}
+    </label>
+);
 
 const VendorPanelPage = () => {
     const [me, setMe] = useState(null);
@@ -66,11 +94,22 @@ const VendorPanelPage = () => {
     const [finance, setFinance] = useState(null);
     const [categories, setCategories] = useState([]);
     const [message, setMessage] = useState('');
+    const [messageError, setMessageError] = useState(false);
     const [docKind, setDocKind] = useState('national_card');
     const [docFiles, setDocFiles] = useState(null);
+    const [showIdentityErrors, setShowIdentityErrors] = useState(false);
+    const [showFinanceErrors, setShowFinanceErrors] = useState(false);
+    const [termsOpen, setTermsOpen] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
+    const [pendingModal, setPendingModal] = useState(false);
     const [productForm, setProductForm] = useState({
         name: '', description: '', category: '', price: '', stock: '', compareAtPrice: '', images: null
     });
+
+    const notify = (text, isError = false) => {
+        setMessage(text);
+        setMessageError(isError);
+    };
 
     const load = async () => {
         const vendor = await fetch('/api/shop/vendors/me').then((r) => (r.ok ? r.json() : null));
@@ -89,6 +128,7 @@ const VendorPanelPage = () => {
                 province: vendor.province || '',
                 city: vendor.city || '',
                 address: vendor.address || '',
+                postalCode: vendor.postalCode || '',
                 bankName: vendor.bankName || '',
                 bankSheba: vendor.bankSheba || '',
                 bankAccount: vendor.bankAccount || '',
@@ -117,22 +157,31 @@ const VendorPanelPage = () => {
     }, []);
 
     const setField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+    const identityErr = identityFieldErrors(form);
+    const financeErr = financeFieldErrors(form);
+    const shownIdentity = showIdentityErrors ? identityErr : {};
+    const shownFinance = showFinanceErrors ? financeErr : {};
 
     const goFinance = () => {
-        const errors = identityErrors(form);
-        if (errors.length) {
-            setMessage(errors[0]);
+        const errors = identityFieldErrors(form);
+        if (Object.keys(errors).length) {
+            setShowIdentityErrors(true);
+            notify(Object.values(errors)[0], true);
             return;
         }
-        setMessage('');
+        notify('');
         setStep(2);
     };
 
     const saveProfile = async (e) => {
         e.preventDefault();
-        const errors = [...identityErrors(form), ...financeErrors(form)];
-        if (errors.length) {
-            setMessage(errors[0]);
+        const idErr = identityFieldErrors(form);
+        const finErr = financeFieldErrors(form);
+        if (Object.keys(idErr).length || Object.keys(finErr).length) {
+            setShowIdentityErrors(true);
+            setShowFinanceErrors(true);
+            notify(Object.values({ ...idErr, ...finErr })[0], true);
+            if (Object.keys(idErr).length) setStep(1);
             return;
         }
         const res = await fetch('/api/shop/vendors/apply', {
@@ -145,18 +194,18 @@ const VendorPanelPage = () => {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-            setMessage(data.message || 'ثبت اطلاعات ناموفق بود');
+            notify(data.message || 'ثبت اطلاعات ناموفق بود', true);
             return;
         }
         setMe(data);
-        setMessage('اطلاعات ذخیره شد.');
+        notify('اطلاعات ذخیره شد.');
         setStep(3);
     };
 
     const uploadDocs = async (e) => {
         e.preventDefault();
         if (!docFiles || !docFiles.length) {
-            setMessage('دست‌کم یک فایل انتخاب کنید');
+            notify('دست‌کم یک فایل انتخاب کنید', true);
             return;
         }
         const body = new FormData();
@@ -165,12 +214,36 @@ const VendorPanelPage = () => {
         const res = await fetch('/api/shop/vendors/me/docs', { method: 'POST', body });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-            setMessage(data.message || 'بارگذاری مدرک ناموفق بود');
+            notify(data.message || 'بارگذاری مدرک ناموفق بود', true);
             return;
         }
         setMe(data);
         setDocFiles(null);
-        setMessage('مدرک ثبت شد. پس از تکمیل، اپراتور درخواست را بررسی می‌کند.');
+        notify('مدرک ثبت شد. پس از تکمیل مدارک، شرایط را تأیید کنید.');
+    };
+
+    const submitRequest = async () => {
+        if (!termsOpen) {
+            notify('ابتدا شرایط و قوانین را باز کنید و مطالعه کنید', true);
+            return;
+        }
+        if (!termsAccepted) {
+            notify('تأیید مطالعه شرایط و قوانین الزامی است', true);
+            return;
+        }
+        const res = await fetch('/api/shop/vendors/me/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ termsAccepted: true })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            notify(data.message || 'ارسال درخواست ناموفق بود', true);
+            return;
+        }
+        setMe(data);
+        setPendingModal(true);
+        notify('');
     };
 
     const createProduct = async (e) => {
@@ -178,7 +251,7 @@ const VendorPanelPage = () => {
         const path = findCategoryPath(categories, productForm.category);
         const leaf = path[path.length - 1];
         if (!productForm.category || (leaf && (leaf.children || []).length)) {
-            setMessage('گروه و زیرگروه محصول را تا آخرین سطح انتخاب کنید.');
+            notify('گروه و زیرگروه محصول را تا آخرین سطح انتخاب کنید.', true);
             return;
         }
         const body = new FormData();
@@ -191,12 +264,12 @@ const VendorPanelPage = () => {
         const res = await fetch('/api/vendor/products', { method: 'POST', body });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-            setMessage(data.message || 'ثبت محصول ناموفق بود');
+            notify(data.message || 'ثبت محصول ناموفق بود', true);
             return;
         }
         setProductForm({ name: '', description: '', category: '', price: '', stock: '', compareAtPrice: '', images: null });
         load();
-        setMessage('محصول ثبت شد و پس از تأیید ادمین در فروشگاه دیده می‌شود.');
+        notify('محصول ثبت شد و پس از تأیید ادمین در فروشگاه دیده می‌شود.');
     };
 
     const updateLine = async (itemId, status) => {
@@ -215,6 +288,7 @@ const VendorPanelPage = () => {
         approved: 'تأییدشده',
         rejected: 'رد شده'
     }[status] || status);
+    const docsCount = (me && me.docs ? me.docs : []).length;
 
     const tabs = useMemo(() => ([
         { id: 'products', label: 'محصولات', icon: faBoxOpen },
@@ -234,7 +308,7 @@ const VendorPanelPage = () => {
                         <p>ثبت‌نام حقیقی یا حقوقی، بارگذاری مدارک، مدیریت کالا و تسویه.</p>
                     </div>
                 </header>
-                {message && <p className="vendor-toast">{message}</p>}
+                {message && <p className={`vendor-toast${messageError ? ' is-error' : ''}`}>{message}</p>}
 
                 {onboarding && (
                     <section className="vendor-onboard">
@@ -244,109 +318,136 @@ const VendorPanelPage = () => {
                             ))}
                         </ol>
 
+                        {me && me.adminNote && (me.status === 'returned' || me.status === 'docs_requested') && (
+                            <aside className="vendor-admin-banner">
+                                <strong>{STATUS_LABELS[me.status] || me.status}</strong>
+                                <p>{me.adminNote}</p>
+                            </aside>
+                        )}
+
                         {(step === 1 || step === 2) && (
-                            <form className="product-form vendor-form" onSubmit={saveProfile}>
+                            <form className="product-form vendor-form" onSubmit={saveProfile} noValidate>
                                 {step === 1 && (
                                     <>
                                         <h3>۱. اطلاعات حقیقی یا حقوقی</h3>
-                                        <p className="vendor-required-hint">موارد ستاره‌دار اجباری هستند.</p>
-                                        <div className="vendor-kind">
-                                            <label className={form.personKind === 'individual' ? 'is-on' : ''}>
-                                                <input type="radio" checked={form.personKind === 'individual'} onChange={() => setField('personKind', 'individual')} />
-                                                حقیقی
-                                            </label>
-                                            <label className={form.personKind === 'company' ? 'is-on' : ''}>
-                                                <input type="radio" checked={form.personKind === 'company'} onChange={() => setField('personKind', 'company')} />
-                                                حقوقی
-                                            </label>
+                                        <p className="vendor-required-hint">موارد ستاره‌دار اجباری هستند. اگر خالی بمانند با حاشیه قرمز مشخص می‌شوند.</p>
+                                        <div className="vendor-kind" role="tablist" aria-label="نوع شخصیت">
+                                            <button
+                                                type="button"
+                                                role="tab"
+                                                aria-selected={form.personKind === 'individual'}
+                                                className={form.personKind === 'individual' ? 'is-on' : ''}
+                                                onClick={() => setField('personKind', 'individual')}
+                                            >
+                                                <FontAwesomeIcon icon={faUser} />
+                                                <span>
+                                                    <strong>حقیقی</strong>
+                                                    <small>شخص حقیقی با کد ملی ۱۰ رقمی</small>
+                                                </span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                role="tab"
+                                                aria-selected={form.personKind === 'company'}
+                                                className={form.personKind === 'company' ? 'is-on' : ''}
+                                                onClick={() => setField('personKind', 'company')}
+                                            >
+                                                <FontAwesomeIcon icon={faBuilding} />
+                                                <span>
+                                                    <strong>حقوقی</strong>
+                                                    <small>شرکت با شناسه ملی ۱۱ رقمی و شماره ثبت</small>
+                                                </span>
+                                            </button>
                                         </div>
-                                        <label className="vendor-label">
-                                            نام فروشگاه *
-                                            <input value={form.displayName} onChange={(e) => setField('displayName', e.target.value)} placeholder="نام فروشگاه روی ویترین" required />
-                                        </label>
-                                        <label className="vendor-label">
-                                            نام صاحب حساب / مدیرعامل *
-                                            <input value={form.ownerName} onChange={(e) => setField('ownerName', e.target.value)} placeholder="نام و نام خانوادگی" required />
-                                        </label>
-                                        <label className="vendor-label">
-                                            {form.personKind === 'company' ? 'شناسه ملی شرکت *' : 'کد ملی *'}
+                                        <Field label="نام فروشگاه" required error={shownIdentity.displayName}>
+                                            <input value={form.displayName} onChange={(e) => setField('displayName', e.target.value)} placeholder="نام فروشگاه روی ویترین" />
+                                        </Field>
+                                        <Field label="نام صاحب حساب / مدیرعامل" required error={shownIdentity.ownerName}>
+                                            <input value={form.ownerName} onChange={(e) => setField('ownerName', e.target.value)} placeholder="نام و نام خانوادگی" />
+                                        </Field>
+                                        <Field
+                                            label={form.personKind === 'company' ? 'شناسه ملی شرکت' : 'کد ملی'}
+                                            required
+                                            error={shownIdentity.nationalId}
+                                        >
                                             <input
                                                 value={form.nationalId}
                                                 onChange={(e) => setField('nationalId', digitsOnly(e.target.value).slice(0, form.personKind === 'company' ? 11 : 10))}
                                                 inputMode="numeric"
-                                                pattern={form.personKind === 'company' ? '\\d{11}' : '\\d{10}'}
                                                 maxLength={form.personKind === 'company' ? 11 : 10}
                                                 placeholder={form.personKind === 'company' ? '۱۱ رقم' : '۱۰ رقم'}
-                                                required
                                             />
-                                        </label>
+                                        </Field>
                                         {form.personKind === 'company' && (
                                             <>
-                                                <label className="vendor-label">
-                                                    نام حقوقی *
-                                                    <input value={form.legalName} onChange={(e) => setField('legalName', e.target.value)} placeholder="نام حقوقی شرکت" required />
-                                                </label>
-                                                <label className="vendor-label">
-                                                    شماره ثبت *
-                                                    <input value={form.registrationNo} onChange={(e) => setField('registrationNo', e.target.value)} placeholder="شماره ثبت" required />
-                                                </label>
-                                                <label className="vendor-label">
-                                                    کد اقتصادی
+                                                <Field label="نام حقوقی" required error={shownIdentity.legalName}>
+                                                    <input value={form.legalName} onChange={(e) => setField('legalName', e.target.value)} placeholder="نام حقوقی شرکت" />
+                                                </Field>
+                                                <Field label="شماره ثبت" required error={shownIdentity.registrationNo}>
+                                                    <input value={form.registrationNo} onChange={(e) => setField('registrationNo', e.target.value)} placeholder="شماره ثبت" />
+                                                </Field>
+                                                <Field label="کد اقتصادی">
                                                     <input value={form.economicCode} onChange={(e) => setField('economicCode', e.target.value)} placeholder="اختیاری" />
-                                                </label>
+                                                </Field>
                                             </>
                                         )}
-                                        <label className="vendor-label">
-                                            شماره تماس *
+                                        <Field label="شماره تماس" required error={shownIdentity.phone}>
                                             <input
                                                 value={form.phone}
                                                 onChange={(e) => setField('phone', digitsOnly(e.target.value).slice(0, 11))}
                                                 inputMode="numeric"
                                                 placeholder="0912xxxxxxx"
-                                                required
                                             />
-                                        </label>
-                                        <label className="vendor-label">
-                                            شماره دوم
+                                        </Field>
+                                        <Field label="شماره دوم" error={shownIdentity.phone2}>
                                             <input
                                                 value={form.phone2}
                                                 onChange={(e) => setField('phone2', digitsOnly(e.target.value).slice(0, 11))}
                                                 inputMode="numeric"
                                                 placeholder="اختیاری"
                                             />
-                                        </label>
+                                        </Field>
                                         <div className="vendor-city-row">
                                             <CitySelector
                                                 required
                                                 selectedProvince={form.province}
                                                 selectedCity={form.city}
+                                                invalidProvince={Boolean(shownIdentity.province)}
+                                                invalidCity={Boolean(shownIdentity.city)}
+                                                provinceError={shownIdentity.province}
+                                                cityError={shownIdentity.city}
                                                 onProvinceChange={(e) => {
                                                     setForm((prev) => ({ ...prev, province: e.target.value, city: '' }));
                                                 }}
                                                 onCityChange={(e) => setField('city', e.target.value)}
                                             />
                                         </div>
-                                        <label className="vendor-label">
-                                            نشانی کامل *
-                                            <textarea value={form.address} onChange={(e) => setField('address', e.target.value)} placeholder="خیابان، پلاک، واحد" rows="3" required />
-                                        </label>
-                                        <label className="vendor-label">
-                                            آدرس سایت
+                                        <Field label="نشانی کامل" required error={shownIdentity.address}>
+                                            <textarea value={form.address} onChange={(e) => setField('address', e.target.value)} placeholder="خیابان، پلاک، واحد" rows="3" />
+                                        </Field>
+                                        <Field label="کد پستی" required error={shownIdentity.postalCode}>
+                                            <input
+                                                value={form.postalCode}
+                                                onChange={(e) => setField('postalCode', digitsOnly(e.target.value).slice(0, 10))}
+                                                inputMode="numeric"
+                                                maxLength={10}
+                                                placeholder="۱۰ رقم"
+                                            />
+                                        </Field>
+                                        <Field label="آدرس سایت" error={shownIdentity.website}>
                                             <input value={form.website} onChange={(e) => setField('website', e.target.value)} placeholder="https://example.com" dir="ltr" />
-                                        </label>
-                                        <label className="vendor-label">
-                                            اینستاگرام
+                                        </Field>
+                                        <Field label="اینستاگرام" error={shownIdentity.instagram}>
                                             <input value={form.instagram} onChange={(e) => setField('instagram', e.target.value)} placeholder="@username" dir="ltr" />
-                                        </label>
+                                        </Field>
                                         <button type="button" onClick={goFinance}>ادامه اطلاعات مالی</button>
                                     </>
                                 )}
                                 {step === 2 && (
                                     <>
                                         <h3>۲. اطلاعات مالی و تسویه</h3>
-                                        <label className="vendor-label">
-                                            بانک *
-                                            <select value={form.bankName} onChange={(e) => setField('bankName', e.target.value)} required>
+                                        <Field label="بانک" required error={shownFinance.bankName}>
+                                            <select value={form.bankName} onChange={(e) => setField('bankName', e.target.value)}>
                                                 <option value="">انتخاب بانک</option>
                                                 {form.bankName && !IRAN_BANKS.includes(form.bankName) && (
                                                     <option value={form.bankName}>{form.bankName}</option>
@@ -355,10 +456,9 @@ const VendorPanelPage = () => {
                                                     <option key={bank} value={bank}>{bank}</option>
                                                 ))}
                                             </select>
-                                        </label>
-                                        <label className="vendor-label">
-                                            شماره شبا *
-                                            <div className="vendor-sheba">
+                                        </Field>
+                                        <Field label="شماره شبا" required error={shownFinance.bankSheba}>
+                                            <div className={`vendor-sheba${shownFinance.bankSheba ? ' is-invalid' : ''}`}>
                                                 <span className="vendor-sheba-prefix">IR</span>
                                                 <input
                                                     value={shebaDigits(form.bankSheba)}
@@ -366,18 +466,15 @@ const VendorPanelPage = () => {
                                                     inputMode="numeric"
                                                     maxLength={24}
                                                     placeholder="۲۴ رقم"
-                                                    required
                                                 />
                                             </div>
-                                        </label>
-                                        <label className="vendor-label">
-                                            شماره حساب
+                                        </Field>
+                                        <Field label="شماره حساب">
                                             <input value={form.bankAccount} onChange={(e) => setField('bankAccount', e.target.value)} placeholder="اختیاری" />
-                                        </label>
-                                        <label className="vendor-label">
-                                            توضیح مجوزها و نوع کالا
+                                        </Field>
+                                        <Field label="توضیح مجوزها و نوع کالا">
                                             <textarea value={form.docsNote} onChange={(e) => setField('docsNote', e.target.value)} placeholder="اختیاری" rows="3" />
-                                        </label>
+                                        </Field>
                                         <div className="product-form-actions">
                                             <button type="button" className="btn-cancel" onClick={() => setStep(1)}>بازگشت</button>
                                             <button type="submit">ذخیره و رفتن به مدارک</button>
@@ -388,7 +485,7 @@ const VendorPanelPage = () => {
                         )}
 
                         {step === 3 && (
-                            <form className="product-form vendor-form" onSubmit={uploadDocs}>
+                            <form className="product-form vendor-form" onSubmit={uploadDocs} noValidate>
                                 <h3>۳. مدارک احراز هویت</h3>
                                 <p>دست‌کم دو مدرک لازم است: کارت شناسایی و تأییدیه شبا. برای حقوقی، آگهی تأسیس هم بارگذاری شود.</p>
                                 <select value={docKind} onChange={(e) => setDocKind(e.target.value)}>
@@ -406,14 +503,70 @@ const VendorPanelPage = () => {
                                         </li>
                                     ))}
                                 </ul>
+                                <div className="product-form-actions">
+                                    <button type="button" className="btn-cancel" onClick={() => setStep(2)}>بازگشت</button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (docsCount < 2) {
+                                                notify('دست‌کم دو مدرک بارگذاری کنید', true);
+                                                return;
+                                            }
+                                            notify('');
+                                            setStep(4);
+                                        }}
+                                    >
+                                        ادامه بررسی نهایی
+                                    </button>
+                                </div>
                             </form>
+                        )}
+
+                        {step === 4 && (
+                            <div className="product-form vendor-form">
+                                <h3>۴. بررسی و تأیید شرایط</h3>
+                                <ul className="vendor-review-list">
+                                    <li>فروشگاه: {form.displayName || '—'}</li>
+                                    <li>نوع: {form.personKind === 'company' ? 'حقوقی' : 'حقیقی'}</li>
+                                    <li>کد پستی: {form.postalCode || '—'}</li>
+                                    <li>مدارک بارگذاری‌شده: {docsCount}</li>
+                                </ul>
+                                {!termsOpen ? (
+                                    <button type="button" className="vendor-terms-open" onClick={() => setTermsOpen(true)}>
+                                        مشاهده شرایط و قوانین
+                                    </button>
+                                ) : (
+                                    <div className="vendor-terms">
+                                        <h4>شرایط و قوانین همکاری فروشندگان</h4>
+                                        <ol>
+                                            {VENDOR_TERMS.map((item) => (
+                                                <li key={item}>{item}</li>
+                                            ))}
+                                        </ol>
+                                        <label className="vendor-terms-check">
+                                            <input
+                                                type="checkbox"
+                                                checked={termsAccepted}
+                                                onChange={(e) => setTermsAccepted(e.target.checked)}
+                                            />
+                                            تمام موارد مطالعه شده و مورد تایید می‌باشد
+                                        </label>
+                                    </div>
+                                )}
+                                <div className="product-form-actions">
+                                    <button type="button" className="btn-cancel" onClick={() => setStep(3)}>بازگشت</button>
+                                    <button type="button" disabled={!termsAccepted} onClick={submitRequest}>
+                                        تأیید و ارسال درخواست
+                                    </button>
+                                </div>
+                            </div>
                         )}
 
                         {me && (
                             <aside className="vendor-status-card">
                                 <h3>وضعیت درخواست</h3>
-                                <p>{me.status === 'pending' ? 'در انتظار تأیید کارشناس' : me.status === 'suspended' ? 'تعلیق‌شده' : me.status}</p>
-                                <p>{me.profileComplete ? 'پرونده کامل است.' : 'برای تکمیل، هویت، شبا و حداقل دو مدرک لازم است.'}</p>
+                                <p>{STATUS_LABELS[me.status] || me.status}</p>
+                                <p>{me.profileComplete ? 'پرونده کامل است.' : 'برای تکمیل، هویت، شبا، کد پستی و حداقل دو مدرک لازم است.'}</p>
                             </aside>
                         )}
                     </section>
@@ -523,6 +676,15 @@ const VendorPanelPage = () => {
                 )}
             </main>
             <Footer />
+            {pendingModal && (
+                <div className="vendor-modal" role="dialog" aria-modal="true" aria-labelledby="vendor-pending-title">
+                    <div className="vendor-modal-card">
+                        <h3 id="vendor-pending-title">درخواست شما در انتظار تایید می‌باشد</h3>
+                        <p>کارشناس پرونده را بررسی می‌کند و در صورت نیاز مدرک یا اصلاح می‌خواهد.</p>
+                        <button type="button" onClick={() => setPendingModal(false)}>متوجه شدم</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
