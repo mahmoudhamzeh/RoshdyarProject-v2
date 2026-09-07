@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
 import './AdminPage.css';
 import AdminDashboard from './admin/AdminDashboard';
@@ -32,11 +32,33 @@ const MAGAZINE_LINKS = [
     { to: 'magazine-banners', label: 'بنر مجله' }
 ];
 
+const NavAccordion = ({ title, open, active, onToggle, children }) => (
+    <div className={`admin-nav-group ${open ? 'is-open' : ''} ${active ? 'is-current' : ''}`}>
+        <button
+            type="button"
+            className={`admin-nav-heading ${active ? 'is-active' : ''}`}
+            aria-expanded={open}
+            onClick={onToggle}
+        >
+            <span>{title}</span>
+            <span className="admin-nav-caret" aria-hidden="true">{open ? '▾' : '▸'}</span>
+        </button>
+        {open && <div className="admin-nav-sub">{children}</div>}
+    </div>
+);
+
 const AdminPage = () => {
     const { path, url } = useRouteMatch();
     const location = useLocation();
     const shopActive = SHOP_LINKS.some((item) => location.pathname.includes(`/${item.to}`));
     const magazineActive = MAGAZINE_LINKS.some((item) => location.pathname.includes(`/${item.to}`));
+    const [shopOpen, setShopOpen] = useState(shopActive);
+    const [magazineOpen, setMagazineOpen] = useState(magazineActive);
+
+    useEffect(() => {
+        if (shopActive) setShopOpen(true);
+        if (magazineActive) setMagazineOpen(true);
+    }, [shopActive, magazineActive]);
 
     return (
         <div className="admin-page-container">
@@ -48,26 +70,30 @@ const AdminPage = () => {
                     <NavLink to={`${url}/dashboard`} activeClassName="active">داشبورد</NavLink>
                     <NavLink to={`${url}/users`} activeClassName="active">مدیریت کاربران</NavLink>
                     <NavLink to={`${url}/messages`} activeClassName="active">پیام‌ها</NavLink>
-                    <div className={`admin-nav-group ${shopActive ? 'is-open' : ''}`}>
-                        <span className={`admin-nav-heading ${shopActive ? 'is-active' : ''}`}>فروشگاه</span>
-                        <div className="admin-nav-sub">
-                            {SHOP_LINKS.map((item) => (
-                                <NavLink key={item.to} to={`${url}/${item.to}`} activeClassName="active">
-                                    {item.label}
-                                </NavLink>
-                            ))}
-                        </div>
-                    </div>
-                    <div className={`admin-nav-group ${magazineActive ? 'is-open' : ''}`}>
-                        <span className={`admin-nav-heading ${magazineActive ? 'is-active' : ''}`}>مجله سلامت</span>
-                        <div className="admin-nav-sub">
-                            {MAGAZINE_LINKS.map((item) => (
-                                <NavLink key={item.to} to={`${url}/${item.to}`} activeClassName="active">
-                                    {item.label}
-                                </NavLink>
-                            ))}
-                        </div>
-                    </div>
+                    <NavAccordion
+                        title="فروشگاه"
+                        open={shopOpen}
+                        active={shopActive}
+                        onToggle={() => setShopOpen((value) => !value)}
+                    >
+                        {SHOP_LINKS.map((item) => (
+                            <NavLink key={item.to} to={`${url}/${item.to}`} activeClassName="active">
+                                {item.label}
+                            </NavLink>
+                        ))}
+                    </NavAccordion>
+                    <NavAccordion
+                        title="مجله سلامت"
+                        open={magazineOpen}
+                        active={magazineActive}
+                        onToggle={() => setMagazineOpen((value) => !value)}
+                    >
+                        {MAGAZINE_LINKS.map((item) => (
+                            <NavLink key={item.to} to={`${url}/${item.to}`} activeClassName="active">
+                                {item.label}
+                            </NavLink>
+                        ))}
+                    </NavAccordion>
                     <NavLink to={`${url}/tickets`} activeClassName="active">تیکت‌ها</NavLink>
                 </nav>
             </aside>
