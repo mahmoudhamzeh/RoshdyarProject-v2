@@ -613,6 +613,9 @@ function ensureShopSchemaSqlite(db) {
     if (!sqliteHasColumn(db, 'products', 'review_status')) {
         db.exec("ALTER TABLE products ADD COLUMN review_status TEXT NOT NULL DEFAULT 'approved'");
     }
+    if (!sqliteHasColumn(db, 'products', 'review_note')) {
+        db.exec('ALTER TABLE products ADD COLUMN review_note TEXT');
+    }
     seedDefaultsSqlite(db);
     backfillSqlite(db);
     seedShopExtrasSqlite(db);
@@ -660,6 +663,99 @@ function enrichProductSqlite(db, asBool, product) {
 
 function listCampaignSqlite(db) {
     return db.prepare('SELECT * FROM shop_campaigns WHERE active = 1 ORDER BY id DESC LIMIT 1').get() || null;
+}
+
+function mapVendorListingRow(row) {
+    if (!row) return null;
+    return {
+        id: Number(row.id),
+        productId: Number(row.product_id),
+        vendorId: Number(row.vendor_id),
+        price: Number(row.price),
+        compareAtPrice: row.compare_at_price != null ? Number(row.compare_at_price) : null,
+        stock: Number(row.stock || 0),
+        status: row.status,
+        product: {
+            id: Number(row.product_id),
+            name: row.product_name,
+            description: row.product_description || '',
+            category: row.product_category,
+            imageUrl: row.product_image_url || '',
+            active: Number(row.product_active) === 1 || row.product_active === true,
+            reviewStatus: row.review_status || 'approved',
+            reviewNote: row.review_note || ''
+        }
+    };
+}
+
+function upsertOfferOnlySqlite(db, { vendorId, productId, price, stock, compareAtPrice }) {
+    const compareAt = compareAtPrice != null && compareAtPrice !== '' ? Number(compareAtPrice) : null;
+    const existing = db.prepare(
+        'SELECT id FROM shop_offers WHERE product_id = ? AND vendor_id = ?'
+    ).get(Number(productId), Number(vendorId));
+    if (existing) {
+        db.prepare(`
+            UPDATE shop_offers
+            SET price = ?, compare_at_price = ?, stock = ?, status = 'active'
+            WHERE id = ?
+        `).run(Number(price), Number.isFinite(compareAt) ? compareAt : null, Number(stock || 0), existing.id);
+        return Number(existing.id);
+    }
+    const info = db.prepare(`
+        INSERT INTO shop_offers (product_id, vendor_id, price, compare_at_price, stock, status)
+        VALUES (?, ?, ?, ?, ?, 'active')
+    `).run(
+        Number(productId),
+        Number(vendorId),
+        Number(price),
+        Number.isFinite(compareAt) ? compareAt : null,
+        Number(stock || 0)
+    );
+    return Number(info.lastInsertRowid);
+}
+
+function getVendorListingSqlite(db, offerId) {
+    return mapVendorListingRow(db.prepare(`
+        SELECT o.id, o.product_id, o.vendor_id, o.price, o.compare_at_price, o.stock, o.status,
+               p.name AS product_name, p.description AS product_description, p.category AS product_category,
+               p.image_url AS product_image_url, p.active AS product_active, p.review_status, p.review_note
+        FROM shop_offers o
+        JOIN products p ON p.id = o.product_id
+        WHERE o.id = ?
+    `).get(Number(offerId)));
+}
+
+function listVendorListingsSqlite(db, vendorId) {
+    return db.prepare(`
+        SELECT o.id, o.product_id, o.vendor_id, o.price, o.compare_at_price, o.stock, o.status,
+               p.name AS product_name, p.description AS product_description, p.category AS product_category,
+               p.image_url AS product_image_url, p.active AS product_active, p.review_status, p.review_note
+        FROM shop_offers o
+        JOIN products p ON p.id = o.product_id
+        WHERE o.vendor_id = ?
+        ORDER BY o.id DESC
+    `).all(Number(vendorId)).map(mapVendorListingRow);
+}
+
+function upsertVendorOfferSqlite(db, payload) {
+    const product = db.prepare('SELECT * FROM products WHERE id = ?').get(Number(payload.productId));
+    if (!product) return { ok: false, status: 404, message: 'محصول یافت نشد' };
+    const review = product.review_status || 'approved';
+    if (!product.active || review !== 'approved') {
+        return { ok: false, status: 400, message: 'فقط محصولات تأییدشده فروشگاه قابل انتخاب هستند' };
+    }
+    const offerId = upsertOfferOnlySqlite(db, payload);
+    return { ok: true, listing: getVendorListingSqlite(db, offerId) };
+}
+
+function findMarketplaceVendorForProductSqlite(db, productId) {
+    const row = db.prepare(`
+        SELECT v.* FROM shop_offers o
+        JOIN shop_vendors v ON v.id = o.vendor_id
+        WHERE o.product_id = ? AND v.kind = 'marketplace'
+        ORDER BY o.id DESC LIMIT 1
+    `).get(Number(productId));
+    return mapVendorRow(row);
 }
 
 function listOffersForProductSqlite(db, productId) {
@@ -958,6 +1054,7 @@ async function ensureShopSchemaPg(q, one, many) {
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS admin_note TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT');
     await q("ALTER TABLE products ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'approved'");
+    await q('ALTER TABLE products ADD COLUMN IF NOT EXISTS review_note TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS user_id BIGINT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS phone TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS docs_note TEXT');
@@ -1098,6 +1195,72 @@ async function enrichProductPg(many, asBool, product) {
 
 async function listCampaignPg(one) {
     return one('SELECT * FROM shop_campaigns WHERE active = 1 ORDER BY id DESC LIMIT 1');
+}
+
+async function upsertOfferOnlyPg(q, one, { vendorId, productId, price, stock, compareAtPrice }) {
+    const compareAt = compareAtPrice != null && compareAtPrice !== '' ? Number(compareAtPrice) : null;
+    const existing = await one(
+        'SELECT id FROM shop_offers WHERE product_id = $1 AND vendor_id = $2',
+        [Number(productId), Number(vendorId)]
+    );
+    if (existing) {
+        const row = await one(
+            `UPDATE shop_offers SET price=$1, compare_at_price=$2, stock=$3, status='active' WHERE id=$4 RETURNING id`,
+            [Number(price), Number.isFinite(compareAt) ? compareAt : null, Number(stock || 0), Number(existing.id)]
+        );
+        return Number(row.id);
+    }
+    const row = await one(
+        `INSERT INTO shop_offers (product_id, vendor_id, price, compare_at_price, stock, status)
+         VALUES ($1,$2,$3,$4,$5,'active') RETURNING id`,
+        [Number(productId), Number(vendorId), Number(price), Number.isFinite(compareAt) ? compareAt : null, Number(stock || 0)]
+    );
+    return Number(row.id);
+}
+
+async function getVendorListingPg(one, offerId) {
+    return mapVendorListingRow(await one(`
+        SELECT o.id, o.product_id, o.vendor_id, o.price, o.compare_at_price, o.stock, o.status,
+               p.name AS product_name, p.description AS product_description, p.category AS product_category,
+               p.image_url AS product_image_url, p.active AS product_active, p.review_status, p.review_note
+        FROM shop_offers o
+        JOIN products p ON p.id = o.product_id
+        WHERE o.id = $1
+    `, [Number(offerId)]));
+}
+
+async function listVendorListingsPg(many, vendorId) {
+    return (await many(`
+        SELECT o.id, o.product_id, o.vendor_id, o.price, o.compare_at_price, o.stock, o.status,
+               p.name AS product_name, p.description AS product_description, p.category AS product_category,
+               p.image_url AS product_image_url, p.active AS product_active, p.review_status, p.review_note
+        FROM shop_offers o
+        JOIN products p ON p.id = o.product_id
+        WHERE o.vendor_id = $1
+        ORDER BY o.id DESC
+    `, [Number(vendorId)])).map(mapVendorListingRow);
+}
+
+async function upsertVendorOfferPg(q, one, payload) {
+    const product = await one('SELECT * FROM products WHERE id = $1', [Number(payload.productId)]);
+    if (!product) return { ok: false, status: 404, message: 'محصول یافت نشد' };
+    const review = product.review_status || 'approved';
+    const active = product.active === true || Number(product.active) === 1;
+    if (!active || review !== 'approved') {
+        return { ok: false, status: 400, message: 'فقط محصولات تأییدشده فروشگاه قابل انتخاب هستند' };
+    }
+    const offerId = await upsertOfferOnlyPg(q, one, payload);
+    return { ok: true, listing: await getVendorListingPg(one, offerId) };
+}
+
+async function findMarketplaceVendorForProductPg(one, productId) {
+    const row = await one(`
+        SELECT v.* FROM shop_offers o
+        JOIN shop_vendors v ON v.id = o.vendor_id
+        WHERE o.product_id = $1 AND v.kind = 'marketplace'
+        ORDER BY o.id DESC LIMIT 1
+    `, [Number(productId)]);
+    return mapVendorRow(row);
 }
 
 async function listOffersForProductPg(many, productId) {
@@ -1380,6 +1543,9 @@ module.exports = {
     insertLedgerSqlite,
     listCampaignSqlite,
     listOffersForProductSqlite,
+    listVendorListingsSqlite,
+    upsertVendorOfferSqlite,
+    findMarketplaceVendorForProductSqlite,
     listVendorsSqlite,
     getVendorByIdSqlite,
     getVendorByUserSqlite,
@@ -1401,6 +1567,9 @@ module.exports = {
     insertLedgerPg,
     listCampaignPg,
     listOffersForProductPg,
+    listVendorListingsPg,
+    upsertVendorOfferPg,
+    findMarketplaceVendorForProductPg,
     listVendorsPg,
     getVendorByIdPg,
     getVendorByUserPg,

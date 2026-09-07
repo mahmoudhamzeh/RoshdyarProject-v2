@@ -161,12 +161,24 @@
 
 .product-admin-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     flex-shrink: 0;
+    max-width: 320px;
+    justify-content: flex-end;
+}
+
+.product-review-note {
+    width: 100%;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
 }
 
 .product-admin-actions .btn-edit,
-.product-admin-actions .btn-delete {
+.product-admin-actions .btn-delete,
+.product-admin-actions .btn-revise {
     border: none;
     padding: 8px 12px;
     border-radius: 6px;
@@ -176,6 +188,10 @@
 
 .product-admin-actions .btn-edit {
     background-color: #0ea5e9;
+}
+
+.product-admin-actions .btn-revise {
+    background-color: #c2410c;
 }
 
 .product-admin-actions .btn-delete {

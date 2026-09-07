@@ -38,7 +38,7 @@ if (typeof document !== 'undefined') {
 const serviceHint = (next) => {
     if (!next || next === '/dashboard' || next === '/') return '';
     if (next.startsWith('/cart')) return 'برای ثبت سفارش وارد شوید.';
-    if (next.startsWith('/vendor')) return 'برای ثبت‌نام یا ورود فروشنده وارد شوید.';
+    if (next.startsWith('/vendor')) return 'برای ورود به پنل فروشنده وارد شوید.';
     if (next.startsWith('/orders') || next.startsWith('/profile')) return 'برای ادامه این بخش وارد شوید.';
     if (
         next.startsWith('/my-children')

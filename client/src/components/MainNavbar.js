@@ -188,7 +188,7 @@ const MainNavbar = () => {
             {isMenuOpen && <div className="menu-backdrop" onClick={closeMenu} />}
             <div className="navbar-subbar">
                 <nav className="navbar-subbar-links" aria-label="فروشندگان">
-                    <Link to="/vendor">فروشنده شوید</Link>
+                    <Link to="/vendor">پنل فروشنده</Link>
                 </nav>
                 {showShopFilter && (
                     <button

@@ -170,7 +170,9 @@ const API_CATALOG = {
             'POST /api/shop/vendors/me/docs',
             'POST /api/shop/vendors/me/submit',
             'GET /api/vendor/offers',
+            'POST /api/vendor/offers',
             'POST /api/vendor/products',
+            'PUT /api/vendor/products/:id',
             'GET /api/vendor/orders',
             'PUT /api/vendor/orders/items/:itemId',
             'GET /api/vendor/finance'
@@ -2624,26 +2626,48 @@ app.put('/api/admin/vendors/:id', isAdmin, async (req, res) => {
 });
 
 app.get('/api/vendor/offers', requireVendor, async (req, res) => {
-    const all = await store.products.listAll();
-    res.json((all || []).filter((p) => Number(p.vendorId) === Number(req.vendor.id)));
+    res.json(await store.shop.listVendorListings(req.vendor.id));
+});
+
+app.post('/api/vendor/offers', requireVendor, async (req, res) => {
+    const productId = parseInt(req.body.productId, 10);
+    const parsedPrice = parsePrice(req.body.price);
+    const parsedStock = req.body.stock === undefined || req.body.stock === '' ? 0 : parseInt(req.body.stock, 10);
+    if (!productId) return res.status(400).json({ message: 'انتخاب محصول الزامی است' });
+    if (parsedPrice === null) return res.status(400).json({ message: 'قیمت معتبر نیست' });
+    const result = await store.shop.upsertVendorOffer({
+        vendorId: req.vendor.id,
+        productId,
+        price: parsedPrice,
+        stock: Number.isFinite(parsedStock) ? parsedStock : 0,
+        compareAtPrice: req.body.compareAtPrice
+    });
+    if (!result.ok) return res.status(result.status || 400).json({ message: result.message });
+    res.status(201).json(result.listing);
 });
 
 app.post('/api/vendor/products', requireVendor, upload.array('images', 8), async (req, res) => {
     const { name, description, category, price, stock, ageBand, brand, safetyWarning, compareAtPrice } = req.body;
     if (!name || !String(name).trim()) return res.status(400).json({ message: 'نام محصول الزامی است' });
+    if (!description || String(description).trim().length < 10) {
+        return res.status(400).json({ message: 'توضیحات کامل محصول الزامی است' });
+    }
+    if (!category || !String(category).trim()) return res.status(400).json({ message: 'گروه و زیرگروه محصول را انتخاب کنید' });
     const parsedPrice = parsePrice(price);
     if (parsedPrice === null) return res.status(400).json({ message: 'قیمت معتبر نیست' });
     const parsedStock = stock === undefined || stock === '' ? 0 : parseInt(stock, 10);
     const uploaded = (req.files || []).map((file) => `/uploads/${file.filename}`);
+    if (!uploaded.length) return res.status(400).json({ message: 'دست‌کم یک عکس محصول الزامی است' });
     const created = await store.products.create({
         name: String(name).trim(),
-        description: description ? String(description).trim() : '',
-        category: category ? String(category).trim() : 'اسباب‌بازی',
+        description: String(description).trim(),
+        category: String(category).trim(),
         price: parsedPrice,
         stock: Number.isFinite(parsedStock) ? parsedStock : 0,
         imageUrl: uploaded[0] || null,
         active: false,
         reviewStatus: 'pending',
+        reviewNote: '',
         createdAt: new Date().toISOString(),
         ageBand,
         brand,
@@ -2652,8 +2676,50 @@ app.post('/api/vendor/products', requireVendor, upload.array('images', 8), async
         skillIds: parseSkillIds(req.body),
         vendorId: req.vendor.id
     });
-    if (uploaded.length) await store.productImages.replace(created.id, uploaded);
+    await store.productImages.replace(created.id, uploaded);
     res.status(201).json(await store.products.getById(created.id));
+});
+
+app.put('/api/vendor/products/:id', requireVendor, upload.array('images', 8), async (req, res) => {
+    const listings = await store.shop.listVendorListings(req.vendor.id);
+    const owned = listings.find((item) => Number(item.productId) === Number(req.params.id));
+    if (!owned) return res.status(404).json({ message: 'محصول یافت نشد' });
+    const current = await store.products.getById(req.params.id);
+    if (!current) return res.status(404).json({ message: 'محصول یافت نشد' });
+    const status = current.reviewStatus || 'approved';
+    if (!['pending', 'rejected', 'needs_revision'].includes(status)) {
+        return res.status(400).json({ message: 'این محصول برای اصلاح باز نیست' });
+    }
+    const { name, description, category, price, stock, ageBand, brand, safetyWarning, compareAtPrice } = req.body;
+    if (description != null && String(description).trim().length < 10) {
+        return res.status(400).json({ message: 'توضیحات کامل محصول الزامی است' });
+    }
+    const parsedPrice = price != null && price !== '' ? parsePrice(price) : current.price;
+    if (parsedPrice === null) return res.status(400).json({ message: 'قیمت معتبر نیست' });
+    const parsedStock = stock === undefined || stock === '' ? current.stock : parseInt(stock, 10);
+    const uploaded = (req.files || []).map((file) => `/uploads/${file.filename}`);
+    const nextImages = uploaded.length ? uploaded : (current.images || []).map((img) => (typeof img === 'string' ? img : img.url)).filter(Boolean);
+    if (!nextImages.length && !current.imageUrl) {
+        return res.status(400).json({ message: 'دست‌کم یک عکس محصول الزامی است' });
+    }
+    const updated = await store.products.update(req.params.id, {
+        name: name != null ? String(name).trim() : current.name,
+        description: description != null ? String(description).trim() : current.description,
+        category: category != null ? String(category).trim() : current.category,
+        price: parsedPrice,
+        stock: Number.isFinite(parsedStock) ? parsedStock : current.stock,
+        imageUrl: nextImages[0] || current.imageUrl,
+        active: false,
+        reviewStatus: 'pending',
+        reviewNote: '',
+        ageBand: ageBand != null ? ageBand : current.ageBand,
+        brand: brand != null ? brand : current.brand,
+        safetyWarning: safetyWarning != null ? safetyWarning : current.safetyWarning,
+        compareAtPrice: compareAtPrice != null ? compareAtPrice : current.compareAtPrice,
+        vendorId: req.vendor.id
+    });
+    if (uploaded.length) await store.productImages.replace(updated.id, uploaded);
+    res.json(await store.products.getById(updated.id));
 });
 
 app.get('/api/vendor/orders', requireVendor, async (req, res) => {
@@ -2672,14 +2738,45 @@ app.get('/api/vendor/finance', requireVendor, async (req, res) => {
 
 app.patch('/api/admin/products/:id/review', isAdmin, async (req, res) => {
     const status = String(req.body.status || '').trim();
-    if (!['approved', 'rejected', 'pending'].includes(status)) {
+    if (!['approved', 'rejected', 'pending', 'needs_revision'].includes(status)) {
         return res.status(400).json({ message: 'وضعیت بررسی نامعتبر است' });
     }
+    const note = String(req.body.note || req.body.reviewNote || '').trim();
+    if ((status === 'rejected' || status === 'needs_revision') && !note) {
+        return res.status(400).json({ message: 'برای رد یا درخواست اصلاح، توضیح برای فروشنده الزامی است' });
+    }
+    const current = await store.products.getById(req.params.id);
+    if (!current) return res.status(404).json({ message: 'محصول یافت نشد' });
     const updated = await store.products.update(req.params.id, {
         reviewStatus: status,
+        reviewNote: status === 'approved' ? '' : note,
         active: status === 'approved'
     });
-    if (!updated) return res.status(404).json({ message: 'محصول یافت نشد' });
+    const vendor = await store.shop.findMarketplaceVendorForProduct(updated.id);
+    if (vendor && vendor.userId) {
+        const titles = {
+            approved: `محصول «${updated.name}» تأیید شد`,
+            rejected: `محصول «${updated.name}» رد شد`,
+            needs_revision: `اصلاح محصول «${updated.name}» لازم است`,
+            pending: `محصول «${updated.name}» در حال بررسی است`
+        };
+        const bodies = {
+            approved: 'محصول شما تأیید شد و در فروشگاه نمایش داده می‌شود.',
+            rejected: note || 'درخواست محصول رد شد.',
+            needs_revision: note || 'لطفاً محصول را اصلاح کنید.',
+            pending: 'محصول دوباره در صف بررسی قرار گرفت.'
+        };
+        await store.messages.create({
+            title: titles[status],
+            body: bodies[status],
+            link: '/vendor',
+            type: 'admin',
+            isBulk: false,
+            recipientIds: [Number(vendor.userId)],
+            createdAt: new Date().toISOString(),
+            createdBy: req.user ? Number(req.user.id) : null
+        });
+    }
     res.json(updated);
 });
 

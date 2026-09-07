@@ -233,7 +233,8 @@ function rowToProduct(row) {
         active: asBool(row.active),
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        reviewStatus: row.review_status || 'approved'
+        reviewStatus: row.review_status || 'approved',
+        reviewNote: row.review_note || ''
     };
 }
 
@@ -1962,6 +1963,9 @@ const products = {
         if (product.reviewStatus) {
             db.prepare('UPDATE products SET review_status = ? WHERE id = ?').run(product.reviewStatus, createdId);
         }
+        if (product.reviewNote != null) {
+            db.prepare('UPDATE products SET review_note = ? WHERE id = ?').run(String(product.reviewNote || ''), createdId);
+        }
         const created = products.getById(createdId);
         shopStore.syncProductCommerceSqlite(db, created.id, product);
         return products.getById(created.id);
@@ -1995,6 +1999,9 @@ const products = {
         });
         if (next.reviewStatus) {
             db.prepare('UPDATE products SET review_status = ? WHERE id = ?').run(next.reviewStatus, Number(id));
+        }
+        if (next.reviewNote != null) {
+            db.prepare('UPDATE products SET review_note = ? WHERE id = ?').run(String(next.reviewNote || ''), Number(id));
         }
         cacheInvalidate('products');
         shopStore.syncProductCommerceSqlite(db, Number(id), next);
@@ -2586,6 +2593,18 @@ module.exports = {
         vendorFinance(vendorId) {
             connect();
             return shopStore.vendorFinanceSqlite(db, vendorId);
+        },
+        listVendorListings(vendorId) {
+            connect();
+            return shopStore.listVendorListingsSqlite(db, vendorId);
+        },
+        upsertVendorOffer(payload) {
+            connect();
+            return shopStore.upsertVendorOfferSqlite(db, payload);
+        },
+        findMarketplaceVendorForProduct(productId) {
+            connect();
+            return shopStore.findMarketplaceVendorForProductSqlite(db, productId);
         },
         ageBands: shopStore.AGE_BANDS,
         skills: shopStore.SKILLS

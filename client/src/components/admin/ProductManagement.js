@@ -36,6 +36,7 @@ const ProductManagement = () => {
     const [form, setForm] = useState(emptyForm);
     const [categories, setCategories] = useState([]);
     const [skills, setSkills] = useState([]);
+    const [reviewNotes, setReviewNotes] = useState({});
 
     const fetchProducts = async () => {
         setLoading(true);
@@ -146,6 +147,25 @@ const ProductManagement = () => {
         } catch (err) {
             alert(`خطا در حذف: ${err.message}`);
         }
+    };
+
+    const reviewProduct = async (product, status) => {
+        const note = String(reviewNotes[product.id] || '').trim();
+        if ((status === 'rejected' || status === 'needs_revision') && !note) {
+            alert('برای رد یا درخواست اصلاح، توضیح بنویسید. مثلاً: عکس با کیفیت ارسال کنید.');
+            return;
+        }
+        const res = await fetch(`${API}/api/admin/products/${product.id}/review`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, note })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            alert(data.message || 'بررسی محصول ناموفق بود');
+            return;
+        }
+        fetchProducts();
     };
 
     return (
@@ -309,26 +329,45 @@ const ProductManagement = () => {
                                     {product.name}
                                     {product.active === false && <span className="inactive-badge">غیرفعال</span>}
                                     {product.reviewStatus === 'pending' && <span className="inactive-badge">منتظر تأیید فروشنده</span>}
+                                    {product.reviewStatus === 'needs_revision' && <span className="inactive-badge">اصلاح خواسته‌شده</span>}
+                                    {product.reviewStatus === 'rejected' && <span className="inactive-badge">رد شده</span>}
                                 </h3>
                                 <p>{product.category} · {formatPrice(product.price)} · موجودی: {product.stock}</p>
-                                <small>{product.description}</small>
+                                {product.vendorName ? <p>فروشنده: {product.vendorName}</p> : null}
+                                {product.reviewNote ? <small>پیام قبلی: {product.reviewNote}</small> : <small>{product.description}</small>}
                             </div>
                             <div className="product-admin-actions">
-                                {product.reviewStatus === 'pending' && (
-                                    <button
-                                        type="button"
-                                        className="btn-edit"
-                                        onClick={async () => {
-                                            await fetch(`${API}/api/admin/products/${product.id}/review`, {
-                                                method: 'PATCH',
-                                                headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ status: 'approved' })
-                                            });
-                                            fetchProducts();
-                                        }}
-                                    >
-                                        تأیید محصول
-                                    </button>
+                                {['pending', 'needs_revision', 'rejected'].includes(product.reviewStatus) && (
+                                    <>
+                                        <textarea
+                                            className="product-review-note"
+                                            rows="2"
+                                            placeholder="توضیح برای فروشنده؛ مثلاً عکس با کیفیت ارسال کنید"
+                                            value={reviewNotes[product.id] || ''}
+                                            onChange={(e) => setReviewNotes((prev) => ({ ...prev, [product.id]: e.target.value }))}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn-edit"
+                                            onClick={() => reviewProduct(product, 'approved')}
+                                        >
+                                            تأیید و نمایش در سایت
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn-revise"
+                                            onClick={() => reviewProduct(product, 'needs_revision')}
+                                        >
+                                            درخواست اصلاح
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn-delete"
+                                            onClick={() => reviewProduct(product, 'rejected')}
+                                        >
+                                            رد و اطلاع به فروشگاه
+                                        </button>
+                                    </>
                                 )}
                                 <button type="button" className="btn-edit" onClick={() => handleEdit(product)}>
                                     ویرایش
