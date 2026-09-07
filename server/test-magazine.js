@@ -55,7 +55,20 @@ function waitForHealth(child, timeoutMs = 20000) {
     });
 }
 
+function assertPgFkTypes() {
+    const { TABLES_PG } = require('./magazine-store');
+    assert.ok(TABLES_PG.includes('parent_id BIGINT'), 'PG parent_id must be BIGINT');
+    assert.ok(TABLES_PG.includes('user_id BIGINT'), 'PG user_id must be BIGINT');
+    assert.ok(TABLES_PG.includes('category_id BIGINT'), 'PG category_id must be BIGINT');
+    assert.ok(TABLES_PG.includes('post_id BIGINT'), 'PG post_id must be BIGINT');
+    assert.ok(!/\bparent_id INTEGER\b/.test(TABLES_PG), 'PG parent_id must not stay INTEGER');
+    assert.ok(!/\buser_id INTEGER\b/.test(TABLES_PG), 'PG user_id must not stay INTEGER');
+    assert.ok(!/\bcategory_id INTEGER\b/.test(TABLES_PG), 'PG category_id must not stay INTEGER');
+    assert.ok(!/\bpost_id INTEGER\b/.test(TABLES_PG), 'PG post_id must not stay INTEGER');
+}
+
 async function run() {
+    assertPgFkTypes();
     const child = spawn(process.execPath, ['server.js'], {
         cwd: __dirname,
         env: {
@@ -75,6 +88,10 @@ async function run() {
 
     try {
         await waitForHealth(child);
+        const otp = await request('POST', '/api/auth/send-otp', { body: { phone: '09121234567' } });
+        assert.ok([200, 201, 429].includes(otp.status), `send-otp should stay up: ${JSON.stringify(otp.data)}`);
+        assert.ok(otp.data && typeof otp.data === 'object' && otp.data.message, JSON.stringify(otp.data));
+
         const login = await request('POST', '/api/login', { body: { login: 'Amin', password: 'admin' } });
         assert.strictEqual(login.status, 200, JSON.stringify(login.data));
         const auth = { Authorization: `Bearer ${login.data.token}` };
