@@ -149,6 +149,7 @@ const VendorDetailPage = () => {
                     <Field label="صاحب / نماینده" value={vendor.ownerName} />
                     <Field label="کد ملی / شناسه" value={vendor.nationalId} />
                     <Field label="تلفن فروشگاه" value={vendor.phone} />
+                    <Field label="شماره دوم" value={vendor.phone2} />
                     {vendor.personKind === 'company' && (
                         <>
                             <Field label="نام حقوقی" value={vendor.legalName} />
@@ -159,6 +160,8 @@ const VendorDetailPage = () => {
                     <Field label="استان" value={vendor.province} />
                     <Field label="شهر" value={vendor.city} />
                     <Field label="نشانی" value={vendor.address} />
+                    <Field label="سایت" value={vendor.website} />
+                    <Field label="اینستاگرام" value={vendor.instagram ? `@${String(vendor.instagram).replace(/^@/, '')}` : ''} />
                 </div>
             </section>
 

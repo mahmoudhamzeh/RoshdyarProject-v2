@@ -34,6 +34,7 @@ const {
 const { deliverOtp } = require('./sms');
 const { analyzeConcernWithModel, chatGrowthAssistant } = require('./child-growth-ai');
 const { registerMagazineRoutes, overlayLegacyContent } = require('./magazine-routes');
+const { validateVendorApply } = require('./vendor-apply');
 
 const app = express();
 app.set('trust proxy', Number(process.env.TRUST_PROXY || 1));
@@ -2492,6 +2493,7 @@ function vendorPayloadFromBody(body, user) {
     return {
         displayName: body.displayName,
         phone: body.phone || (user && user.mobile) || '',
+        phone2: body.phone2,
         docsNote: body.docsNote || '',
         personKind: body.personKind === 'company'
             ? 'company'
@@ -2506,19 +2508,20 @@ function vendorPayloadFromBody(body, user) {
         address: body.address,
         bankName: body.bankName,
         bankSheba: body.bankSheba,
-        bankAccount: body.bankAccount
+        bankAccount: body.bankAccount,
+        website: body.website,
+        instagram: body.instagram
     };
 }
 
 app.post('/api/shop/vendors/apply', async (req, res) => {
     const user = await requireUser(req, res);
     if (!user) return;
-    const displayName = String(req.body.displayName || '').trim();
-    if (displayName.length < 3) return res.status(400).json({ message: 'نام فروشگاه خیلی کوتاه است' });
+    const checked = validateVendorApply(req.body, user);
+    if (!checked.ok) return res.status(400).json({ message: checked.message });
     const vendor = await store.shop.applyVendor({
         userId: user.id,
-        ...vendorPayloadFromBody(req.body, user),
-        displayName
+        ...checked.payload
     });
     res.status(201).json(vendor);
 });
