@@ -610,6 +610,78 @@ async function run() {
         assert.strictEqual(finance.status, 200, JSON.stringify(finance.data));
         assert.ok(finance.data.sales);
 
+        const vendorMe = await request('GET', '/api/shop/vendors/me', {
+            headers: { Authorization: `Bearer ${verify.data.token}` }
+        });
+        assert.strictEqual(vendorMe.status, 200, JSON.stringify(vendorMe.data));
+        assert.strictEqual(vendorMe.data.ownerName, 'علی فروشنده');
+        assert.strictEqual(vendorMe.data.bankName, 'ملی');
+        assert.ok(Array.isArray(vendorMe.data.docs) && vendorMe.data.docs.length >= 2);
+
+        const catalogItem = await request('GET', `/api/shop/products/${existingProduct.id}`);
+        assert.strictEqual(catalogItem.status, 200, JSON.stringify(catalogItem.data));
+        assert.ok(catalogItem.data.name);
+        assert.ok(String(catalogItem.data.description || '').length > 5);
+        assert.ok(catalogItem.data.category);
+        assert.ok('images' in catalogItem.data || catalogItem.data.imageUrl != null);
+
+        const blockLiveEdit = await request('POST', '/api/shop/vendors/apply', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            body: {
+                displayName: 'فروشگاه بازی‌کده تست',
+                personKind: 'individual',
+                ownerName: 'علی فروشنده',
+                nationalId: '0012345678',
+                phone: '09121112233',
+                province: 'تهران',
+                city: 'تهران',
+                address: 'تهران، خیابان تست',
+                postalCode: '1234567890',
+                bankName: 'ملی',
+                bankSheba: 'IR120170000000123456789001'
+            }
+        });
+        assert.strictEqual(blockLiveEdit.status, 400);
+
+        const changeReq = await request('POST', '/api/vendor/profile/change-request', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            body: {
+                displayName: 'فروشگاه بازی‌کده تست',
+                personKind: 'individual',
+                ownerName: 'علی فروشنده',
+                nationalId: '0012345678',
+                phone: '09121112233',
+                province: 'تهران',
+                city: 'تهران',
+                address: 'تهران، خیابان جدید ۱۲',
+                postalCode: '1234567890',
+                bankName: 'ملت',
+                bankSheba: 'IR120170000000123456789001',
+                note: 'تغییر نشانی و بانک'
+            }
+        });
+        assert.strictEqual(changeReq.status, 201, JSON.stringify(changeReq.data));
+        assert.strictEqual(changeReq.data.changeRequestStatus, 'pending');
+        assert.strictEqual(changeReq.data.address, 'تهران، خیابان تست');
+        assert.strictEqual(changeReq.data.bankName, 'ملی');
+        assert.strictEqual(changeReq.data.changeRequest.payload.address, 'تهران، خیابان جدید ۱۲');
+
+        const rejectChangeNeedsNote = await request('PATCH', `/api/admin/vendors/${vendorApply.data.id}/change-request`, {
+            headers: auth,
+            body: { action: 'reject' }
+        });
+        assert.strictEqual(rejectChangeNeedsNote.status, 400);
+
+        const approveChange = await request('PATCH', `/api/admin/vendors/${vendorApply.data.id}/change-request`, {
+            headers: auth,
+            body: { action: 'approve' }
+        });
+        assert.strictEqual(approveChange.status, 200, JSON.stringify(approveChange.data));
+        assert.strictEqual(approveChange.data.address, 'تهران، خیابان جدید ۱۲');
+        assert.strictEqual(approveChange.data.bankName, 'ملت');
+        assert.strictEqual(approveChange.data.changeRequestStatus, 'approved');
+        assert.strictEqual(approveChange.data.status, 'active');
+
         const loginAgain = await request('POST', '/api/login', {
             body: { login: 'Amin', password: 'admin' }
         });

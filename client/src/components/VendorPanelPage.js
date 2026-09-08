@@ -6,6 +6,7 @@ import {
     faBuilding,
     faChartLine,
     faClipboardList,
+    faIdCard,
     faStore,
     faUser,
     faWallet
@@ -25,6 +26,8 @@ import { VENDOR_TERMS } from '../utils/vendor-terms';
 import { clearAuthSession } from '../api';
 import CategoryCascade from './CategoryCascade';
 import CitySelector from './CitySelector';
+import VendorProfileSection from './VendorProfileSection';
+import VendorCatalogPick from './VendorCatalogPick';
 import './ShopWorld.css';
 import './VendorPanelPage.css';
 import './admin/ProductManagement.css';
@@ -337,7 +340,11 @@ const VendorPanelPage = () => {
     const offeredIds = new Set(listings.map((item) => Number(item.productId)));
     const catalogChoices = catalog.filter((item) => {
         if (offeredIds.has(Number(item.id))) return false;
-        if (catalogQ && !String(item.name || '').includes(catalogQ)) return false;
+        if (catalogQ) {
+            const q = catalogQ.trim();
+            const hay = `${item.name || ''} ${item.description || ''} ${item.category || ''}`;
+            if (!hay.includes(q)) return false;
+        }
         return true;
     });
     const reviewLabel = (status) => PRODUCT_REVIEW_LABELS[status] || status;
@@ -345,6 +352,7 @@ const VendorPanelPage = () => {
 
     const tabs = useMemo(() => ([
         { id: 'products', label: 'محصولات', icon: faBoxOpen },
+        { id: 'profile', label: 'پرونده فروشگاه', icon: faIdCard },
         { id: 'orders', label: 'سفارش‌ها', icon: faClipboardList },
         { id: 'sales', label: 'گزارش فروش', icon: faChartLine },
         { id: 'finance', label: 'گزارش مالی', icon: faWallet }
@@ -675,31 +683,14 @@ const VendorPanelPage = () => {
                                 </div>
 
                                 {productMode === 'existing' && (
-                                    <form className="product-form vendor-form" onSubmit={createOffer}>
-                                        <h3>فروش محصول موجود</h3>
-                                        <input
-                                            value={catalogQ}
-                                            onChange={(e) => setCatalogQ(e.target.value)}
-                                            placeholder="جستجوی نام محصول"
-                                        />
-                                        <select
-                                            value={offerForm.productId}
-                                            onChange={(e) => setOfferForm((p) => ({ ...p, productId: e.target.value }))}
-                                            required
-                                        >
-                                            <option value="">انتخاب محصول کاتالوگ</option>
-                                            {catalogChoices.map((item) => (
-                                                <option key={item.id} value={item.id}>
-                                                    {item.name} · {item.category}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <div className="product-form-row">
-                                            <input value={offerForm.price} onChange={(e) => setOfferForm((p) => ({ ...p, price: e.target.value }))} placeholder="قیمت فروش شما" required />
-                                            <input value={offerForm.stock} onChange={(e) => setOfferForm((p) => ({ ...p, stock: e.target.value }))} placeholder="موجودی" required />
-                                        </div>
-                                        <button type="submit">ثبت قیمت و موجودی</button>
-                                    </form>
+                                    <VendorCatalogPick
+                                        catalogChoices={catalogChoices}
+                                        catalogQ={catalogQ}
+                                        setCatalogQ={setCatalogQ}
+                                        offerForm={offerForm}
+                                        setOfferForm={setOfferForm}
+                                        onSubmit={createOffer}
+                                    />
                                 )}
 
                                 {productMode === 'new' && (
@@ -782,6 +773,10 @@ const VendorPanelPage = () => {
                                     })}
                                 </div>
                             </>
+                        )}
+
+                        {tab === 'profile' && (
+                            <VendorProfileSection me={me} onReload={load} notify={notify} />
                         )}
 
                         {tab === 'orders' && (

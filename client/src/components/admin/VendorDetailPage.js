@@ -36,6 +36,7 @@ const VendorDetailPage = () => {
     const [vendor, setVendor] = useState(null);
     const [commission, setCommission] = useState('');
     const [adminNote, setAdminNote] = useState('');
+    const [changeNote, setChangeNote] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
@@ -61,7 +62,7 @@ const VendorDetailPage = () => {
     }, [vendorId]);
 
     const update = async (patch) => {
-        const omit = new Set(['applicant', 'docs', 'missingFields', 'profileComplete']);
+        const omit = new Set(['applicant', 'docs', 'missingFields', 'profileComplete', 'changeRequest']);
         const safeVendor = Object.fromEntries(
             Object.entries(vendor || {}).filter(([key]) => !omit.has(key))
         );
@@ -81,6 +82,23 @@ const VendorDetailPage = () => {
         setError('');
         setVendor(data);
         setCommission(String(data.commissionPct ?? ''));
+        setAdminNote(data.adminNote || '');
+    };
+
+    const reviewChange = async (action) => {
+        const res = await fetch(`/api/admin/vendors/${vendorId}/change-request`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action, note: changeNote })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            setError(data.message || 'بررسی درخواست تغییر ناموفق بود');
+            return;
+        }
+        setError('');
+        setVendor(data);
+        setChangeNote('');
         setAdminNote(data.adminNote || '');
     };
 
@@ -203,6 +221,41 @@ const VendorDetailPage = () => {
                     </div>
                 )}
             </section>
+
+            {vendor.changeRequestStatus === 'pending' && vendor.changeRequest && vendor.changeRequest.payload && (
+                <section className="vendor-card">
+                    <h3>درخواست تغییر اطلاعات</h3>
+                    {vendor.changeRequest.note ? <p className="vendor-note">یادداشت فروشنده: {vendor.changeRequest.note}</p> : null}
+                    <div className="vendor-grid">
+                        <Field label="نام فروشگاه پیشنهادی" value={vendor.changeRequest.payload.displayName} />
+                        <Field label="صاحب / نماینده" value={vendor.changeRequest.payload.ownerName} />
+                        <Field label="کد ملی / شناسه" value={vendor.changeRequest.payload.nationalId} />
+                        <Field label="تلفن" value={vendor.changeRequest.payload.phone} />
+                        <Field label="استان / شهر" value={[vendor.changeRequest.payload.province, vendor.changeRequest.payload.city].filter(Boolean).join(' / ')} />
+                        <Field label="نشانی پیشنهادی" value={vendor.changeRequest.payload.address} />
+                        <Field label="کد پستی" value={vendor.changeRequest.payload.postalCode} />
+                        <Field label="بانک" value={vendor.changeRequest.payload.bankName} />
+                        <Field label="شبا پیشنهادی" value={vendor.changeRequest.payload.bankSheba} />
+                    </div>
+                    <label className="vendor-admin-note">
+                        توضیح رد (در صورت رد الزامی است)
+                        <textarea
+                            value={changeNote}
+                            onChange={(e) => setChangeNote(e.target.value)}
+                            rows="2"
+                            placeholder="مثلاً تصویر کارت ملی با شبا هم‌خوانی ندارد"
+                        />
+                    </label>
+                    <div className="vendor-review-buttons">
+                        <button type="button" className="btn-edit" onClick={() => reviewChange('approve')}>
+                            تأیید و اعمال تغییرات
+                        </button>
+                        <button type="button" className="btn-delete" onClick={() => reviewChange('reject')}>
+                            رد درخواست تغییر
+                        </button>
+                    </div>
+                </section>
+            )}
 
             <section className="vendor-card vendor-review-actions">
                 <h3>{vendor.kind === 'internal' ? 'کمیسیون فروشنده داخلی' : 'بررسی و تأیید'}</h3>
