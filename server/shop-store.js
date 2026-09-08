@@ -249,8 +249,25 @@ function mapVendorRow(row) {
         instagram: row.instagram || '',
         phone2: row.phone2 || '',
         adminNote: row.admin_note || '',
-        termsAcceptedAt: row.terms_accepted_at || ''
+        termsAcceptedAt: row.terms_accepted_at || '',
+        changeRequestStatus: row.change_request_status || '',
+        changeRequest: parseChangeRequest(row.change_request)
     };
+}
+
+function parseChangeRequest(raw) {
+    if (!raw) return null;
+    if (typeof raw === 'object') return raw;
+    try {
+        return JSON.parse(raw);
+    } catch (_) {
+        return null;
+    }
+}
+
+function serializeChangeRequest(value) {
+    if (!value) return '';
+    return typeof value === 'string' ? value : JSON.stringify(value);
 }
 
 function mapVendorDocRow(row) {
@@ -604,7 +621,9 @@ function ensureShopSchemaSqlite(db) {
         ['phone2', 'TEXT'],
         ['postal_code', 'TEXT'],
         ['admin_note', 'TEXT'],
-        ['terms_accepted_at', 'TEXT']
+        ['terms_accepted_at', 'TEXT'],
+        ['change_request', 'TEXT'],
+        ['change_request_status', 'TEXT']
     ].forEach(([col, type]) => {
         if (!sqliteHasColumn(db, 'shop_vendors', col)) {
             db.exec(`ALTER TABLE shop_vendors ADD COLUMN ${col} ${type}`);
@@ -824,7 +843,8 @@ function writeVendorSqlite(db, id, next) {
             display_name = ?, status = ?, commission_pct = ?, settlement_cycle = ?, phone = ?, docs_note = ?,
             person_kind = ?, national_id = ?, legal_name = ?, registration_no = ?, economic_code = ?,
             owner_name = ?, province = ?, city = ?, address = ?, postal_code = ?, bank_name = ?, bank_sheba = ?, bank_account = ?,
-            website = ?, instagram = ?, phone2 = ?, admin_note = ?, terms_accepted_at = ?
+            website = ?, instagram = ?, phone2 = ?, admin_note = ?, terms_accepted_at = ?,
+            change_request = ?, change_request_status = ?
         WHERE id = ?
     `).run(
         next.displayName,
@@ -851,6 +871,8 @@ function writeVendorSqlite(db, id, next) {
         next.phone2 || null,
         next.adminNote || null,
         next.termsAcceptedAt || null,
+        serializeChangeRequest(next.changeRequest),
+        next.changeRequestStatus || '',
         Number(id)
     );
     return hydrateVendorSqlite(db, mapVendorRow(db.prepare('SELECT * FROM shop_vendors WHERE id = ?').get(Number(id))));
@@ -1053,6 +1075,8 @@ async function ensureShopSchemaPg(q, one, many) {
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS postal_code TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS admin_note TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS change_request TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS change_request_status TEXT');
     await q("ALTER TABLE products ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'approved'");
     await q('ALTER TABLE products ADD COLUMN IF NOT EXISTS review_note TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS user_id BIGINT');
@@ -1327,8 +1351,9 @@ async function writeVendorPg(q, one, many, id, next) {
             display_name=$1, status=$2, commission_pct=$3, settlement_cycle=$4, phone=$5, docs_note=$6,
             person_kind=$7, national_id=$8, legal_name=$9, registration_no=$10, economic_code=$11,
             owner_name=$12, province=$13, city=$14, address=$15, postal_code=$16, bank_name=$17, bank_sheba=$18, bank_account=$19,
-            website=$20, instagram=$21, phone2=$22, admin_note=$23, terms_accepted_at=$24
-         WHERE id=$25 RETURNING *`,
+            website=$20, instagram=$21, phone2=$22, admin_note=$23, terms_accepted_at=$24,
+            change_request=$25, change_request_status=$26
+         WHERE id=$27 RETURNING *`,
         [
             next.displayName,
             next.status,
@@ -1354,6 +1379,8 @@ async function writeVendorPg(q, one, many, id, next) {
             next.phone2 || null,
             next.adminNote || null,
             next.termsAcceptedAt || null,
+            serializeChangeRequest(next.changeRequest),
+            next.changeRequestStatus || '',
             Number(id)
         ]
     );

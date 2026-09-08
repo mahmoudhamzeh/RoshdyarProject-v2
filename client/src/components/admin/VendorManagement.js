@@ -44,6 +44,7 @@ const VendorManagement = () => {
                                 {vendor.kind === 'internal' ? 'فروشنده داخلی مجموعه' : (vendor.personKind === 'company' ? 'حقوقی' : 'حقیقی')}
                                 {' · '}
                                 وضعیت: {STATUS_LABELS[vendor.status] || vendor.status}
+                                {vendor.changeRequestStatus === 'pending' ? ' · درخواست تغییر اطلاعات' : ''}
                                 {vendor.profileComplete ? ' · پرونده کامل' : ' · ناقص'}
                             </p>
                             <small>

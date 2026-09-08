@@ -169,6 +169,7 @@ const API_CATALOG = {
             'POST /api/shop/vendors/apply',
             'POST /api/shop/vendors/me/docs',
             'POST /api/shop/vendors/me/submit',
+            'POST /api/vendor/profile/change-request',
             'GET /api/vendor/offers',
             'POST /api/vendor/offers',
             'POST /api/vendor/products',
@@ -240,6 +241,7 @@ const API_CATALOG = {
             'GET /api/admin/vendors',
             'GET /api/admin/vendors/:id',
             'PUT /api/admin/vendors/:id',
+            'PATCH /api/admin/vendors/:id/change-request',
             'PATCH /api/admin/products/:id/review'
         ]
     }
@@ -1459,6 +1461,35 @@ const requireVendor = (req, res, next) => {
     }).catch(next);
 };
 
+async function notifyAdmins({ title, body, link, createdBy }) {
+    const admins = (await store.users.list()).filter((user) => user.isAdmin).map((user) => Number(user.id));
+    if (!admins.length) return;
+    await store.messages.create({
+        title,
+        body,
+        link: link || '/admin/vendors',
+        type: 'admin',
+        isBulk: false,
+        recipientIds: admins,
+        createdAt: new Date().toISOString(),
+        createdBy: createdBy || null
+    });
+}
+
+async function notifyVendorUser(userId, { title, body, link, createdBy }) {
+    if (!userId) return;
+    await store.messages.create({
+        title,
+        body,
+        link: link || '/vendor',
+        type: 'admin',
+        isBulk: false,
+        recipientIds: [Number(userId)],
+        createdAt: new Date().toISOString(),
+        createdBy: createdBy || null
+    });
+}
+
 // --- Admin Routes ---
 app.get('/api/admin/users', isAdmin, async (req, res) => {
     res.json((await store.users.list()).map((u) => publicUser(u)));
@@ -2512,6 +2543,10 @@ function vendorPayloadFromBody(body, user) {
 app.post('/api/shop/vendors/apply', async (req, res) => {
     const user = await requireUser(req, res);
     if (!user) return;
+    const existing = await store.shop.getVendorByUser(user.id);
+    if (existing && existing.status === 'active') {
+        return res.status(400).json({ message: 'فروشگاه تأییدشده است. برای ویرایش، درخواست تغییر اطلاعات بفرستید' });
+    }
     const checked = validateVendorApply(req.body, user);
     if (!checked.ok) return res.status(400).json({ message: checked.message });
     const vendor = await store.shop.applyVendor({
@@ -2734,6 +2769,67 @@ app.put('/api/vendor/orders/items/:itemId', requireVendor, async (req, res) => {
 
 app.get('/api/vendor/finance', requireVendor, async (req, res) => {
     res.json(await store.shop.vendorFinance(req.vendor.id));
+});
+
+app.post('/api/vendor/profile/change-request', requireVendor, async (req, res) => {
+    const checked = validateVendorApply(req.body, req.user);
+    if (!checked.ok) return res.status(400).json({ message: checked.message });
+    const note = String(req.body.note || req.body.changeNote || '').trim();
+    const updated = await store.shop.updateVendor(req.vendor.id, {
+        changeRequestStatus: 'pending',
+        changeRequest: {
+            payload: checked.payload,
+            note,
+            requestedAt: new Date().toISOString()
+        }
+    });
+    await notifyAdmins({
+        title: `درخواست تغییر اطلاعات «${req.vendor.displayName}»`,
+        body: note || 'فروشنده درخواست تغییر اطلاعات هویتی یا مالی داده است.',
+        link: `/admin/vendors/${req.vendor.id}`,
+        createdBy: req.user && Number(req.user.id)
+    });
+    res.status(201).json(updated);
+});
+
+app.patch('/api/admin/vendors/:id/change-request', isAdmin, async (req, res) => {
+    const action = String(req.body.action || req.body.status || '').trim();
+    if (!['approve', 'reject', 'approved', 'rejected'].includes(action)) {
+        return res.status(400).json({ message: 'وضعیت بررسی نامعتبر است' });
+    }
+    const approve = action === 'approve' || action === 'approved';
+    const note = String(req.body.note || req.body.adminNote || '').trim();
+    if (!approve && !note) {
+        return res.status(400).json({ message: 'برای رد درخواست تغییر، توضیح برای فروشنده الزامی است' });
+    }
+    const current = await store.shop.getVendor(req.params.id);
+    if (!current) return res.status(404).json({ message: 'فروشنده یافت نشد' });
+    if (current.changeRequestStatus !== 'pending' || !current.changeRequest || !current.changeRequest.payload) {
+        return res.status(400).json({ message: 'درخواست تغییر اطلاعات فعالی وجود ندارد' });
+    }
+    const patch = approve
+        ? {
+            ...current.changeRequest.payload,
+            changeRequestStatus: 'approved',
+            changeRequest: { ...current.changeRequest, reviewedAt: new Date().toISOString() },
+            adminNote: ''
+        }
+        : {
+            changeRequestStatus: 'rejected',
+            changeRequest: { ...current.changeRequest, reviewedAt: new Date().toISOString(), rejectNote: note },
+            adminNote: note
+        };
+    const updated = await store.shop.updateVendor(current.id, patch);
+    await notifyVendorUser(current.userId, {
+        title: approve
+            ? 'درخواست تغییر اطلاعات تأیید شد'
+            : 'درخواست تغییر اطلاعات رد شد',
+        body: approve
+            ? 'اطلاعات پرونده فروشگاه شما به‌روز شد.'
+            : note,
+        createdBy: req.user && Number(req.user.id)
+    });
+    res.json(await adminVendorPayload(updated));
 });
 
 app.patch('/api/admin/products/:id/review', isAdmin, async (req, res) => {
