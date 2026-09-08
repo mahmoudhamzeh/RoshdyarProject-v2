@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faBoxOpen,
@@ -22,6 +22,7 @@ import {
     financeFieldErrors
 } from '../utils/vendor-apply';
 import { VENDOR_TERMS } from '../utils/vendor-terms';
+import { clearAuthSession } from '../api';
 import CategoryCascade from './CategoryCascade';
 import CitySelector from './CitySelector';
 import './ShopWorld.css';
@@ -52,6 +53,13 @@ const STATUS_LABELS = {
     active: 'تأییدشده',
     suspended: 'تعلیق‌شده',
     rejected: 'رد شده'
+};
+
+const PRODUCT_REVIEW_LABELS = {
+    pending: 'در انتظار تأیید ادمین',
+    approved: 'تأییدشده و در فروش',
+    rejected: 'رد شده',
+    needs_revision: 'نیاز به اصلاح'
 };
 
 const emptyApply = {
@@ -85,11 +93,17 @@ const Field = ({ label, error, required, children }) => (
 );
 
 const VendorPanelPage = () => {
+    const history = useHistory();
     const [me, setMe] = useState(null);
     const [form, setForm] = useState(emptyApply);
     const [step, setStep] = useState(1);
     const [tab, setTab] = useState('products');
-    const [products, setProducts] = useState([]);
+    const [listings, setListings] = useState([]);
+    const [catalog, setCatalog] = useState([]);
+    const [catalogQ, setCatalogQ] = useState('');
+    const [productMode, setProductMode] = useState('existing');
+    const [offerForm, setOfferForm] = useState({ productId: '', price: '', stock: '' });
+    const [reviseId, setReviseId] = useState(null);
     const [orders, setOrders] = useState([]);
     const [finance, setFinance] = useState(null);
     const [categories, setCategories] = useState([]);
@@ -146,9 +160,14 @@ const VendorPanelPage = () => {
                 fetch('/api/vendor/orders'),
                 fetch('/api/vendor/finance')
             ]);
-            setProducts(offerRes.ok ? await offerRes.json() : []);
+            setListings(offerRes.ok ? await offerRes.json() : []);
             setOrders(orderRes.ok ? await orderRes.json() : []);
             setFinance(financeRes.ok ? await financeRes.json() : null);
+            const catRes = await fetch('/api/shop/products');
+            if (catRes.ok) {
+                const payload = await catRes.json();
+                setCatalog(Array.isArray(payload) ? payload : (payload.items || payload.data || []));
+            }
         }
     };
 
@@ -246,12 +265,41 @@ const VendorPanelPage = () => {
         notify('');
     };
 
+    const createOffer = async (e) => {
+        e.preventDefault();
+        if (!offerForm.productId) {
+            notify('یک محصول موجود انتخاب کنید', true);
+            return;
+        }
+        const res = await fetch('/api/vendor/offers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(offerForm)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            notify(data.message || 'ثبت قیمت و موجودی ناموفق بود', true);
+            return;
+        }
+        setOfferForm({ productId: '', price: '', stock: '' });
+        load();
+        notify('قیمت و موجودی این محصول برای فروشگاه شما ثبت شد.');
+    };
+
     const createProduct = async (e) => {
         e.preventDefault();
         const path = findCategoryPath(categories, productForm.category);
         const leaf = path[path.length - 1];
         if (!productForm.category || (leaf && (leaf.children || []).length)) {
             notify('گروه و زیرگروه محصول را تا آخرین سطح انتخاب کنید.', true);
+            return;
+        }
+        if (!productForm.images || !productForm.images.length) {
+            notify('دست‌کم یک عکس محصول بارگذاری کنید', true);
+            return;
+        }
+        if (!String(productForm.description || '').trim() || String(productForm.description).trim().length < 10) {
+            notify('توضیحات کامل محصول را بنویسید', true);
             return;
         }
         const body = new FormData();
@@ -261,15 +309,18 @@ const VendorPanelPage = () => {
         if (productForm.images) {
             Array.from(productForm.images).forEach((file) => body.append('images', file));
         }
-        const res = await fetch('/api/vendor/products', { method: 'POST', body });
+        const url = reviseId ? `/api/vendor/products/${reviseId}` : '/api/vendor/products';
+        const res = await fetch(url, { method: reviseId ? 'PUT' : 'POST', body });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
             notify(data.message || 'ثبت محصول ناموفق بود', true);
             return;
         }
         setProductForm({ name: '', description: '', category: '', price: '', stock: '', compareAtPrice: '', images: null });
+        setReviseId(null);
+        setProductMode('existing');
         load();
-        notify('محصول ثبت شد و پس از تأیید ادمین در فروشگاه دیده می‌شود.');
+        notify(reviseId ? 'اصلاح ارسال شد و دوباره در صف بررسی است.' : 'محصول جدید برای تأیید ادمین ارسال شد.');
     };
 
     const updateLine = async (itemId, status) => {
@@ -283,11 +334,13 @@ const VendorPanelPage = () => {
     };
 
     const onboarding = !me || me.status !== 'active';
-    const reviewLabel = (status) => ({
-        pending: 'در انتظار تأیید ادمین',
-        approved: 'تأییدشده',
-        rejected: 'رد شده'
-    }[status] || status);
+    const offeredIds = new Set(listings.map((item) => Number(item.productId)));
+    const catalogChoices = catalog.filter((item) => {
+        if (offeredIds.has(Number(item.id))) return false;
+        if (catalogQ && !String(item.name || '').includes(catalogQ)) return false;
+        return true;
+    });
+    const reviewLabel = (status) => PRODUCT_REVIEW_LABELS[status] || status;
     const docsCount = (me && me.docs ? me.docs : []).length;
 
     const tabs = useMemo(() => ([
@@ -304,8 +357,8 @@ const VendorPanelPage = () => {
                 <header className="vendor-hero">
                     <FontAwesomeIcon icon={faStore} />
                     <div>
-                        <h1>پنل فروشندگان تات کیدز</h1>
-                        <p>ثبت‌نام حقیقی یا حقوقی، بارگذاری مدارک، مدیریت کالا و تسویه.</p>
+                        <h1>پنل مدیریت فروشنده</h1>
+                        <p>ورود جدا از حساب کاربری تات کیدز؛ مدیریت کالا، سفارش و تسویه.</p>
                     </div>
                 </header>
                 {message && <p className={`vendor-toast${messageError ? ' is-error' : ''}`}>{message}</p>}
@@ -574,7 +627,19 @@ const VendorPanelPage = () => {
 
                 {me && me.status === 'active' && (
                     <section className="vendor-workspace">
-                        <p className="vendor-active-line">فروشگاه فعال: {me.displayName} · کمیسیون {me.commissionPct}٪</p>
+                        <p className="vendor-active-line">
+                            فروشگاه فعال: {me.displayName} · کمیسیون {me.commissionPct}٪
+                            <button
+                                type="button"
+                                className="vendor-logout"
+                                onClick={() => {
+                                    clearAuthSession();
+                                    history.push('/register?next=/vendor');
+                                }}
+                            >
+                                خروج از پنل
+                            </button>
+                        </p>
                         <div className="vendor-tabs">
                             {tabs.map((item) => (
                                 <button key={item.id} type="button" className={tab === item.id ? 'is-on' : ''} onClick={() => setTab(item.id)}>
@@ -586,36 +651,135 @@ const VendorPanelPage = () => {
 
                         {tab === 'products' && (
                             <>
-                                <form className="product-form vendor-form" onSubmit={createProduct}>
-                                    <h3>تعریف محصول جدید</h3>
-                                    <input value={productForm.name} onChange={(e) => setProductForm((p) => ({ ...p, name: e.target.value }))} placeholder="نام محصول" required />
-                                    <textarea value={productForm.description} onChange={(e) => setProductForm((p) => ({ ...p, description: e.target.value }))} placeholder="توضیح" />
-                                    <CategoryCascade
-                                        tree={categories}
-                                        value={productForm.category}
-                                        onChange={(name) => setProductForm((p) => ({ ...p, category: name }))}
-                                        emptyLabel="انتخاب گروه"
-                                        required
-                                        forceLeaf
-                                    />
-                                    <div className="product-form-row">
-                                        <input value={productForm.price} onChange={(e) => setProductForm((p) => ({ ...p, price: e.target.value }))} placeholder="قیمت فروش" required />
-                                        <input value={productForm.compareAtPrice} onChange={(e) => setProductForm((p) => ({ ...p, compareAtPrice: e.target.value }))} placeholder="قیمت قبل از تخفیف" />
-                                        <input value={productForm.stock} onChange={(e) => setProductForm((p) => ({ ...p, stock: e.target.value }))} placeholder="موجودی" />
-                                    </div>
-                                    <input type="file" accept="image/*" multiple onChange={(e) => setProductForm((p) => ({ ...p, images: e.target.files }))} />
-                                    <button type="submit">ارسال برای تأیید ادمین</button>
-                                </form>
-                                <div className="products-admin-list">
-                                    {products.map((product) => (
-                                        <div key={product.id} className="product-admin-item">
-                                            <div>
-                                                <h3>{product.name}</h3>
-                                                <p>{formatPrice(product.price)} · موجودی {product.stock} · {reviewLabel(product.reviewStatus)}</p>
-                                            </div>
-                                            {product.active && <Link to={`/shop/${product.id}`}>مشاهده</Link>}
+                                <div className="vendor-kind vendor-product-mode" role="tablist">
+                                    <button
+                                        type="button"
+                                        className={productMode === 'existing' ? 'is-on' : ''}
+                                        onClick={() => { setProductMode('existing'); setReviseId(null); }}
+                                    >
+                                        <span>
+                                            <strong>محصول موجود فروشگاه</strong>
+                                            <small>از کاتالوگ انتخاب کنید و فقط قیمت و موجودی بگذارید</small>
+                                        </span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={productMode === 'new' ? 'is-on' : ''}
+                                        onClick={() => setProductMode('new')}
+                                    >
+                                        <span>
+                                            <strong>محصول جدید</strong>
+                                            <small>عکس، توضیح کامل و گروه را بفرستید تا ادمین بررسی کند</small>
+                                        </span>
+                                    </button>
+                                </div>
+
+                                {productMode === 'existing' && (
+                                    <form className="product-form vendor-form" onSubmit={createOffer}>
+                                        <h3>فروش محصول موجود</h3>
+                                        <input
+                                            value={catalogQ}
+                                            onChange={(e) => setCatalogQ(e.target.value)}
+                                            placeholder="جستجوی نام محصول"
+                                        />
+                                        <select
+                                            value={offerForm.productId}
+                                            onChange={(e) => setOfferForm((p) => ({ ...p, productId: e.target.value }))}
+                                            required
+                                        >
+                                            <option value="">انتخاب محصول کاتالوگ</option>
+                                            {catalogChoices.map((item) => (
+                                                <option key={item.id} value={item.id}>
+                                                    {item.name} · {item.category}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="product-form-row">
+                                            <input value={offerForm.price} onChange={(e) => setOfferForm((p) => ({ ...p, price: e.target.value }))} placeholder="قیمت فروش شما" required />
+                                            <input value={offerForm.stock} onChange={(e) => setOfferForm((p) => ({ ...p, stock: e.target.value }))} placeholder="موجودی" required />
                                         </div>
-                                    ))}
+                                        <button type="submit">ثبت قیمت و موجودی</button>
+                                    </form>
+                                )}
+
+                                {productMode === 'new' && (
+                                    <form className="product-form vendor-form" onSubmit={createProduct}>
+                                        <h3>{reviseId ? 'اصلاح و ارسال دوباره محصول' : 'تعریف محصول جدید برای تأیید ادمین'}</h3>
+                                        <input value={productForm.name} onChange={(e) => setProductForm((p) => ({ ...p, name: e.target.value }))} placeholder="نام محصول" required />
+                                        <textarea value={productForm.description} onChange={(e) => setProductForm((p) => ({ ...p, description: e.target.value }))} placeholder="توضیحات کامل" rows="4" required />
+                                        <CategoryCascade
+                                            tree={categories}
+                                            value={productForm.category}
+                                            onChange={(name) => setProductForm((p) => ({ ...p, category: name }))}
+                                            emptyLabel="انتخاب گروه"
+                                            required
+                                            forceLeaf
+                                        />
+                                        <div className="product-form-row">
+                                            <input value={productForm.price} onChange={(e) => setProductForm((p) => ({ ...p, price: e.target.value }))} placeholder="قیمت فروش" required />
+                                            <input value={productForm.compareAtPrice} onChange={(e) => setProductForm((p) => ({ ...p, compareAtPrice: e.target.value }))} placeholder="قیمت قبل از تخفیف" />
+                                            <input value={productForm.stock} onChange={(e) => setProductForm((p) => ({ ...p, stock: e.target.value }))} placeholder="موجودی" />
+                                        </div>
+                                        <input type="file" accept="image/*" multiple onChange={(e) => setProductForm((p) => ({ ...p, images: e.target.files }))} />
+                                        <div className="product-form-actions">
+                                            {reviseId && (
+                                                <button
+                                                    type="button"
+                                                    className="btn-cancel"
+                                                    onClick={() => {
+                                                        setReviseId(null);
+                                                        setProductForm({ name: '', description: '', category: '', price: '', stock: '', compareAtPrice: '', images: null });
+                                                    }}
+                                                >
+                                                    انصراف از اصلاح
+                                                </button>
+                                            )}
+                                            <button type="submit">{reviseId ? 'ارسال اصلاح برای ادمین' : 'ارسال برای تأیید ادمین'}</button>
+                                        </div>
+                                    </form>
+                                )}
+
+                                <div className="products-admin-list">
+                                    {listings.length === 0 && <p>هنوز محصولی برای این فروشگاه ثبت نشده است.</p>}
+                                    {listings.map((listing) => {
+                                        const product = listing.product || {};
+                                        const status = product.reviewStatus || 'approved';
+                                        return (
+                                            <div key={listing.id} className="product-admin-item">
+                                                <div>
+                                                    <h3>{product.name}</h3>
+                                                    <p>
+                                                        {formatPrice(listing.price)} · موجودی {listing.stock}
+                                                        {' · '}
+                                                        {status === 'approved' ? 'فروش روی محصول موجود' : reviewLabel(status)}
+                                                    </p>
+                                                    {product.reviewNote ? <p className="vendor-admin-banner">{product.reviewNote}</p> : null}
+                                                </div>
+                                                {product.active && <Link to={`/shop/${product.id}`}>مشاهده</Link>}
+                                                {(status === 'needs_revision' || status === 'rejected') && (
+                                                    <button
+                                                        type="button"
+                                                        className="btn-edit"
+                                                        onClick={() => {
+                                                            setProductMode('new');
+                                                            setReviseId(product.id);
+                                                            setProductForm({
+                                                                name: product.name || '',
+                                                                description: product.description || '',
+                                                                category: product.category || '',
+                                                                price: String(listing.price || ''),
+                                                                stock: String(listing.stock || ''),
+                                                                compareAtPrice: '',
+                                                                images: null
+                                                            });
+                                                        }}
+                                                    >
+                                                        اصلاح و ارسال دوباره
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </>
                         )}

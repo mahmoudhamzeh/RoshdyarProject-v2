@@ -221,6 +221,24 @@
 .vendor-active-line {
   font-weight: 700;
   color: #115e59;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.vendor-logout {
+  border: 1px solid #d7e5e2;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vendor-product-mode {
+  margin-bottom: 1rem;
 }
 
 .vendor-order-card,

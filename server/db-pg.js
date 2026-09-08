@@ -239,7 +239,8 @@ function rowToProduct(row) {
         active: asBool(row.active),
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        reviewStatus: row.review_status || 'approved'
+        reviewStatus: row.review_status || 'approved',
+        reviewNote: row.review_note || ''
     };
 }
 
@@ -1880,6 +1881,9 @@ const products = {
         if (product.reviewStatus) {
             await q('UPDATE products SET review_status = $1 WHERE id = $2', [product.reviewStatus, row.id]);
         }
+        if (product.reviewNote != null) {
+            await q('UPDATE products SET review_note = $1 WHERE id = $2', [String(product.reviewNote || ''), row.id]);
+        }
         await shopStore.syncProductCommercePg(q, one, row.id, product);
         return products.getById(row.id);
     },
@@ -1905,6 +1909,9 @@ const products = {
         );
         if (next.reviewStatus) {
             await q('UPDATE products SET review_status = $1 WHERE id = $2', [next.reviewStatus, Number(id)]);
+        }
+        if (next.reviewNote != null) {
+            await q('UPDATE products SET review_note = $1 WHERE id = $2', [String(next.reviewNote || ''), Number(id)]);
         }
         cacheInvalidate('products');
         await shopStore.syncProductCommercePg(q, one, Number(id), next);
@@ -2450,6 +2457,15 @@ module.exports = {
         },
         vendorFinance(vendorId) {
             return shopStore.vendorFinancePg(many, vendorId);
+        },
+        listVendorListings(vendorId) {
+            return shopStore.listVendorListingsPg(many, vendorId);
+        },
+        upsertVendorOffer(payload) {
+            return shopStore.upsertVendorOfferPg(q, one, payload);
+        },
+        findMarketplaceVendorForProduct(productId) {
+            return shopStore.findMarketplaceVendorForProductPg(one, productId);
         },
         ageBands: shopStore.AGE_BANDS,
         skills: shopStore.SKILLS

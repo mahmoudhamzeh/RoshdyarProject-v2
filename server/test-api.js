@@ -42,6 +42,47 @@ function request(method, urlPath, { body, headers } = {}) {
     });
 }
 
+function postMultipart(urlPath, { headers, fields, files } = {}) {
+    const boundary = `----tatkids${Date.now()}${Math.random().toString(16).slice(2)}`;
+    const chunks = [];
+    Object.entries(fields || {}).forEach(([name, value]) => {
+        chunks.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`));
+    });
+    (files || []).forEach((file) => {
+        chunks.push(Buffer.from(
+            `--${boundary}\r\nContent-Disposition: form-data; name="${file.field}"; filename="${file.filename}"\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`
+        ));
+        chunks.push(file.body);
+        chunks.push(Buffer.from('\r\n'));
+    });
+    chunks.push(Buffer.from(`--${boundary}--\r\n`));
+    const fileBody = Buffer.concat(chunks);
+    return new Promise((resolve, reject) => {
+        const req = http.request({
+            hostname: '127.0.0.1',
+            port,
+            path: urlPath,
+            method: 'POST',
+            headers: {
+                ...(headers || {}),
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'Content-Length': fileBody.length
+            }
+        }, (res) => {
+            let raw = '';
+            res.on('data', (chunk) => { raw += chunk; });
+            res.on('end', () => {
+                let data = raw;
+                try { data = raw ? JSON.parse(raw) : null; } catch (_) {}
+                resolve({ status: res.statusCode, data });
+            });
+        });
+        req.on('error', reject);
+        req.write(fileBody);
+        req.end();
+    });
+}
+
 function waitForHealth(child, timeoutMs = 15000) {
     const started = Date.now();
     return new Promise((resolve, reject) => {
@@ -492,22 +533,68 @@ async function run() {
         assert.strictEqual(approveVendor.data.status, 'active');
         assert.strictEqual(approveVendor.data.personKind, 'individual');
 
-        const vendorProduct = await request('POST', '/api/vendor/products', {
+        const shopCatalog = await request('GET', '/api/shop/products');
+        assert.ok(Array.isArray(shopCatalog.data) && shopCatalog.data.length, JSON.stringify(shopCatalog.data));
+        const existingProduct = shopCatalog.data[0];
+        const vendorOffer = await request('POST', '/api/vendor/offers', {
             headers: { Authorization: `Bearer ${verify.data.token}` },
-            body: {
+            body: { productId: existingProduct.id, price: 99000, stock: 7 }
+        });
+        assert.strictEqual(vendorOffer.status, 201, JSON.stringify(vendorOffer.data));
+        assert.strictEqual(Number(vendorOffer.data.productId), Number(existingProduct.id));
+        assert.strictEqual(vendorOffer.data.price, 99000);
+
+        const png = Buffer.from(
+            '89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000a49444154789c63000100000500010d0a2db40000000049454e44ae426082',
+            'hex'
+        );
+        const vendorProduct = await postMultipart('/api/vendor/products', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            fields: {
                 name: 'حلقه چوبی فروشنده',
-                description: 'محصول فروشنده برای تأیید ادمین',
+                description: 'محصول فروشنده برای تأیید ادمین با توضیح کامل',
                 category: 'لگو',
-                price: 120000,
-                stock: 4
-            }
+                price: '120000',
+                stock: '4'
+            },
+            files: [{ field: 'images', filename: 'ring.png', type: 'image/png', body: png }]
         });
         assert.strictEqual(vendorProduct.status, 201, JSON.stringify(vendorProduct.data));
         assert.strictEqual(vendorProduct.data.reviewStatus, 'pending');
         assert.strictEqual(vendorProduct.data.active, false);
 
+        const vendorListings = await request('GET', '/api/vendor/offers', {
+            headers: { Authorization: `Bearer ${verify.data.token}` }
+        });
+        assert.strictEqual(vendorListings.status, 200, JSON.stringify(vendorListings.data));
+        assert.ok(
+            (vendorListings.data || []).some((item) => Number(item.productId) === Number(vendorProduct.data.id)),
+            'pending vendor product should appear in store listings'
+        );
+
         const hiddenVendorProduct = await request('GET', `/api/shop/products/${vendorProduct.data.id}`);
         assert.strictEqual(hiddenVendorProduct.status, 404);
+
+        const rejectNeedsNote = await request('PATCH', `/api/admin/products/${vendorProduct.data.id}/review`, {
+            headers: auth,
+            body: { status: 'rejected' }
+        });
+        assert.strictEqual(rejectNeedsNote.status, 400);
+
+        const askRevision = await request('PATCH', `/api/admin/products/${vendorProduct.data.id}/review`, {
+            headers: auth,
+            body: { status: 'needs_revision', note: 'عکس با کیفیت ارسال کنید' }
+        });
+        assert.strictEqual(askRevision.status, 200, JSON.stringify(askRevision.data));
+        assert.strictEqual(askRevision.data.reviewStatus, 'needs_revision');
+        assert.strictEqual(askRevision.data.reviewNote, 'عکس با کیفیت ارسال کنید');
+        assert.strictEqual(askRevision.data.active, false);
+
+        const vendorInbox = await request('GET', '/api/messages', {
+            headers: { Authorization: `Bearer ${verify.data.token}` }
+        });
+        assert.strictEqual(vendorInbox.status, 200, JSON.stringify(vendorInbox.data));
+        assert.ok((vendorInbox.data || []).some((item) => String(item.body || '').includes('عکس با کیفیت')));
 
         const approveProduct = await request('PATCH', `/api/admin/products/${vendorProduct.data.id}/review`, {
             headers: auth,
