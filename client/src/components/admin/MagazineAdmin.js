@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import CategoryTree, { CategoryParentCascade } from './CategoryTree';
 import './ArticleManagement.css';
 import '../magazine/Magazine.css';
 
@@ -7,14 +8,7 @@ export const MagazineTaxonomy = () => {
     const [tags, setTags] = useState([]);
     const [catForm, setCatForm] = useState({ name: '', parentId: '', slug: '' });
     const [tagName, setTagName] = useState('');
-
-    const flatten = (nodes, acc = []) => {
-        nodes.forEach((node) => {
-            acc.push(node);
-            if (node.children) flatten(node.children, acc);
-        });
-        return acc;
-    };
+    const nameRef = useRef(null);
 
     const load = async () => {
         const [c, t] = await Promise.all([fetch('/api/magazine/categories'), fetch('/api/magazine/tags')]);
@@ -45,32 +39,43 @@ export const MagazineTaxonomy = () => {
         load();
     };
 
-    const flatCats = flatten(categories);
+    const addChild = (id) => {
+        setCatForm((current) => ({ ...current, parentId: String(id) }));
+        if (nameRef.current) nameRef.current.focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <div className="article-management">
             <h2>دسته‌بندی و برچسب‌های مجله</h2>
+            <p>دسته اصلی و زیرشاخه‌ها مثل درخت نمایش داده می‌شوند؛ فلش هر گره را باز و بسته می‌کند.</p>
             <form className="article-form" onSubmit={saveCategory}>
                 <h3>دسته جدید</h3>
-                <input required placeholder="نام دسته" value={catForm.name} onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} />
+                <input
+                    ref={nameRef}
+                    required
+                    placeholder="نام دسته"
+                    value={catForm.name}
+                    onChange={(e) => setCatForm({ ...catForm, name: e.target.value })}
+                />
                 <input placeholder="نامک (اختیاری)" value={catForm.slug} onChange={(e) => setCatForm({ ...catForm, slug: e.target.value })} />
-                <select value={catForm.parentId} onChange={(e) => setCatForm({ ...catForm, parentId: e.target.value })}>
-                    <option value="">دسته اصلی</option>
-                    {flatCats.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                </select>
+                <CategoryParentCascade
+                    tree={categories}
+                    value={catForm.parentId}
+                    onChange={(parentId) => setCatForm({ ...catForm, parentId })}
+                />
                 <button type="submit">افزودن دسته</button>
             </form>
-            <ul>
-                {flatCats.map((item) => (
-                    <li key={item.id}>
-                        {item.parentId ? '— ' : ''}{item.name}
-                        <button type="button" className="btn-delete" onClick={async () => {
-                            await fetch(`/api/admin/magazine/categories/${item.id}`, { method: 'DELETE' });
-                            load();
-                        }}>حذف</button>
-                    </li>
-                ))}
-            </ul>
+            <CategoryTree
+                tree={categories}
+                onAddChild={addChild}
+                onDelete={async (id) => {
+                    if (!window.confirm('این دسته حذف شود؟')) return;
+                    await fetch(`/api/admin/magazine/categories/${id}`, { method: 'DELETE' });
+                    load();
+                }}
+                emptyText="هنوز دسته‌ای ثبت نشده است."
+            />
             <form className="article-form" onSubmit={saveTag}>
                 <h3>برچسب جدید</h3>
                 <input required placeholder="نام برچسب" value={tagName} onChange={(e) => setTagName(e.target.value)} />

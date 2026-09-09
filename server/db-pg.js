@@ -2433,6 +2433,9 @@ module.exports = {
         listVendors() {
             return shopStore.listVendorsPg(many);
         },
+        getVendor(id) {
+            return shopStore.getVendorByIdPg(one, many, id);
+        },
         getVendorByUser(userId) {
             return shopStore.getVendorByUserPg(one, many, userId);
         },

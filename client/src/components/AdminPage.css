@@ -9,12 +9,15 @@
   width: 250px;
   background: linear-gradient(180deg, var(--brand-deep) 0%, #0b3d3a 100%);
   color: #fff;
-  padding: 1rem;
+  padding: 1rem 1rem 1.5rem;
   height: 100vh;
   position: fixed;
   right: 0;
   top: 0;
   z-index: 20;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-sidebar-header h3 {
@@ -62,15 +65,28 @@
 }
 
 .admin-nav-heading {
-  display: block;
-  padding: 0.55rem 0.75rem 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
   font-weight: 800;
   color: #99f6e4;
   font-size: 0.92rem;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: right;
 }
 
 .admin-nav-heading.is-active {
   color: #fff;
+}
+
+.admin-nav-caret {
+  font-size: 0.85rem;
+  color: #99f6e4;
 }
 
 .admin-nav-sub {
@@ -102,6 +118,8 @@
     position: sticky;
     width: 100%;
     height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .admin-sidebar-header {
@@ -122,8 +140,8 @@
   }
 
   .admin-nav-group {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     margin-bottom: 0;
     margin-left: 8px;
   }
@@ -133,8 +151,9 @@
     padding: 0.55rem 0.4rem;
   }
 
-  .admin-nav-sub {
+  .admin-nav-group.is-open .admin-nav-sub {
     flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .admin-main-content {

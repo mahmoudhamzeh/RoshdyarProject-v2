@@ -1,0 +1,179 @@
+.cat-cascade {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.cat-cascade label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-weight: 700;
+    color: #3f3a2f;
+}
+
+.cat-cascade select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
+    background: #fff;
+}
+
+.cat-cascade-preview {
+    margin: 0;
+    padding: 0.65rem 0.75rem;
+    background: #f0fdfa;
+    border: 1px dashed #99f6e4;
+    border-radius: 8px;
+    color: #0f766e;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.cat-tree-empty {
+    color: #5b716e;
+}
+
+.cat-tree-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.cat-tree-toolbar button {
+    border: 1px solid #d7e5e2;
+    background: #fff;
+    color: #0f766e;
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.cat-tree-node {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.cat-tree-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    background: #fff;
+    border: 1px solid #d7e5e2;
+    border-radius: 10px;
+    padding: 0.7rem 0.85rem;
+}
+
+.cat-tree-node.depth-0 > .cat-tree-row {
+    border-color: #0f766e;
+    box-shadow: 0 1px 4px rgba(15, 118, 110, 0.08);
+}
+
+.cat-tree-toggle {
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+    border: 1px solid #99f6e4;
+    background: #f0fdfa;
+    color: #0f766e;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.cat-tree-toggle.is-leaf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-color: transparent;
+    background: transparent;
+    color: #94a3b8;
+    cursor: default;
+}
+
+.cat-tree-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.cat-tree-main strong {
+    font-size: 1rem;
+}
+
+.cat-tree-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.7rem;
+    color: #5b716e;
+    font-size: 0.8rem;
+}
+
+.cat-tree-badge {
+    background: #ecfdf5;
+    color: #0f766e;
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    font-weight: 800;
+}
+
+.cat-tree-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.cat-tree-add {
+    border: 1px solid #0f766e;
+    background: #fff;
+    color: #0f766e;
+    border-radius: 6px;
+    padding: 0.35rem 0.65rem;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
+.cat-tree-actions .btn-delete {
+    border: none;
+    background: #e74c3c;
+    color: #fff;
+    border-radius: 6px;
+    padding: 0.35rem 0.65rem;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
+.cat-tree-children {
+    margin-right: 1.1rem;
+    padding-right: 0.75rem;
+    border-right: 2px solid #99f6e4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+@media (max-width: 700px) {
+    .cat-tree-row {
+        flex-wrap: wrap;
+    }
+
+    .cat-tree-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .cat-tree-children {
+        margin-right: 0.55rem;
+        padding-right: 0.45rem;
+    }
+}

@@ -327,20 +327,76 @@ async function run() {
                 ownerName: 'علی فروشنده',
                 nationalId: '0012345678',
                 phone: '09121112233',
+                phone2: '09123334455',
+                province: 'تهران',
+                city: 'تهران',
+                address: 'تهران، خیابان تست',
+                postalCode: '1234567890',
+                bankName: 'ملی',
+                bankSheba: 'IR120170000000123456789001',
+                website: 'example.com',
+                instagram: '@tatkids_shop'
+            }
+        });
+        assert.strictEqual(vendorApply.status, 201, JSON.stringify(vendorApply.data));
+        assert.strictEqual(vendorApply.data.status, 'draft');
+        assert.strictEqual(vendorApply.data.profileComplete, false);
+        assert.strictEqual(vendorApply.data.postalCode, '1234567890');
+        assert.strictEqual(vendorApply.data.phone2, '09123334455');
+        assert.strictEqual(vendorApply.data.instagram, 'tatkids_shop');
+        assert.ok(String(vendorApply.data.website).includes('example.com'));
+        assert.strictEqual(vendorApply.data.bankSheba, 'IR120170000000123456789001');
+
+        const badNational = await request('POST', '/api/shop/vendors/apply', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            body: {
+                displayName: 'فروشگاه بازی‌کده تست',
+                personKind: 'individual',
+                ownerName: 'علی فروشنده',
+                nationalId: '12345',
+                phone: '09121112233',
+                province: 'تهران',
+                city: 'تهران',
                 address: 'تهران، خیابان تست',
                 bankName: 'ملی',
                 bankSheba: 'IR120170000000123456789001'
             }
         });
-        assert.strictEqual(vendorApply.status, 201, JSON.stringify(vendorApply.data));
-        assert.strictEqual(vendorApply.data.status, 'pending');
-        assert.strictEqual(vendorApply.data.profileComplete, false);
+        assert.strictEqual(badNational.status, 400);
+
+        const badPostal = await request('POST', '/api/shop/vendors/apply', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            body: {
+                displayName: 'فروشگاه بازی‌کده تست',
+                personKind: 'individual',
+                ownerName: 'علی فروشنده',
+                nationalId: '0012345678',
+                phone: '09121112233',
+                province: 'تهران',
+                city: 'تهران',
+                address: 'تهران، خیابان تست',
+                postalCode: '123',
+                bankName: 'ملی',
+                bankSheba: 'IR120170000000123456789001'
+            }
+        });
+        assert.strictEqual(badPostal.status, 400);
+
+        const missingVendor = await request('GET', '/api/admin/vendors/999999', { headers: auth });
+        assert.strictEqual(missingVendor.status, 404);
+
+        const pendingFile = await request('GET', `/api/admin/vendors/${vendorApply.data.id}`, { headers: auth });
+        assert.strictEqual(pendingFile.status, 200, JSON.stringify(pendingFile.data));
+        assert.ok(pendingFile.data.applicant && pendingFile.data.applicant.id);
+        assert.ok(Array.isArray(pendingFile.data.missingFields));
+        assert.ok(pendingFile.data.missingFields.some((item) => String(item).includes('مدارک')));
 
         const blockApprove = await request('PUT', `/api/admin/vendors/${vendorApply.data.id}`, {
             headers: auth,
             body: { status: 'active' }
         });
         assert.strictEqual(blockApprove.status, 400);
+        assert.ok(Array.isArray(blockApprove.data.missingFields));
 
         const boundary = `----tatkids${Date.now()}`;
         const fileBody = Buffer.concat([
@@ -375,6 +431,58 @@ async function run() {
         });
         assert.strictEqual(docs.status, 201, JSON.stringify(docs.data));
         assert.ok(docs.data.profileComplete);
+
+        const rejectSubmit = await request('POST', '/api/shop/vendors/me/submit', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            body: { termsAccepted: false }
+        });
+        assert.strictEqual(rejectSubmit.status, 400);
+
+        const submitVendor = await request('POST', '/api/shop/vendors/me/submit', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            body: { termsAccepted: true }
+        });
+        assert.strictEqual(submitVendor.status, 200, JSON.stringify(submitVendor.data));
+        assert.strictEqual(submitVendor.data.status, 'pending');
+        assert.ok(submitVendor.data.termsAcceptedAt);
+
+        const vendorFile = await request('GET', `/api/admin/vendors/${vendorApply.data.id}`, { headers: auth });
+        assert.strictEqual(vendorFile.status, 200, JSON.stringify(vendorFile.data));
+        assert.ok(Array.isArray(vendorFile.data.docs) && vendorFile.data.docs.length >= 2);
+        assert.strictEqual(vendorFile.data.ownerName, 'علی فروشنده');
+        assert.ok(vendorFile.data.applicant && vendorFile.data.applicant.id);
+        assert.ok(vendorFile.data.profileComplete);
+        assert.deepStrictEqual(vendorFile.data.missingFields, []);
+        assert.strictEqual(vendorFile.data.postalCode, '1234567890');
+
+        const returnNeedsNote = await request('PUT', `/api/admin/vendors/${vendorApply.data.id}`, {
+            headers: auth,
+            body: { status: 'returned', adminNote: '' }
+        });
+        assert.strictEqual(returnNeedsNote.status, 400);
+
+        const returnVendor = await request('PUT', `/api/admin/vendors/${vendorApply.data.id}`, {
+            headers: auth,
+            body: { status: 'returned', adminNote: 'کارت ملی واضح نیست' }
+        });
+        assert.strictEqual(returnVendor.status, 200, JSON.stringify(returnVendor.data));
+        assert.strictEqual(returnVendor.data.status, 'returned');
+        assert.strictEqual(returnVendor.data.adminNote, 'کارت ملی واضح نیست');
+
+        const askDocs = await request('PUT', `/api/admin/vendors/${vendorApply.data.id}`, {
+            headers: auth,
+            body: { status: 'docs_requested', adminNote: 'تأییدیه شبا را دوباره بارگذاری کنید' }
+        });
+        assert.strictEqual(askDocs.status, 200, JSON.stringify(askDocs.data));
+        assert.strictEqual(askDocs.data.status, 'docs_requested');
+
+        const resubmitVendor = await request('POST', '/api/shop/vendors/me/submit', {
+            headers: { Authorization: `Bearer ${verify.data.token}` },
+            body: { termsAccepted: true }
+        });
+        assert.strictEqual(resubmitVendor.status, 200, JSON.stringify(resubmitVendor.data));
+        assert.strictEqual(resubmitVendor.data.status, 'pending');
+        assert.strictEqual(resubmitVendor.data.adminNote, '');
 
         const approveVendor = await request('PUT', `/api/admin/vendors/${vendorApply.data.id}`, {
             headers: auth,

@@ -2563,6 +2563,10 @@ module.exports = {
             connect();
             return shopStore.listVendorsSqlite(db);
         },
+        getVendor(id) {
+            connect();
+            return shopStore.getVendorByIdSqlite(db, id);
+        },
         getVendorByUser(userId) {
             connect();
             return shopStore.getVendorByUserSqlite(db, userId);

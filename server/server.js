@@ -34,6 +34,7 @@ const {
 const { deliverOtp } = require('./sms');
 const { analyzeConcernWithModel, chatGrowthAssistant } = require('./child-growth-ai');
 const { registerMagazineRoutes, overlayLegacyContent } = require('./magazine-routes');
+const { validateVendorApply } = require('./vendor-apply');
 
 const app = express();
 app.set('trust proxy', Number(process.env.TRUST_PROXY || 1));
@@ -167,6 +168,7 @@ const API_CATALOG = {
             'GET /api/shop/vendors/me',
             'POST /api/shop/vendors/apply',
             'POST /api/shop/vendors/me/docs',
+            'POST /api/shop/vendors/me/submit',
             'GET /api/vendor/offers',
             'POST /api/vendor/products',
             'GET /api/vendor/orders',
@@ -234,6 +236,7 @@ const API_CATALOG = {
             'PUT /api/admin/product-categories/:id',
             'DELETE /api/admin/product-categories/:id',
             'GET /api/admin/vendors',
+            'GET /api/admin/vendors/:id',
             'PUT /api/admin/vendors/:id',
             'PATCH /api/admin/products/:id/review'
         ]
@@ -2487,37 +2490,31 @@ app.get('/api/shop/vendors/me', async (req, res) => {
     res.json(await store.shop.getVendorByUser(user.id));
 });
 
+const VENDOR_STATUSES = ['draft', 'pending', 'active', 'suspended', 'rejected', 'returned', 'docs_requested'];
+
 function vendorPayloadFromBody(body, user) {
-    return {
-        displayName: body.displayName,
-        phone: body.phone || (user && user.mobile) || '',
-        docsNote: body.docsNote || '',
-        personKind: body.personKind === 'company'
-            ? 'company'
-            : (body.personKind === 'individual' ? 'individual' : undefined),
-        nationalId: body.nationalId,
-        legalName: body.legalName,
-        registrationNo: body.registrationNo,
-        economicCode: body.economicCode,
-        ownerName: body.ownerName,
-        province: body.province,
-        city: body.city,
-        address: body.address,
-        bankName: body.bankName,
-        bankSheba: body.bankSheba,
-        bankAccount: body.bankAccount
-    };
+    const src = body || {};
+    const out = {};
+    [
+        'displayName', 'phone', 'phone2', 'docsNote', 'nationalId', 'legalName', 'registrationNo',
+        'economicCode', 'ownerName', 'province', 'city', 'address', 'postalCode', 'bankName',
+        'bankSheba', 'bankAccount', 'website', 'instagram', 'adminNote'
+    ].forEach((key) => {
+        if (src[key] !== undefined) out[key] = src[key];
+    });
+    if (src.personKind === 'company' || src.personKind === 'individual') out.personKind = src.personKind;
+    if (out.phone === undefined && user && user.mobile) out.phone = user.mobile;
+    return out;
 }
 
 app.post('/api/shop/vendors/apply', async (req, res) => {
     const user = await requireUser(req, res);
     if (!user) return;
-    const displayName = String(req.body.displayName || '').trim();
-    if (displayName.length < 3) return res.status(400).json({ message: 'نام فروشگاه خیلی کوتاه است' });
+    const checked = validateVendorApply(req.body, user);
+    if (!checked.ok) return res.status(400).json({ message: checked.message });
     const vendor = await store.shop.applyVendor({
         userId: user.id,
-        ...vendorPayloadFromBody(req.body, user),
-        displayName
+        ...checked.payload
     });
     res.status(201).json(vendor);
 });
@@ -2543,26 +2540,87 @@ app.post('/api/shop/vendors/me/docs', upload.array('docs', 8), async (req, res) 
     res.status(201).json(await store.shop.getVendorByUser(user.id));
 });
 
+app.post('/api/shop/vendors/me/submit', async (req, res) => {
+    const user = await requireUser(req, res);
+    if (!user) return;
+    const vendor = await store.shop.getVendorByUser(user.id);
+    if (!vendor) return res.status(400).json({ message: 'ابتدا اطلاعات فروشگاه را ثبت کنید' });
+    if (vendor.status === 'active') return res.status(400).json({ message: 'این فروشگاه قبلاً تأیید شده است' });
+    if (vendor.status === 'suspended') return res.status(400).json({ message: 'حساب فروشنده تعلیق شده است' });
+    if (!req.body || req.body.termsAccepted !== true) {
+        return res.status(400).json({ message: 'پذیرش شرایط و قوانین الزامی است' });
+    }
+    if (!vendor.profileComplete) {
+        return res.status(400).json({
+            message: 'اطلاعات و مدارک هنوز کامل نیست',
+            missingFields: vendor.missingFields || []
+        });
+    }
+    const updated = await store.shop.updateVendor(vendor.id, {
+        status: 'pending',
+        termsAcceptedAt: new Date().toISOString(),
+        adminNote: ''
+    });
+    res.json(updated);
+});
+
+function publicApplicant(user) {
+    if (!user) return null;
+    return {
+        id: user.id,
+        username: user.username || '',
+        email: user.email || '',
+        mobile: user.mobile || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || ''
+    };
+}
+
+async function adminVendorPayload(vendor) {
+    if (!vendor) return null;
+    const applicant = vendor.userId ? publicApplicant(await store.users.getById(vendor.userId)) : null;
+    return { ...vendor, applicant };
+}
+
 app.get('/api/admin/vendors', isAdmin, async (req, res) => {
-    res.json(await store.shop.listVendors());
+    const vendors = await store.shop.listVendors();
+    res.json(await Promise.all(vendors.map((vendor) => adminVendorPayload(vendor))));
+});
+
+app.get('/api/admin/vendors/:id', isAdmin, async (req, res) => {
+    const vendor = await store.shop.getVendor(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'فروشنده یافت نشد' });
+    res.json(await adminVendorPayload(vendor));
 });
 
 app.put('/api/admin/vendors/:id', isAdmin, async (req, res) => {
-    const current = (await store.shop.listVendors()).find((item) => Number(item.id) === Number(req.params.id));
-    if (req.body.status === 'active' && current && !current.profileComplete) {
-        return res.status(400).json({ message: 'مدارک و اطلاعات حقیقی/حقوقی و مالی هنوز کامل نیست' });
+    const current = await store.shop.getVendor(req.params.id);
+    if (!current) return res.status(404).json({ message: 'فروشنده یافت نشد' });
+    if (req.body.status !== undefined && req.body.status !== current.status && !VENDOR_STATUSES.includes(req.body.status)) {
+        return res.status(400).json({ message: 'وضعیت نامعتبر است' });
     }
-    const updated = await store.shop.updateVendor(req.params.id, {
+    if (req.body.status === 'active' && !current.profileComplete) {
+        return res.status(400).json({
+            message: 'مدارک و اطلاعات حقیقی/حقوقی و مالی هنوز کامل نیست',
+            missingFields: current.missingFields || []
+        });
+    }
+    const note = String(req.body.adminNote != null ? req.body.adminNote : current.adminNote || '').trim();
+    if ((req.body.status === 'returned' || req.body.status === 'docs_requested') && !note) {
+        return res.status(400).json({ message: 'برای برگشت یا درخواست مدرک، توضیح برای فروشنده الزامی است' });
+    }
+    const patch = {
         ...vendorPayloadFromBody(req.body, null),
         displayName: req.body.displayName,
         status: req.body.status,
         commissionPct: req.body.commissionPct,
-        settlementCycle: req.body.settlementCycle,
-        phone: req.body.phone,
-        docsNote: req.body.docsNote
-    });
+        settlementCycle: req.body.settlementCycle
+    };
+    if (req.body.adminNote !== undefined) patch.adminNote = String(req.body.adminNote || '').trim();
+    else if (req.body.status === 'active') patch.adminNote = '';
+    const updated = await store.shop.updateVendor(req.params.id, patch);
     if (!updated) return res.status(404).json({ message: 'فروشنده یافت نشد' });
-    res.json(updated);
+    res.json(await adminVendorPayload(updated));
 });
 
 app.get('/api/vendor/offers', requireVendor, async (req, res) => {

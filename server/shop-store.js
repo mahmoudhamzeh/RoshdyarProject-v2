@@ -241,9 +241,15 @@ function mapVendorRow(row) {
         province: row.province || '',
         city: row.city || '',
         address: row.address || '',
+        postalCode: row.postal_code || '',
         bankName: row.bank_name || '',
         bankSheba: row.bank_sheba || '',
-        bankAccount: row.bank_account || ''
+        bankAccount: row.bank_account || '',
+        website: row.website || '',
+        instagram: row.instagram || '',
+        phone2: row.phone2 || '',
+        adminNote: row.admin_note || '',
+        termsAcceptedAt: row.terms_accepted_at || ''
     };
 }
 
@@ -258,14 +264,32 @@ function mapVendorDocRow(row) {
     };
 }
 
-function isVendorProfileComplete(vendor) {
-    if (!vendor) return false;
-    const hasCore = vendor.displayName && vendor.phone && vendor.ownerName && vendor.nationalId
-        && vendor.bankName && vendor.bankSheba && vendor.address;
-    if (!hasCore) return false;
-    if (vendor.personKind === 'company' && (!vendor.legalName || !vendor.registrationNo)) return false;
+function vendorMissingFields(vendor) {
+    if (!vendor) return ['پرونده یافت نشد'];
+    const missing = [];
+    if (!vendor.displayName) missing.push('نام فروشگاه');
+    if (!vendor.phone) missing.push('شماره تماس');
+    if (!vendor.ownerName) missing.push('نام صاحب / نماینده');
+    if (!vendor.nationalId) missing.push('کد ملی / شناسه');
+    if (!vendor.province) missing.push('استان');
+    if (!vendor.city) missing.push('شهر');
+    if (!vendor.address) missing.push('نشانی');
+    if (!vendor.postalCode || String(vendor.postalCode).replace(/\D/g, '').length !== 10) {
+        missing.push('کد پستی');
+    }
+    if (!vendor.bankName) missing.push('نام بانک');
+    if (!vendor.bankSheba) missing.push('شماره شبا');
+    if (vendor.personKind === 'company') {
+        if (!vendor.legalName) missing.push('نام حقوقی');
+        if (!vendor.registrationNo) missing.push('شماره ثبت');
+    }
     const docs = vendor.docs || [];
-    return docs.length >= 2;
+    if (docs.length < 2) missing.push(`مدارک (حداقل ۲ فایل، الان ${docs.length})`);
+    return missing;
+}
+
+function isVendorProfileComplete(vendor) {
+    return vendorMissingFields(vendor).length === 0;
 }
 
 function slugifyVendor(name) {
@@ -279,7 +303,7 @@ function slugifyVendor(name) {
 }
 
 function seedShopExtrasSqlite(db) {
-    ['user_id', 'phone', 'docs_note'].forEach((col) => {
+    ['user_id', 'phone', 'docs_note', 'website', 'instagram', 'phone2', 'postal_code', 'admin_note', 'terms_accepted_at'].forEach((col) => {
         const type = col === 'user_id' ? 'INTEGER' : 'TEXT';
         if (!sqliteHasColumn(db, 'shop_vendors', col)) {
             db.exec(`ALTER TABLE shop_vendors ADD COLUMN ${col} ${type}`);
@@ -574,7 +598,13 @@ function ensureShopSchemaSqlite(db) {
         ['address', 'TEXT'],
         ['bank_name', 'TEXT'],
         ['bank_sheba', 'TEXT'],
-        ['bank_account', 'TEXT']
+        ['bank_account', 'TEXT'],
+        ['website', 'TEXT'],
+        ['instagram', 'TEXT'],
+        ['phone2', 'TEXT'],
+        ['postal_code', 'TEXT'],
+        ['admin_note', 'TEXT'],
+        ['terms_accepted_at', 'TEXT']
     ].forEach(([col, type]) => {
         if (!sqliteHasColumn(db, 'shop_vendors', col)) {
             db.exec(`ALTER TABLE shop_vendors ADD COLUMN ${col} ${type}`);
@@ -667,7 +697,17 @@ function hydrateVendorSqlite(db, vendor) {
     if (!vendor) return null;
     const docs = listVendorDocsSqlite(db, vendor.id);
     const next = { ...vendor, docs };
-    return { ...next, profileComplete: isVendorProfileComplete(next) };
+    return {
+        ...next,
+        profileComplete: isVendorProfileComplete(next),
+        missingFields: vendorMissingFields(next)
+    };
+}
+
+function getVendorByIdSqlite(db, id) {
+    return hydrateVendorSqlite(db, mapVendorRow(
+        db.prepare('SELECT * FROM shop_vendors WHERE id = ?').get(Number(id))
+    ));
 }
 
 function listVendorsSqlite(db) {
@@ -687,7 +727,8 @@ function writeVendorSqlite(db, id, next) {
         UPDATE shop_vendors SET
             display_name = ?, status = ?, commission_pct = ?, settlement_cycle = ?, phone = ?, docs_note = ?,
             person_kind = ?, national_id = ?, legal_name = ?, registration_no = ?, economic_code = ?,
-            owner_name = ?, province = ?, city = ?, address = ?, bank_name = ?, bank_sheba = ?, bank_account = ?
+            owner_name = ?, province = ?, city = ?, address = ?, postal_code = ?, bank_name = ?, bank_sheba = ?, bank_account = ?,
+            website = ?, instagram = ?, phone2 = ?, admin_note = ?, terms_accepted_at = ?
         WHERE id = ?
     `).run(
         next.displayName,
@@ -705,9 +746,15 @@ function writeVendorSqlite(db, id, next) {
         next.province || null,
         next.city || null,
         next.address || null,
+        next.postalCode || null,
         next.bankName || null,
         next.bankSheba || null,
         next.bankAccount || null,
+        next.website || null,
+        next.instagram || null,
+        next.phone2 || null,
+        next.adminNote || null,
+        next.termsAcceptedAt || null,
         Number(id)
     );
     return hydrateVendorSqlite(db, mapVendorRow(db.prepare('SELECT * FROM shop_vendors WHERE id = ?').get(Number(id))));
@@ -730,7 +777,7 @@ function applyVendorSqlite(db, payload) {
     }
     const info = db.prepare(`
         INSERT INTO shop_vendors (slug, display_name, kind, status, commission_pct, settlement_cycle, user_id, phone, docs_note)
-        VALUES (?, ?, 'marketplace', 'pending', 8, 'weekly', ?, ?, ?)
+        VALUES (?, ?, 'marketplace', 'draft', 8, 'weekly', ?, ?, ?)
     `).run(
         slugifyVendor(displayName || 'vendor'),
         displayName || 'فروشنده جدید',
@@ -742,7 +789,7 @@ function applyVendorSqlite(db, payload) {
         ...mapVendorRow(db.prepare('SELECT * FROM shop_vendors WHERE id = ?').get(Number(info.lastInsertRowid))),
         ...payload,
         displayName: displayName || 'فروشنده جدید',
-        status: 'pending'
+        status: 'draft'
     });
 }
 
@@ -904,6 +951,12 @@ async function ensureShopSchemaPg(q, one, many) {
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS bank_name TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS bank_sheba TEXT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS bank_account TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS website TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS instagram TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS phone2 TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS postal_code TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS admin_note TEXT');
+    await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT');
     await q("ALTER TABLE products ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'approved'");
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS user_id BIGINT');
     await q('ALTER TABLE shop_vendors ADD COLUMN IF NOT EXISTS phone TEXT');
@@ -1083,7 +1136,15 @@ async function hydrateVendorPg(many, vendor) {
     if (!vendor) return null;
     const docs = await listVendorDocsPg(many, vendor.id);
     const next = { ...vendor, docs };
-    return { ...next, profileComplete: isVendorProfileComplete(next) };
+    return {
+        ...next,
+        profileComplete: isVendorProfileComplete(next),
+        missingFields: vendorMissingFields(next)
+    };
+}
+
+async function getVendorByIdPg(one, many, id) {
+    return hydrateVendorPg(many, mapVendorRow(await one('SELECT * FROM shop_vendors WHERE id = $1', [Number(id)])));
 }
 
 async function listVendorsPg(many) {
@@ -1102,8 +1163,9 @@ async function writeVendorPg(q, one, many, id, next) {
         `UPDATE shop_vendors SET
             display_name=$1, status=$2, commission_pct=$3, settlement_cycle=$4, phone=$5, docs_note=$6,
             person_kind=$7, national_id=$8, legal_name=$9, registration_no=$10, economic_code=$11,
-            owner_name=$12, province=$13, city=$14, address=$15, bank_name=$16, bank_sheba=$17, bank_account=$18
-         WHERE id=$19 RETURNING *`,
+            owner_name=$12, province=$13, city=$14, address=$15, postal_code=$16, bank_name=$17, bank_sheba=$18, bank_account=$19,
+            website=$20, instagram=$21, phone2=$22, admin_note=$23, terms_accepted_at=$24
+         WHERE id=$25 RETURNING *`,
         [
             next.displayName,
             next.status,
@@ -1120,9 +1182,15 @@ async function writeVendorPg(q, one, many, id, next) {
             next.province || null,
             next.city || null,
             next.address || null,
+            next.postalCode || null,
             next.bankName || null,
             next.bankSheba || null,
             next.bankAccount || null,
+            next.website || null,
+            next.instagram || null,
+            next.phone2 || null,
+            next.adminNote || null,
+            next.termsAcceptedAt || null,
             Number(id)
         ]
     );
@@ -1137,14 +1205,14 @@ async function applyVendorPg(q, one, many, payload) {
     }
     const row = await one(
         `INSERT INTO shop_vendors (slug, display_name, kind, status, commission_pct, settlement_cycle, user_id, phone, docs_note)
-         VALUES ($1,$2,'marketplace','pending',8,'weekly',$3,$4,$5) RETURNING *`,
+         VALUES ($1,$2,'marketplace','draft',8,'weekly',$3,$4,$5) RETURNING *`,
         [slugifyVendor(displayName || 'vendor'), displayName || 'فروشنده جدید', Number(payload.userId), payload.phone || null, payload.docsNote || null]
     );
     return writeVendorPg(q, one, many, row.id, {
         ...mapVendorRow(row),
         ...payload,
         displayName: displayName || 'فروشنده جدید',
-        status: 'pending'
+        status: 'draft'
     });
 }
 
@@ -1313,6 +1381,7 @@ module.exports = {
     listCampaignSqlite,
     listOffersForProductSqlite,
     listVendorsSqlite,
+    getVendorByIdSqlite,
     getVendorByUserSqlite,
     applyVendorSqlite,
     updateVendorSqlite,
@@ -1333,6 +1402,7 @@ module.exports = {
     listCampaignPg,
     listOffersForProductPg,
     listVendorsPg,
+    getVendorByIdPg,
     getVendorByUserPg,
     applyVendorPg,
     updateVendorPg,
