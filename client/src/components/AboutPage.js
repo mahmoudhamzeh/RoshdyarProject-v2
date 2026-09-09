@@ -12,7 +12,7 @@ import './DashboardPage.css';
 import './HomeAbout.css';
 import './AboutPage.css';
 
-const HERO_PHOTO = 'https://images.unsplash.com/photo-1471286174890-9c112ffca5ba?auto=format&fit=crop&w=1600&q=80';
+const HERO_PHOTO = 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=1800&q=80';
 
 const VALUES = [
     {
@@ -43,7 +43,14 @@ const AboutPage = () => {
             <MainNavbar />
             <main className="dashboard-main">
                 <section className="about-hero" aria-labelledby="about-hero-title">
-                    <img className="about-hero-photo" src={HERO_PHOTO} alt="" />
+                    <img
+                        className="about-hero-photo"
+                        src={HERO_PHOTO}
+                        alt=""
+                        onError={(event) => {
+                            event.currentTarget.style.display = 'none';
+                        }}
+                    />
                     <div className="about-hero-wash" aria-hidden="true" />
                     <div className="about-hero-shapes" aria-hidden="true">
                         <span className="s1" />
@@ -75,15 +82,15 @@ const AboutPage = () => {
                                 <Link to="/news" className="home-about-btn home-about-btn-ghost">خواندن مجله</Link>
                             </div>
                         </div>
-                        <div className="about-hero-art-wrap">
-                            <AboutHeroArt />
-                        </div>
                     </div>
                 </section>
 
                 <div className="about-section">
                     <section className="about-story" aria-labelledby="about-story-title">
-                        <AboutStoryArt />
+                        <div className="about-story-visuals">
+                            <AboutHeroArt />
+                            <AboutStoryArt />
+                        </div>
                         <div>
                             <h2 id="about-story-title">یک پرونده، مسیر کامل رشد</h2>
                             <p>
