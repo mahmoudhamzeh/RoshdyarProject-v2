@@ -96,9 +96,11 @@ const ProductDetailPage = () => {
                         let score = 0;
                         if (item.category && item.category === product.category) score += 100;
                         score += shared * 20;
-                        if (product.ageBand && item.ageBand === product.ageBand) score += 8;
-                        if ((item.skills || []).some((skill) => productSkills.has(skill.slug || skill.id || skill.title))) {
-                            score += 5;
+                        if (score > 0) {
+                            if (product.ageBand && item.ageBand === product.ageBand) score += 8;
+                            if ((item.skills || []).some((skill) => productSkills.has(skill.slug || skill.id || skill.title))) {
+                                score += 5;
+                            }
                         }
                         return { item, score };
                     })
