@@ -1,5 +1,8 @@
-.about-page .home-about {
-  min-height: calc(100vh - 8rem);
+.home-about-services-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.4vw, 1.7rem);
+  color: var(--ink);
 }
 
 .home-about {

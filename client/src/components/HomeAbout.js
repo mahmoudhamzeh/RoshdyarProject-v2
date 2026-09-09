@@ -52,37 +52,42 @@ const FEATURES = [
     }
 ];
 
-const HomeAbout = () => {
+const HomeAbout = ({ showIntro = true }) => {
     const signedIn = isLoggedIn();
 
     return (
-        <section className="home-about" id="about" aria-labelledby="home-about-title">
+        <section className="home-about" id="about" aria-labelledby={showIntro ? 'home-about-title' : 'home-about-services'}>
             <div className="home-about-glow" aria-hidden="true" />
             <div className="home-about-inner">
-                <div className="home-about-intro">
-                    <div className="home-about-brand">
-                        <BrandLogo size={56} alt="" />
-                        <span>درباره تات کیدز</span>
+                {showIntro && (
+                    <div className="home-about-intro">
+                        <div className="home-about-brand">
+                            <BrandLogo size={56} alt="" />
+                            <span>درباره تات کیدز</span>
+                        </div>
+                        <h2 id="home-about-title">همراه رشد و سلامت کودک شما</h2>
+                        <p>
+                            تات کیدز جای والدین است برای دیدن مسیر رشد، واکسن، آموزش و خرید کالای مناسب سن کودک.
+                            فروشگاه و مجله برای همه باز است؛ سرویس‌های شخصی بعد از ورود فعال می‌شوند.
+                        </p>
+                        <div className="home-about-actions">
+                            {signedIn ? (
+                                <Link to="/my-children" className="home-about-btn home-about-btn-primary">
+                                    سرویس‌های من
+                                </Link>
+                            ) : (
+                                <Link to="/register" className="home-about-btn home-about-btn-primary">
+                                    ورود و شروع سرویس
+                                </Link>
+                            )}
+                            <Link to="/shop" className="home-about-btn home-about-btn-ghost">مشاهده فروشگاه</Link>
+                            <Link to="/news" className="home-about-btn home-about-btn-ghost">خواندن مجله</Link>
+                        </div>
                     </div>
-                    <h2 id="home-about-title">همراه رشد و سلامت کودک شما</h2>
-                    <p>
-                        تات کیدز جای والدین است برای دیدن مسیر رشد، واکسن، آموزش و خرید کالای مناسب سن کودک.
-                        فروشگاه و مجله برای همه باز است؛ سرویس‌های شخصی بعد از ورود فعال می‌شوند.
-                    </p>
-                    <div className="home-about-actions">
-                        {signedIn ? (
-                            <Link to="/my-children" className="home-about-btn home-about-btn-primary">
-                                سرویس‌های من
-                            </Link>
-                        ) : (
-                            <Link to="/register" className="home-about-btn home-about-btn-primary">
-                                ورود و شروع سرویس
-                            </Link>
-                        )}
-                        <Link to="/shop" className="home-about-btn home-about-btn-ghost">مشاهده فروشگاه</Link>
-                        <Link to="/news" className="home-about-btn home-about-btn-ghost">خواندن مجله</Link>
-                    </div>
-                </div>
+                )}
+                {!showIntro && (
+                    <h2 id="home-about-services" className="home-about-services-title">سرویس‌های تات کیدز</h2>
+                )}
                 <ul className="home-about-grid">
                     {FEATURES.map((item) => (
                         <li key={item.title} className={`home-about-card is-${item.tone}`}>
