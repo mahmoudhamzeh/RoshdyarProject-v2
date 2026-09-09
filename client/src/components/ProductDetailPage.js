@@ -84,21 +84,28 @@ const ProductDetailPage = () => {
         let cancelled = false;
         const loadSimilar = async () => {
             try {
-                const qs = new URLSearchParams();
-                if (product.category) qs.set('category', product.category);
-                const res = await fetch(`${API}/api/shop/products?${qs.toString()}`);
+                const res = await fetch(`${API}/api/shop/products`);
                 const list = asProductList(res.ok ? await res.json() : []);
-                let next = list.filter((item) => Number(item.id) !== Number(product.id));
-                if (next.length < 4) {
-                    const extraRes = await fetch(`${API}/api/shop/products`);
-                    const extra = asProductList(extraRes.ok ? await extraRes.json() : []);
-                    extra.forEach((item) => {
-                        if (Number(item.id) === Number(product.id)) return;
-                        if (next.some((row) => Number(row.id) === Number(item.id))) return;
-                        next.push(item);
-                    });
-                }
-                if (!cancelled) setSimilar(next.slice(0, 8));
+                const productPath = findCategoryPath(categories, product.category).map((node) => node.name);
+                const productSkills = new Set((product.skills || []).map((skill) => skill.slug || skill.id || skill.title));
+                const ranked = list
+                    .filter((item) => Number(item.id) !== Number(product.id))
+                    .map((item) => {
+                        const itemPath = findCategoryPath(categories, item.category).map((node) => node.name);
+                        const shared = itemPath.filter((name) => productPath.includes(name)).length;
+                        let score = 0;
+                        if (item.category && item.category === product.category) score += 100;
+                        score += shared * 20;
+                        if (product.ageBand && item.ageBand === product.ageBand) score += 8;
+                        if ((item.skills || []).some((skill) => productSkills.has(skill.slug || skill.id || skill.title))) {
+                            score += 5;
+                        }
+                        return { item, score };
+                    })
+                    .sort((a, b) => b.score - a.score);
+                const related = ranked.filter((row) => row.score > 0);
+                const next = (related.length ? related : ranked).slice(0, 8).map((row) => row.item);
+                if (!cancelled) setSimilar(next);
             } catch (err) {
                 if (!cancelled) setSimilar([]);
             }
@@ -107,7 +114,7 @@ const ProductDetailPage = () => {
         return () => {
             cancelled = true;
         };
-    }, [product]);
+    }, [product, categories]);
 
     useEffect(() => {
         if (!product) return undefined;
