@@ -43,7 +43,8 @@
   font-size: 1.45rem;
 }
 
-.cg-hero-avatar img {
+.cg-hero-avatar img,
+.cg-hero-avatar .child-avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;

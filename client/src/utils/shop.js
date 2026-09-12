@@ -87,6 +87,17 @@ export const formatRating = (value) => {
     return n.toFixed(1);
 };
 
+export const formatFaDate = (value) => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    try {
+        return date.toLocaleDateString('fa-IR');
+    } catch (_) {
+        return '';
+    }
+};
+
 export const looksLikePhone = (value) =>
     /^\+?\d{8,15}$/.test(String(value || '').replace(/[\s-]/g, ''));
 

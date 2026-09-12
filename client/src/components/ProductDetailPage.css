@@ -527,6 +527,119 @@
   padding: 0;
 }
 
+.product-reviews-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.product-reviews-head h2,
+.product-reviews-head .shop-rating--lg {
+  margin: 0;
+}
+
+.product-review-form {
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 1.25rem;
+  background: #fffdf6;
+  border: 1px solid #eadfbf;
+  border-radius: 14px;
+  padding: 1rem 1.05rem 1.1rem;
+}
+
+.product-review-form h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.product-review-form-label {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.product-review-form textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  resize: vertical;
+  min-height: 96px;
+}
+
+.product-review-submit {
+  justify-self: start;
+  border: 0;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.7rem 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.product-review-submit:hover {
+  background: var(--brand-deep);
+}
+
+.product-reviews-empty {
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.product-review-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.product-review-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+}
+
+.product-review-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.product-review-body p {
+  margin: 0.35rem 0 0.55rem;
+  line-height: 1.75;
+}
+
+.product-review-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.75rem;
+}
+
+.product-review-meta time {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+}
+
+.product-similar {
+  margin-top: 1.5rem;
+}
+
 .product-comments form {
   display: grid;
   gap: 0.55rem;

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import ChildAvatar from './ChildAvatar';
+import { getChildDisplayName } from '../utils/childName';
 import './MyChildrenPage.css';
 
 const MyChildrenPage = () => {
@@ -10,8 +12,6 @@ const MyChildrenPage = () => {
         try {
             const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
             if (!loggedInUser) {
-                console.error("No user logged in.");
-                // Optionally redirect to login
                 history.push('/register');
                 return;
             }
@@ -41,7 +41,7 @@ const MyChildrenPage = () => {
         if (window.confirm('آیا از حذف این کودک مطمئن هستید؟')) {
             try {
                 await fetch(`/api/children/${childId}`, { method: 'DELETE' });
-                fetchChildren(); // Refresh list
+                fetchChildren();
             } catch (error) { alert('خطا در حذف کودک'); }
         }
     };
@@ -67,33 +67,31 @@ const MyChildrenPage = () => {
     return (
         <div className="children-page-final">
             <nav className="page-nav-final">
-                <button onClick={() => history.push('/dashboard')} className="home-btn-final">
+                <button type="button" onClick={() => history.push('/dashboard')} className="back-btn">
                     <ArrowRightIcon />
                     <span>صفحه اصلی</span>
                 </button>
                 <h1>کودکان من</h1>
+                <div className="nav-placeholder" />
             </nav>
             <div className="children-content-final">
-                <button onClick={() => history.push('/add-child')} className="add-child-btn-final">+ افزودن کودک جدید</button>
+                <button type="button" onClick={() => history.push('/add-child')} className="add-child-btn-final">+ افزودن کودک جدید</button>
                 <div className="children-list-final">
                     {children.length === 0 ? <p className="no-children-message">هنوز کودکی اضافه نشده است.</p> :
-                     children.map(child => {
-                        const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
-                        return (
+                     children.map((child) => (
                             <div key={child.id} className="child-card-final" data-id={child.id}>
-                                <img src={avatarUrl} alt={child.name} className="child-avatar-final" />
+                                <ChildAvatar child={child} size={64} className="child-avatar-final" />
                                 <div className="child-info-final">
-                                    <h3>{child.name || `${child.firstName} ${child.lastName}`}</h3>
+                                    <h3>{getChildDisplayName(child)}</h3>
                                     <p>سن: {calculateAge(child.birthDate)}</p>
                                 </div>
                                 <div className="child-card-actions">
-                                    <button onClick={() => history.push(`/health-profile/${child.id}`)} className="view-profile-btn-final">مشاهده پرونده</button>
-                                    <button onClick={() => history.push(`/edit-child/${child.id}`)} className="edit-btn-final">ویرایش</button>
-                                    <button onClick={() => handleDelete(child.id)} className="delete-btn-final">حذف</button>
+                                    <button type="button" onClick={() => history.push(`/health-profile/${child.id}`)} className="view-profile-btn-final">مشاهده پرونده</button>
+                                    <button type="button" onClick={() => history.push(`/edit-child/${child.id}`)} className="edit-btn-final">ویرایش</button>
+                                    <button type="button" onClick={() => handleDelete(child.id)} className="delete-btn-final">حذف</button>
                                 </div>
                             </div>
-                        );
-                    })}
+                     ))}
                 </div>
             </div>
         </div>

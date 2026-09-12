@@ -1,0 +1,36 @@
+.child-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+  background: var(--brand-soft);
+  border: 3px solid var(--brand-soft);
+}
+
+.child-avatar--svg {
+  border-color: transparent;
+  background: transparent;
+}
+
+.child-avatar--svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.child-avatar--girl {
+  background: #fce7f3;
+}
+
+.child-avatar--boy {
+  background: #ccfbf1;
+}
+
+img.child-avatar {
+  max-width: none;
+}

@@ -4,53 +4,10 @@
   overflow-x: hidden;
 }
 
-.page-nav-final {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 0.9rem clamp(1rem, 3vw, 1.5rem);
-  background: linear-gradient(120deg, rgba(204, 251, 241, 0.9), rgba(255, 255, 255, 0.95));
-  border-bottom: 1px solid var(--border);
-  min-height: 56px;
-  position: relative;
-}
-
-.page-nav-final h1 {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  margin: 0;
-  color: var(--ink);
-}
-
-.page-nav-final .home-btn-final {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: none;
-  border: none;
-  color: var(--brand);
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 1.1rem;
-  font-family: var(--font-body);
-  transition: color 0.2s ease;
-}
-
-.home-btn-final:hover {
-  color: var(--brand-deep);
-}
-
-.home-btn-final span {
-  font-size: 0.9rem;
-}
-
 .children-content-final {
   max-width: 820px;
   margin: 2rem auto;
-  padding: 0 1rem;
+  padding: 0 1rem 2rem;
   width: 100%;
   box-sizing: border-box;
 }
@@ -85,31 +42,24 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem 1.15rem;
   background-color: var(--surface);
   padding: 1.15rem 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   min-width: 0;
 }
 
-.child-card-final:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
-}
-
+.child-card-final .child-avatar,
 .child-avatar-final {
   width: 64px;
   height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--brand-soft);
 }
 
 .child-info-final {
   text-align: right;
+  min-width: 0;
 }
 
 .child-info-final h3 {
@@ -117,6 +67,7 @@
   font-family: var(--font-display);
   font-size: 1.15rem;
   color: var(--ink);
+  overflow-wrap: anywhere;
 }
 
 .child-info-final p {
@@ -127,7 +78,9 @@
 
 .child-card-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
+  justify-content: flex-end;
   gap: 0.5rem;
 }
 
@@ -144,13 +97,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.view-profile-btn-final:hover,
-.delete-btn-final:hover,
-.edit-btn-final:hover {
-  transform: translateY(-1px);
+  min-height: 42px;
 }
 
 .view-profile-btn-final {
@@ -177,66 +124,45 @@
   border: 1px dashed var(--border-strong);
 }
 
-.sort-options {
-  margin-bottom: 1rem;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.sort-options button {
-  padding: 0.45rem 1rem;
-  border: 1.5px solid var(--brand);
-  background-color: var(--surface);
-  color: var(--brand);
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-family: var(--font-body);
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.sort-options button:hover {
-  background-color: var(--brand);
-  color: #fff;
-}
-
 @media (max-width: 768px) {
-  .page-nav-final {
-    padding: 0.65rem 1rem;
-  }
-
-  .page-nav-final h1 {
-    font-size: 1.15rem;
-  }
-
-  .home-btn-final span {
+  .page-nav-final .back-btn span {
     display: none;
   }
 
   .children-content-final {
-    margin: 1rem;
-    padding: 0;
+    margin: 1rem auto 1.5rem;
+    padding: 0 0.85rem 2.5rem;
   }
 
   .child-card-final {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    text-align: center;
+    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-areas:
+      "avatar info"
+      "actions actions";
+    gap: 0.75rem 0.85rem;
+    padding: 1rem;
   }
 
+  .child-card-final .child-avatar,
   .child-avatar-final {
-    margin: 0 auto;
+    grid-area: avatar;
+    width: 56px;
+    height: 56px;
   }
 
   .child-info-final {
-    text-align: center;
+    grid-area: info;
+    text-align: right;
   }
 
   .child-card-actions {
-    flex-direction: column;
-    align-items: stretch;
+    grid-area: actions;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: stretch;
+  }
+
+  .view-profile-btn-final {
+    grid-column: 1 / -1;
   }
 }
