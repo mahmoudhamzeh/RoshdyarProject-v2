@@ -1042,7 +1042,10 @@ app.post('/api/children/:childId/concerns/chat', async (req, res) => {
             role: item.role === 'assistant' ? 'assistant' : 'user',
             content: String(item.content).slice(0, 1200)
         }));
+    const lastHistory = history[history.length - 1];
+    const historyHasUser = lastHistory && lastHistory.role === 'user' && lastHistory.content === text;
     const userMessage = { role: 'user', content: text, at: new Date().toISOString() };
+    const conversation = historyHasUser ? history : [...history, userMessage];
     const nutrition = guide.nutrition && (guide.nutrition.overview || '');
     const sleep = guide.sleep && (guide.sleep.overview || '');
     const result = await chatGrowthAssistant(
@@ -1051,7 +1054,7 @@ app.post('/api/children/:childId/concerns/chat', async (req, res) => {
             gender: child.gender,
             ageInMonths: guide.child.ageInMonths
         },
-        [...history, userMessage],
+        conversation,
         {
             bandTitle: guide.band && guide.band.title,
             nutrition,
@@ -1065,7 +1068,7 @@ app.post('/api/children/:childId/concerns/chat', async (req, res) => {
         content: result.reply,
         at: new Date().toISOString()
     };
-    const messages = [...history, userMessage, assistantMessage].slice(-24);
+    const messages = [...conversation, assistantMessage].slice(-24);
     await store.children.saveGrowthState(req.params.childId, { chat: messages });
     res.status(201).json({ reply: result.reply, source: result.source, messages });
 });

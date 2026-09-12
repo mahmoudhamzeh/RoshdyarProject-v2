@@ -216,7 +216,7 @@ function classifyChatIntent(text) {
     }
     if (/ممنون|مرسی|متشکرم|خداحافظ|thanks/.test(t)) return 'thanks';
     if (/کی هستی|چیکار میکنی|چه کمکی|چطور کمک|چه کاری میتونی/.test(t)) return 'identity';
-    if (/دندان|دندون|لثه/.test(t)) return 'teeth';
+    if (/دندان|دندون|ندون|لثه/.test(t)) return 'teeth';
     if (/تب/.test(t)) return 'fever';
     if (/واکسن|تزریق|ایمن[ -]?سازی/.test(t)) return 'vaccine';
     if (/پوشک|دستشویی|لگن|توالت|توآلت|پی[ -]?پی|ادرار|مدفوع/.test(t)) return 'potty';

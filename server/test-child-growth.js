@@ -110,6 +110,7 @@ assert.ok(lateWalk.summary_verdict.includes('پزشک'));
 
 assert.strictEqual(classifyChatIntent('سلام'), 'greeting');
 assert.strictEqual(classifyChatIntent('دندونش دیر دراومده'), 'teeth');
+assert.strictEqual(classifyChatIntent('ندونش دیر دراومده؟'), 'teeth');
 assert.strictEqual(classifyChatIntent('تب کرده'), 'fever');
 assert.strictEqual(classifyChatIntent('قد و وزنش مناسب است؟'), 'growth');
 assert.strictEqual(classifyChatIntent('شب‌ها بدخواب است'), 'sleep');
