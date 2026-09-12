@@ -1,17 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faCartPlus, faThumbsDown, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
+import { faCartPlus, faThumbsDown, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
 import MainNavbar from './MainNavbar';
 import Footer from './Footer';
+import ShopBreadcrumb from './ShopBreadcrumb';
+import ShopRating from './ShopRating';
 import { addToCart, formatPrice } from '../utils/cart';
-import { ageBandLabel, displayCommentAuthor, formatRating, stars } from '../utils/shop';
+import { ageBandLabel, displayCommentAuthor } from '../utils/shop';
 import ProductImageGallery from './ProductImageGallery';
 import './ProductDetailPage.css';
 import './ShopWorld.css';
 
 const API = '';
-const TABS = [
+const SECTIONS = [
     { id: 'intro', label: 'معرفی' },
     { id: 'specs', label: 'مشخصات' },
     { id: 'reviews', label: 'نظرات' }
@@ -29,7 +31,7 @@ const ProductDetailPage = () => {
     const [comments, setComments] = useState([]);
     const [rating, setRating] = useState(5);
     const [offerId, setOfferId] = useState(null);
-    const [tab, setTab] = useState('intro');
+    const [activeSection, setActiveSection] = useState('intro');
 
     const loadComments = async () => {
         const res = await fetch(`${API}/api/shop/products/${id}/comments`);
@@ -49,7 +51,7 @@ const ProductDetailPage = () => {
                 setQuantity(1);
                 setComments(data.comments || []);
                 setOfferId(data.offerId || (data.offers && data.offers[0] && data.offers[0].id) || null);
-                setTab('intro');
+                setActiveSection('intro');
             } catch (err) {
                 setError(err.message || 'خطا در دریافت محصول');
             } finally {
@@ -58,6 +60,28 @@ const ProductDetailPage = () => {
         };
         fetchProduct();
     }, [id]);
+
+    useEffect(() => {
+        if (!product) return undefined;
+        const els = SECTIONS
+            .map((item) => document.getElementById(`product-section-${item.id}`))
+            .filter(Boolean);
+        if (!els.length) return undefined;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const visible = entries
+                    .filter((entry) => entry.isIntersecting)
+                    .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+                if (!visible[0]) return;
+                const next = visible[0].target.id.replace('product-section-', '');
+                setActiveSection(next);
+            },
+            { rootMargin: '-28% 0px -58% 0px', threshold: [0.1, 0.35, 0.6] }
+        );
+        els.forEach((el) => observer.observe(el));
+        return () => observer.disconnect();
+    }, [product, comments.length]);
 
     const selectedOffer = useMemo(
         () => (product && product.offers ? product.offers.find((item) => item.id === offerId) : null),
@@ -100,14 +124,26 @@ const ProductDetailPage = () => {
         setComments((prev) => prev.map((item) => (item.id === commentId ? data : item)));
     };
 
+    const scrollToSection = (sectionId) => {
+        setActiveSection(sectionId);
+        const el = document.getElementById(`product-section-${sectionId}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const crumbs = product ? [
+        { label: 'فروشگاه', to: '/shop' },
+        product.category ? {
+            label: product.category,
+            to: `/shop?category=${encodeURIComponent(product.category)}`
+        } : null,
+        { label: product.name }
+    ].filter(Boolean) : [{ label: 'فروشگاه', to: '/shop' }];
+
     return (
         <div className="product-detail-page shop-world">
             <MainNavbar />
             <main className="product-detail-main">
-                <Link to="/shop" className="product-back">
-                    <FontAwesomeIcon icon={faArrowRight} />
-                    بازگشت به فروشگاه
-                </Link>
+                <ShopBreadcrumb items={crumbs} />
 
                 {loading && <p className="shop-status">در حال بارگذاری...</p>}
                 {error && <p className="shop-status shop-error">{error}</p>}
@@ -147,12 +183,14 @@ const ProductDetailPage = () => {
                                         ))}
                                     </div>
                                 )}
-                                {product.ratingCount > 0 && (
-                                    <p className="shop-rating">
-                                        <strong className="shop-rating-num">{formatRating(product.ratingAvg)}</strong>
-                                        {stars(product.ratingAvg)}
-                                        <span> ({product.ratingCount})</span>
-                                    </p>
+                                {product.ratingCount > 0 ? (
+                                    <ShopRating
+                                        value={product.ratingAvg}
+                                        count={product.ratingCount}
+                                        size="lg"
+                                    />
+                                ) : (
+                                    <p className="shop-rating-empty">هنوز امتیازی ثبت نشده</p>
                                 )}
                                 <p className="product-detail-price">
                                     {formatPrice(salePrice)}
@@ -204,153 +242,143 @@ const ProductDetailPage = () => {
                             </div>
                         </article>
 
-                        <section className="product-tabs animate-fade-up">
-                            <div className="product-tab-bar" role="tablist">
-                                {TABS.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        type="button"
-                                        role="tab"
-                                        aria-selected={tab === item.id}
-                                        className={tab === item.id ? 'is-active' : ''}
-                                        onClick={() => setTab(item.id)}
-                                    >
-                                        {item.label}
-                                        {item.id === 'reviews' && comments.length > 0 ? ` (${comments.length})` : ''}
-                                    </button>
-                                ))}
-                            </div>
+                        <nav className="product-section-nav" aria-label="بخش‌های محصول">
+                            {SECTIONS.map((item) => (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    className={activeSection === item.id ? 'is-active' : ''}
+                                    onClick={() => scrollToSection(item.id)}
+                                >
+                                    {item.label}
+                                    {item.id === 'reviews' && comments.length > 0 ? ` (${comments.length})` : ''}
+                                </button>
+                            ))}
+                        </nav>
 
-                            {tab === 'intro' && (
-                                <div className="product-tab-panel">
-                                    <h2>معرفی محصول</h2>
-                                    <p className="product-detail-desc">
-                                        {product.description || 'توضیحی برای این محصول ثبت نشده است.'}
-                                    </p>
-                                </div>
-                            )}
+                        <div className="product-sections">
+                            <section id="product-section-intro" className="product-section">
+                                <h2>معرفی محصول</h2>
+                                <p className="product-detail-desc">
+                                    {product.description || 'توضیحی برای این محصول ثبت نشده است.'}
+                                </p>
+                            </section>
 
-                            {tab === 'specs' && (
-                                <div className="product-tab-panel">
-                                    <h2>مشخصات</h2>
-                                    <dl className="product-specs">
+                            <section id="product-section-specs" className="product-section">
+                                <h2>مشخصات</h2>
+                                <dl className="product-specs">
+                                    <div>
+                                        <dt>دسته‌بندی</dt>
+                                        <dd>{product.category || '—'}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>گروه سنی</dt>
+                                        <dd>{product.ageBand ? ageBandLabel(product.ageBand) : '—'}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>برند</dt>
+                                        <dd>{product.brand || '—'}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>مهارت‌ها</dt>
+                                        <dd>
+                                            {(product.skills || []).map((skill) => skill.title).join('، ') || '—'}
+                                        </dd>
+                                    </div>
+                                    {product.safetyWarning && (
                                         <div>
-                                            <dt>دسته‌بندی</dt>
-                                            <dd>{product.category || '—'}</dd>
+                                            <dt>ایمنی</dt>
+                                            <dd>{product.safetyWarning}</dd>
                                         </div>
+                                    )}
+                                    {(product.offers || []).length > 0 && (
                                         <div>
-                                            <dt>گروه سنی</dt>
-                                            <dd>{product.ageBand ? ageBandLabel(product.ageBand) : '—'}</dd>
+                                            <dt>فروشندگان</dt>
+                                            <dd>{product.offers.map((offer) => offer.vendorName).join('، ')}</dd>
                                         </div>
-                                        <div>
-                                            <dt>برند</dt>
-                                            <dd>{product.brand || '—'}</dd>
-                                        </div>
-                                        <div>
-                                            <dt>مهارت‌ها</dt>
-                                            <dd>
-                                                {(product.skills || []).map((skill) => skill.title).join('، ') || '—'}
-                                            </dd>
-                                        </div>
-                                        {product.safetyWarning && (
-                                            <div>
-                                                <dt>ایمنی</dt>
-                                                <dd>{product.safetyWarning}</dd>
-                                            </div>
-                                        )}
-                                        {(product.offers || []).length > 0 && (
-                                            <div>
-                                                <dt>فروشندگان</dt>
-                                                <dd>{product.offers.map((offer) => offer.vendorName).join('، ')}</dd>
-                                            </div>
-                                        )}
-                                    </dl>
-                                </div>
-                            )}
+                                    )}
+                                </dl>
+                            </section>
 
-                            {tab === 'reviews' && (
-                                <div className="product-tab-panel product-comments">
-                                    <h2>نظر کاربران</h2>
-                                    <form
-                                        onSubmit={async (e) => {
-                                            e.preventDefault();
-                                            if (!comment.trim()) return;
-                                            const res = await fetch(`${API}/api/shop/products/${id}/comments`, {
-                                                method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ body: comment.trim(), rating })
-                                            });
-                                            const data = await res.json().catch(() => ({}));
-                                            if (!res.ok) {
-                                                setMessage(data.message || 'ثبت نظر ناموفق بود');
-                                                return;
-                                            }
-                                            setComment('');
-                                            setMessage(data.message || 'نظر شما پس از تأیید کارشناس نمایش داده می‌شود');
-                                            loadComments();
-                                        }}
-                                    >
-                                        <div className="shop-stars-input" role="radiogroup" aria-label="امتیاز">
-                                            {[1, 2, 3, 4, 5].map((value) => (
-                                                <button
-                                                    key={value}
-                                                    type="button"
-                                                    className={value <= rating ? 'is-on' : ''}
-                                                    onClick={() => setRating(value)}
-                                                    aria-label={`${value} ستاره`}
-                                                >
-                                                    ★
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <textarea
-                                            value={comment}
-                                            onChange={(e) => setComment(e.target.value)}
-                                            rows="3"
-                                            placeholder="نظر خود را بنویسید"
-                                        />
-                                        <button type="submit">ثبت نظر</button>
-                                    </form>
-                                    {comments.length === 0 ? (
-                                        <p>هنوز نظر تأیید‌شده‌ای ثبت نشده است.</p>
-                                    ) : (
-                                        comments.map((item) => (
-                                            <article key={item.id} className="product-comment">
+                            <section id="product-section-reviews" className="product-section product-comments">
+                                <h2>نظر کاربران</h2>
+                                <form
+                                    onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        if (!comment.trim()) return;
+                                        const res = await fetch(`${API}/api/shop/products/${id}/comments`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ body: comment.trim(), rating })
+                                        });
+                                        const data = await res.json().catch(() => ({}));
+                                        if (!res.ok) {
+                                            setMessage(data.message || 'ثبت نظر ناموفق بود');
+                                            return;
+                                        }
+                                        setComment('');
+                                        setMessage(data.message || 'نظر شما پس از تأیید کارشناس نمایش داده می‌شود');
+                                        loadComments();
+                                    }}
+                                >
+                                    <div className="shop-stars-input" role="radiogroup" aria-label="امتیاز">
+                                        {[1, 2, 3, 4, 5].map((value) => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                className={value <= rating ? 'is-on' : ''}
+                                                onClick={() => setRating(value)}
+                                                aria-label={`${value} ستاره`}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <textarea
+                                        value={comment}
+                                        onChange={(e) => setComment(e.target.value)}
+                                        rows="3"
+                                        placeholder="نظر خود را بنویسید"
+                                    />
+                                    <button type="submit">ثبت نظر</button>
+                                </form>
+                                {comments.length === 0 ? (
+                                    <p>هنوز نظر تأیید‌شده‌ای ثبت نشده است.</p>
+                                ) : (
+                                    comments.map((item) => (
+                                        <article key={item.id} className="product-comment">
+                                            <div className="product-comment-head">
                                                 <strong>{displayCommentAuthor(item)}</strong>
                                                 {item.rating ? (
-                                                    <span className="shop-rating">
-                                                        {' '}
-                                                        <strong className="shop-rating-num">{formatRating(item.rating)}</strong>
-                                                        {stars(item.rating)}
-                                                    </span>
+                                                    <ShopRating value={item.rating} size="sm" />
                                                 ) : null}
-                                                <p>{item.body}</p>
-                                                <div className="product-comment-votes">
-                                                    <button
-                                                        type="button"
-                                                        className={item.myVote === 1 ? 'is-on' : ''}
-                                                        onClick={() => handleVote(item.id, 1)}
-                                                        aria-label="پسندیدن نظر"
-                                                    >
-                                                        <FontAwesomeIcon icon={faThumbsUp} />
-                                                        {item.likeCount || 0}
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className={item.myVote === -1 ? 'is-on is-down' : ''}
-                                                        onClick={() => handleVote(item.id, -1)}
-                                                        aria-label="نپسندیدن نظر"
-                                                    >
-                                                        <FontAwesomeIcon icon={faThumbsDown} />
-                                                        {item.dislikeCount || 0}
-                                                    </button>
-                                                </div>
-                                            </article>
-                                        ))
-                                    )}
-                                </div>
-                            )}
-                        </section>
+                                            </div>
+                                            <p>{item.body}</p>
+                                            <div className="product-comment-votes">
+                                                <button
+                                                    type="button"
+                                                    className={item.myVote === 1 ? 'is-on' : ''}
+                                                    onClick={() => handleVote(item.id, 1)}
+                                                    aria-label="پسندیدن نظر"
+                                                >
+                                                    <FontAwesomeIcon icon={faThumbsUp} />
+                                                    {item.likeCount || 0}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={item.myVote === -1 ? 'is-on is-down' : ''}
+                                                    onClick={() => handleVote(item.id, -1)}
+                                                    aria-label="نپسندیدن نظر"
+                                                >
+                                                    <FontAwesomeIcon icon={faThumbsDown} />
+                                                    {item.dislikeCount || 0}
+                                                </button>
+                                            </div>
+                                        </article>
+                                    ))
+                                )}
+                            </section>
+                        </div>
                     </>
                 )}
             </main>
