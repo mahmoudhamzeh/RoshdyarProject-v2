@@ -554,7 +554,7 @@ async function seedTaxonomyPg(q, one) {
         );
     }
     const editorial = await one('SELECT id FROM magazine_authors WHERE slug = $1', ['tatkids-editorial']);
-    const admin = await one('SELECT id FROM users WHERE is_admin = true OR is_admin = 1 ORDER BY id LIMIT 1');
+    const admin = await one('SELECT id FROM users WHERE is_admin = 1 ORDER BY id LIMIT 1');
     if (editorial && admin) {
         await q('UPDATE magazine_authors SET user_id = $1 WHERE id = $2', [admin.id, editorial.id]);
     }

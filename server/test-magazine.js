@@ -65,6 +65,9 @@ function assertPgFkTypes() {
     assert.ok(!/\buser_id INTEGER\b/.test(TABLES_PG), 'PG user_id must not stay INTEGER');
     assert.ok(!/\bcategory_id INTEGER\b/.test(TABLES_PG), 'PG category_id must not stay INTEGER');
     assert.ok(!/\bpost_id INTEGER\b/.test(TABLES_PG), 'PG post_id must not stay INTEGER');
+    const storeSrc = fs.readFileSync(path.join(__dirname, 'magazine-store.js'), 'utf8');
+    assert.ok(!/is_admin\s*=\s*true/.test(storeSrc), 'users.is_admin is INTEGER on Postgres; comparing to true throws 42883');
+    assert.ok(/is_admin\s*=\s*1/.test(storeSrc), 'admin lookup must use integer 1');
 }
 
 async function run() {
