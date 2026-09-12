@@ -53,14 +53,16 @@
   opacity: 0.92;
 }
 
-.shop-hero-slider__copy span {
-  display: inline-block;
-  background: #fff;
-  color: #9a3412;
-  font-weight: 800;
-  border-radius: 999px;
-  padding: 0.28rem 0.85rem;
-  font-size: 0.85rem;
+.shop-hero-slider .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .shop-hero-slider__dots {

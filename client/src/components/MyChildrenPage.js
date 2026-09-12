@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { resolveChildAvatar } from '../utils/childAvatars';
 import './MyChildrenPage.css';
 
 const MyChildrenPage = () => {
@@ -72,13 +73,14 @@ const MyChildrenPage = () => {
                     <span>صفحه اصلی</span>
                 </button>
                 <h1>کودکان من</h1>
+                <span className="page-nav-spacer" aria-hidden="true" />
             </nav>
             <div className="children-content-final">
                 <button onClick={() => history.push('/add-child')} className="add-child-btn-final">+ افزودن کودک جدید</button>
                 <div className="children-list-final">
                     {children.length === 0 ? <p className="no-children-message">هنوز کودکی اضافه نشده است.</p> :
                      children.map(child => {
-                        const avatarUrl = child.avatar && child.avatar.startsWith('/uploads') ? `${child.avatar}` : (child.avatar || 'https://i.pravatar.cc/100');
+                        const avatarUrl = resolveChildAvatar(child);
                         return (
                             <div key={child.id} className="child-card-final" data-id={child.id}>
                                 <img src={avatarUrl} alt={child.name} className="child-avatar-final" />

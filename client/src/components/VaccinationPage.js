@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useParams, useHistory } from 'react-router-dom';
 import moment from 'jalali-moment';
 import { toShamsi } from '../utils/dateConverter';
+import { resolveChildAvatar } from '../utils/childAvatars';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
@@ -62,12 +63,7 @@ const vaccineDetails = {
     },
 };
 
-const getAvatarUrl = (avatar) => {
-    if (!avatar) return null;
-    if (avatar.startsWith('http') || avatar.startsWith('data:')) return avatar;
-    if (avatar.startsWith('/uploads')) return `${avatar}`;
-    return avatar;
-};
+const getAvatarUrl = (child) => resolveChildAvatar(child);
 
 const formatAgeLabel = (birthMoment) => {
     if (!birthMoment?.isValid()) return '';
@@ -401,7 +397,7 @@ const VaccinationPage = () => {
         );
     }
 
-    const avatarUrl = getAvatarUrl(child.avatar);
+    const avatarUrl = getAvatarUrl(child);
     const ageLabel = formatAgeLabel(birthMoment);
     const genderLabel = child.gender === 'boy' ? 'پسر' : child.gender === 'girl' ? 'دختر' : (child.gender || '—');
     const birthTypeLabel = child.birthType ? (BIRTH_TYPE_LABELS[child.birthType] || child.birthType) : '—';

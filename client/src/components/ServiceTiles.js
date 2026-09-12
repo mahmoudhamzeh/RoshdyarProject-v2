@@ -13,6 +13,7 @@ import {
     faSeedling,
 } from '@fortawesome/free-solid-svg-icons';
 import { getChildDisplayName } from '../utils/childName';
+import { resolveChildAvatar } from '../utils/childAvatars';
 import './ServiceTiles.css';
 
 const services = [
@@ -168,9 +169,7 @@ const ServiceTiles = () => {
                             onClick={() => setSelectedChild(child.id)}
                         >
                             <img
-                                src={child.avatar && child.avatar.startsWith('/uploads')
-                                    ? `${child.avatar}`
-                                    : (child.avatar || 'https://i.pravatar.cc/50')}
+                                src={resolveChildAvatar(child)}
                                 alt={getChildDisplayName(child)}
                             />
                             <div className="child-name">{getChildDisplayName(child)}</div>

@@ -12,6 +12,8 @@ import {
     faCamera,
     faCheck
 } from '@fortawesome/free-solid-svg-icons';
+import ChildAvatarPicker from './ChildAvatarPicker';
+import { assignChildAvatar } from '../utils/childAvatars';
 import './AddChildPage.css';
 
 const STEPS = [
@@ -56,6 +58,7 @@ const AddChildPage = () => {
     const [birthDate, setBirthDate] = useState(null);
     const [avatarFile, setAvatarFile] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [selectedAvatar, setSelectedAvatar] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [documentFiles, setDocumentFiles] = useState([]);
     const [stepError, setStepError] = useState('');
@@ -70,6 +73,7 @@ const AddChildPage = () => {
         const { name, value, type, checked, files } = e.target;
         if (name === 'avatar' && files && files[0]) {
             setAvatarFile(files[0]);
+            setSelectedAvatar('');
             setPreview(URL.createObjectURL(files[0]));
             return;
         }
@@ -149,7 +153,11 @@ const AddChildPage = () => {
                 userId: loggedInUser.id,
                 birthDate: formattedBirthDate,
                 name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim(),
-                avatar: '',
+                avatar: avatarFile ? '' : assignChildAvatar({
+                    ...formData,
+                    avatar: selectedAvatar,
+                    name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim()
+                }),
                 documents: []
             };
 
@@ -271,7 +279,16 @@ const AddChildPage = () => {
                                     capture="user"
                                     className="visually-hidden"
                                 />
-                                <p className="field-note">اختیاری — بعداً هم می‌توانید اضافه کنید</p>
+                                <p className="field-note">اختیاری — می‌توانید عکس بگذارید یا یکی از آواتارها را انتخاب کنید</p>
+                                <ChildAvatarPicker
+                                    value={selectedAvatar}
+                                    gender={formData.gender}
+                                    onChange={(src) => {
+                                        setAvatarFile(null);
+                                        setSelectedAvatar(src);
+                                        setPreview(src);
+                                    }}
+                                />
                             </div>
 
                             <div className="form-row">

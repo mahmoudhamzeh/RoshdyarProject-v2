@@ -68,6 +68,18 @@ function assertPgFkTypes() {
     const storeSrc = fs.readFileSync(path.join(__dirname, 'magazine-store.js'), 'utf8');
     assert.ok(!/is_admin\s*=\s*true/.test(storeSrc), 'users.is_admin is INTEGER on Postgres; comparing to true throws 42883');
     assert.ok(/is_admin\s*=\s*1/.test(storeSrc), 'admin lookup must use integer 1');
+    const { MAGAZINE_BIGINT_COLUMNS } = require('./magazine-store');
+    assert.ok(TABLES_PG.includes('source_id BIGINT'), 'new PG tables must use BIGINT source_id');
+    assert.ok(
+        MAGAZINE_BIGINT_COLUMNS.some(([table, column]) => table === 'magazine_posts' && column === 'source_id'),
+        'existing PG source_id must be upgraded off INTEGER'
+    );
+    assert.ok(storeSrc.includes('upgradeMagazinePgIdColumns'), 'startup must widen leftover INTEGER ids');
+    const ensureFn = storeSrc.slice(storeSrc.indexOf('async function ensureMagazineSchemaPg'));
+    assert.ok(
+        ensureFn.indexOf('upgradeMagazinePgIdColumns') < ensureFn.indexOf('migrateLegacyPg'),
+        'widen id columns before copying Date.now() news ids'
+    );
 }
 
 async function run() {

@@ -34,6 +34,7 @@ const {
 const { deliverOtp } = require('./sms');
 const { analyzeConcernWithModel, chatGrowthAssistant } = require('./child-growth-ai');
 const { registerMagazineRoutes, overlayLegacyContent } = require('./magazine-routes');
+const { assignChildAvatar } = require('./child-avatars');
 
 const app = express();
 app.set('trust proxy', Number(process.env.TRUST_PROXY || 1));
@@ -336,6 +337,16 @@ function normalizeChildName(childData) {
         childData.lastName = parts.slice(1).join(' ');
     }
     return childData;
+}
+
+async function persistChildAvatar(child) {
+    const name = getChildDisplayName(child);
+    const avatar = assignChildAvatar({ ...child, name });
+    if (avatar && avatar !== child.avatar) {
+        const updated = await store.children.update(child.id, { avatar });
+        return { ...(updated || child), name, avatar };
+    }
+    return { ...child, name, avatar };
 }
 
 // --- Auth helpers (OTP registration) ---
@@ -765,8 +776,9 @@ app.put('/api/users/:id/password', async (req, res) => {
 app.get('/api/children', async (req, res) => {
     const user = await requireUser(req, res);
     if (!user) return;
-    const userChildren = (await store.children.listByUserId(user.id))
-        .map(c => ({ ...c, name: getChildDisplayName(c) }));
+    const userChildren = await Promise.all(
+        (await store.children.listByUserId(user.id)).map((c) => persistChildAvatar(c))
+    );
     res.json(userChildren);
 });
 
@@ -776,6 +788,7 @@ app.post('/api/children', async (req, res) => {
     const childData = req.body || {};
     const ownerId = user.isAdmin && childData.userId ? parseInt(childData.userId, 10) : user.id;
     normalizeChildName(childData);
+    childData.avatar = assignChildAvatar(childData);
     const newChild = await store.children.create({
         ...childData,
         userId: ownerId,
@@ -803,9 +816,9 @@ app.get('/api/children/:childId', async (req, res) => {
     const child = owned.child;
     const { childId } = req.params;
     if (child) {
+        const resolved = await persistChildAvatar(child);
         res.json({
-            ...child,
-            name: getChildDisplayName(child),
+            ...resolved,
             growthData: await store.growth.list(childId)
         });
     } else {
@@ -1112,6 +1125,7 @@ app.put('/api/children/:childId', async (req, res) => {
     const { childId } = req.params;
     const updatedData = { ...req.body };
     normalizeChildName(updatedData);
+    updatedData.avatar = assignChildAvatar({ ...owned.child, ...updatedData });
     delete updatedData.id;
     delete updatedData.growthData;
     const updated = await store.children.update(childId, updatedData);
@@ -1945,13 +1959,36 @@ app.get('/api/shop/products', async (req, res) => {
     res.json(paginateList(await store.products.listActive(filters), req));
 });
 
+async function relatedShopProducts(product, limit = 8) {
+    const seen = new Set([Number(product.id)]);
+    const out = [];
+    const push = (items) => {
+        for (const item of items || []) {
+            if (seen.has(Number(item.id))) continue;
+            seen.add(Number(item.id));
+            out.push(item);
+            if (out.length >= limit) return true;
+        }
+        return false;
+    };
+    if (product.category) {
+        if (push(await store.products.listActive({ category: product.category, sort: 'rating' }))) return out;
+    }
+    if (product.ageBand) {
+        if (push(await store.products.listActive({ age: product.ageBand, sort: 'popular' }))) return out;
+    }
+    push(await store.products.listActive({ sort: 'popular' }));
+    return out;
+}
+
 app.get('/api/shop/products/:id', async (req, res) => {
     const product = await store.products.getById(req.params.id);
     if (!product || product.active === false) {
         return res.status(404).json({ message: 'محصول یافت نشد' });
     }
     const offers = await store.shop.listOffers(product.id);
-    res.json({ ...product, offers });
+    const related = await relatedShopProducts(product);
+    res.json({ ...product, offers, related });
 });
 
 app.get('/api/admin/products', isAdmin, async (req, res) => {
