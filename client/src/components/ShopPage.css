@@ -128,6 +128,108 @@
   margin-bottom: 1.5rem;
 }
 
+.shop-catalog {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+  margin-top: 0.5rem;
+}
+
+.shop-filters {
+  position: sticky;
+  top: 5.25rem;
+  background: #fffdf6;
+  border: 1px solid #eadfbf;
+  border-radius: 16px;
+  padding: 1rem 0.95rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.shop-filters-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0;
+}
+
+.shop-filters-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #134e4a;
+}
+
+.shop-filters-toggle {
+  display: none;
+  border: 1px solid #e4d8b8;
+  background: #fff;
+  color: #3f3a2f;
+  border-radius: 10px;
+  padding: 0.5rem 0.8rem;
+  font-weight: 800;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.shop-filters-toggle span {
+  min-width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  background: #b45309;
+  color: #fff;
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shop-filters-clear {
+  border: 0;
+  background: transparent;
+  color: #b45309;
+  font-weight: 800;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.shop-filters-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.shop-filters .shop-search {
+  flex-wrap: wrap;
+}
+
+.shop-filters .shop-search button {
+  width: 100%;
+}
+
+.shop-catalog-main {
+  min-width: 0;
+}
+
+.shop-sort-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #6b5b3a;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .shop-search {
   display: flex;
   align-items: center;
@@ -344,5 +446,39 @@
 
   .shop-search button {
     width: 100%;
+  }
+
+  .shop-catalog {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-filters {
+    position: static;
+    padding: 0.8rem 0.85rem;
+  }
+
+  .shop-filters-title {
+    display: none;
+  }
+
+  .shop-filters-head {
+    margin-bottom: 0;
+  }
+
+  .shop-filters-body {
+    display: none;
+  }
+
+  .shop-filters.is-open .shop-filters-body {
+    display: flex;
+    margin-top: 0.75rem;
+  }
+
+  .shop-section-title {
+    flex-wrap: wrap;
+  }
+
+  .shop-sort {
+    min-width: 8.5rem;
   }
 }

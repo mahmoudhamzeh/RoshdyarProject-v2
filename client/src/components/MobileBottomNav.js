@@ -75,7 +75,7 @@ const MobileBottomNav = () => {
             to: '/shop',
             icon: faStore,
             label: 'خانه فروشگاه',
-            isActive: (_match, loc) => loc.pathname === '/shop' || /^\/shop\/\d+/.test(loc.pathname)
+            isActive: (_match, loc) => loc.pathname === '/shop'
         },
         {
             key: 'categories',

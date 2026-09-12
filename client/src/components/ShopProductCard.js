@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStore } from '@fortawesome/free-solid-svg-icons';
 import { formatPrice } from '../utils/cart';
-import { ageBandLabel, formatRating, stars } from '../utils/shop';
+import { ageBandLabel } from '../utils/shop';
+import ShopRating from './ShopRating';
 
 const ShopProductCard = ({ product, index = 0 }) => (
     <Link
@@ -25,13 +26,7 @@ const ShopProductCard = ({ product, index = 0 }) => (
         <div className="shop-product-body">
             {product.ageBand && <span className="shop-age-badge">{ageBandLabel(product.ageBand)}</span>}
             <h2>{product.name}</h2>
-            {product.ratingCount > 0 && (
-                <div className="shop-rating" aria-label={`${formatRating(product.ratingAvg)} از ۵`}>
-                    <strong className="shop-rating-num">{formatRating(product.ratingAvg)}</strong>
-                    {stars(product.ratingAvg)}
-                    <span> ({product.ratingCount})</span>
-                </div>
-            )}
+            <ShopRating value={product.ratingAvg} count={product.ratingCount} size="sm" />
             <p>{product.description}</p>
             <div className="shop-chip-row">
                 {(product.skills || []).slice(0, 2).map((skill) => (

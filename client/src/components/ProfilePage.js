@@ -73,7 +73,6 @@ const ProfilePage = () => {
         { id: 'messages', label: 'پیام‌ها' },
         { id: 'tickets', label: 'پشتیبانی' },
         { id: 'orders', label: 'سفارش‌ها', href: '/orders' },
-        { id: 'vendor', label: 'فروشنده شو', href: '/vendor' },
         { id: 'changePassword', label: 'رمز عبور' }
     ];
 

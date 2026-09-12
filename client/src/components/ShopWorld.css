@@ -58,18 +58,127 @@
 }
 
 .shop-rating {
-  color: #d97706;
-  letter-spacing: 0.08em;
+  color: #92400e;
+  letter-spacing: 0;
   font-size: 0.85rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.shop-rating-stars {
+  display: inline-flex;
+  direction: ltr;
+  gap: 0.08rem;
+  line-height: 1;
+}
+
+.shop-star {
+  position: relative;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  font-size: 1.05em;
+  line-height: 1;
+  overflow: hidden;
+}
+
+.shop-star__base {
+  position: absolute;
+  inset: 0;
+  font-size: 1em;
+  line-height: 1;
+  color: #e8dcc4;
+}
+
+.shop-star__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow: hidden;
+  color: #f59e0b;
+  white-space: nowrap;
+  font-size: 1em;
+  line-height: 1;
 }
 
 .shop-rating-num {
   letter-spacing: 0;
   font-size: 0.95rem;
-  color: #92400e;
+  font-variant-numeric: tabular-nums;
+  color: #b45309;
+}
+
+.shop-rating-count {
+  color: #7a6a4e;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.shop-rating--sm {
+  font-size: 0.78rem;
+}
+
+.shop-rating--sm .shop-rating-num {
+  font-size: 0.82rem;
+}
+
+.shop-rating--lg {
+  font-size: 1rem;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.shop-rating--lg .shop-star {
+  font-size: 1.2em;
+}
+
+.shop-rating--lg .shop-rating-num {
+  font-size: 1.15rem;
+}
+
+.shop-rating-empty {
+  margin: 0 0 0.75rem;
+  color: #9a8b73;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.shop-breadcrumb {
+  margin: 0 0 1rem;
+}
+
+.shop-breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: #7a6a4e;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.shop-breadcrumb a {
+  color: #0f766e;
+  text-decoration: none;
+}
+
+.shop-breadcrumb a:hover {
+  color: #b45309;
+}
+
+.shop-breadcrumb [aria-current="page"] {
+  color: #3f3a2f;
+}
+
+.shop-breadcrumb-sep {
+  color: #c4b594;
+  margin-inline: 0.1rem;
 }
 
 .shop-price-was {
@@ -168,6 +277,20 @@
 
 .shop-filter-selects .category-cascade {
   grid-column: 1 / -1;
+}
+
+.shop-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.shop-filter-group p,
+.shop-filters-body > p {
+  margin: 0;
+  font-weight: 800;
+  color: #6b5b3a;
+  font-size: 0.82rem;
 }
 
 .category-cascade {
