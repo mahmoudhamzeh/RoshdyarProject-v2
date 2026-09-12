@@ -115,7 +115,6 @@ const ShopPage = () => {
         <div className="shop-page shop-world">
             <MainNavbar />
             <main className="shop-main">
-                {crumbs.length > 1 && <ShopBreadcrumb items={crumbs} />}
                 <ShopHeroSlider
                     banners={
                         (home?.banners || []).length
@@ -217,6 +216,7 @@ const ShopPage = () => {
                     </aside>
 
                     <div className="shop-catalog-main">
+                        {crumbs.length > 1 && <ShopBreadcrumb items={crumbs} />}
                         {loading && <p className="shop-status">در حال بارگذاری محصولات...</p>}
                         {error && <p className="shop-status shop-error">{error}</p>}
 
