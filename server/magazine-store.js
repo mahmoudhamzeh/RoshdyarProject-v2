@@ -1876,6 +1876,63 @@ async function rewriteHeroLinksPg(q, one, many) {
     }
 }
 
+const MAGAZINE_BIGINT_COLUMNS = [
+    ['magazine_post_tags', 'post_id'],
+    ['magazine_post_tags', 'tag_id'],
+    ['magazine_post_authors', 'post_id'],
+    ['magazine_post_authors', 'author_id'],
+    ['magazine_related_posts', 'post_id'],
+    ['magazine_related_posts', 'related_post_id'],
+    ['magazine_comments', 'post_id'],
+    ['magazine_comments', 'parent_id'],
+    ['magazine_comments', 'user_id'],
+    ['magazine_comments', 'id'],
+    ['magazine_posts', 'source_id'],
+    ['magazine_posts', 'category_id'],
+    ['magazine_posts', 'id'],
+    ['magazine_categories', 'parent_id'],
+    ['magazine_categories', 'id'],
+    ['magazine_tags', 'id'],
+    ['magazine_authors', 'user_id'],
+    ['magazine_authors', 'id'],
+    ['magazine_banners', 'id']
+];
+
+async function dropMagazineForeignKeys(q) {
+    await q(`
+        DO $mag$
+        DECLARE r RECORD;
+        BEGIN
+            FOR r IN
+                SELECT c.conname, t.relname
+                FROM pg_constraint c
+                JOIN pg_class t ON t.oid = c.conrelid
+                JOIN pg_namespace n ON n.oid = t.relnamespace
+                WHERE n.nspname = 'public'
+                  AND c.contype = 'f'
+                  AND t.relname LIKE 'magazine_%'
+            LOOP
+                EXECUTE format('ALTER TABLE %I DROP CONSTRAINT IF EXISTS %I', r.relname, r.conname);
+            END LOOP;
+        END
+        $mag$;
+    `);
+}
+
+async function upgradeMagazinePgIdColumns(q, one) {
+    await dropMagazineForeignKeys(q);
+    for (const [table, column] of MAGAZINE_BIGINT_COLUMNS) {
+        const row = await one(
+            `SELECT data_type FROM information_schema.columns
+             WHERE table_schema = 'public' AND table_name = $1 AND column_name = $2`,
+            [table, column]
+        );
+        if (row && (row.data_type === 'integer' || row.data_type === 'smallint')) {
+            await q(`ALTER TABLE ${table} ALTER COLUMN ${column} TYPE BIGINT`);
+        }
+    }
+}
+
 async function runSqlBatch(q, sql) {
     const statements = String(sql)
         .split(';')
@@ -1902,6 +1959,7 @@ function ensureMagazineSchemaSqlite(db) {
 async function ensureMagazineSchemaPg(q, one, many) {
     try {
         await runSqlBatch(q, TABLES_PG);
+        await upgradeMagazinePgIdColumns(q, one);
         await seedTaxonomyPg(q, one);
         await migrateLegacyPg(q, one, many);
         await rewriteHeroLinksPg(q, one, many);
@@ -1915,6 +1973,8 @@ async function ensureMagazineSchemaPg(q, one, many) {
 
 module.exports = {
     TABLES_PG,
+    MAGAZINE_BIGINT_COLUMNS,
+    upgradeMagazinePgIdColumns,
     ensureMagazineSchemaSqlite,
     ensureMagazineSchemaPg,
     sqliteApi,
