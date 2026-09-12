@@ -26,6 +26,7 @@ import {
     faCircleInfo,
 } from '@fortawesome/free-solid-svg-icons';
 import { getChildDisplayName } from '../utils/childName';
+import { resolveChildAvatar } from '../utils/childAvatars';
 import './HealthProfilePage.css';
 
 Modal.setAppElement('#root');
@@ -198,9 +199,7 @@ const HealthProfilePage = () => {
 
     const displayName = getChildDisplayName(child);
     const ageLabel = calculateAge(child.birthDate);
-    const avatarUrl = child.avatar
-        ? (child.avatar.startsWith('/uploads') ? `${child.avatar}` : child.avatar)
-        : null;
+    const avatarUrl = resolveChildAvatar(child);
     const allergyTags = getActiveTags(child.allergies);
     const illnessTags = getActiveTags(child.special_illnesses);
     const allergyDescription = typeof child.allergies === 'object' ? child.allergies?.description : '';

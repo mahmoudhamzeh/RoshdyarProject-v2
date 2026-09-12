@@ -6,7 +6,6 @@ import {
     faBed,
     faChartLine,
     faCheck,
-    faChild,
     faComments,
     faHeart,
     faNotesMedical,
@@ -26,6 +25,7 @@ import {
     sendGrowthChat,
 } from '../utils/child-growth';
 import { buildOverallStatus, collectHealthTags, metricCaption, statusPhrase } from '../utils/child-snapshot';
+import { resolveChildAvatar } from '../utils/childAvatars';
 import './ChildGrowthPage.css';
 
 const DOMAIN_TILES = [
@@ -209,7 +209,7 @@ const ChildGrowthPage = () => {
 
             <header className={`cg-hero is-${overall.tone}`}>
                 <div className="cg-hero-avatar" aria-hidden="true">
-                    {childRaw?.avatar ? <img src={childRaw.avatar} alt="" /> : <FontAwesomeIcon icon={faChild} />}
+                    <img src={resolveChildAvatar(childRaw || child)} alt="" />
                 </div>
                 <div>
                     <p className="cg-kicker">{band?.title} · {child.ageLabel}</p>

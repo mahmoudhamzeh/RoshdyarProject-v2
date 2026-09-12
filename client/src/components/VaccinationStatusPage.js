@@ -2,15 +2,9 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import moment from 'jalali-moment';
 import { getChildDisplayName } from '../utils/childName';
+import { resolveChildAvatar } from '../utils/childAvatars';
 import { toShamsi } from '../utils/dateConverter';
 import './VaccinationStatusPage.css';
-
-const getAvatarUrl = (avatar) => {
-    if (!avatar) return null;
-    if (avatar.startsWith('http') || avatar.startsWith('data:')) return avatar;
-    if (avatar.startsWith('/uploads')) return `${avatar}`;
-    return avatar;
-};
 
 const VaccinationStatusPage = () => {
     const { childId } = useParams();
@@ -130,7 +124,7 @@ const VaccinationStatusPage = () => {
     };
 
     const childName = getChildDisplayName(child);
-    const avatarUrl = getAvatarUrl(child?.avatar);
+    const avatarUrl = resolveChildAvatar(child);
     const initial = childName.charAt(0) || 'ک';
 
     const ageLabel = useMemo(() => {

@@ -14,6 +14,8 @@ import {
     faCamera,
     faCheck
 } from '@fortawesome/free-solid-svg-icons';
+import ChildAvatarPicker from './ChildAvatarPicker';
+import { assignChildAvatar, resolveChildAvatar } from '../utils/childAvatars';
 import './AddChildPage.css';
 
 const STEPS = [
@@ -44,6 +46,7 @@ const EditChildPage = () => {
     const [birthDate, setBirthDate] = useState(null);
     const [avatarFile, setAvatarFile] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [selectedAvatar, setSelectedAvatar] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [documentFiles, setDocumentFiles] = useState([]);
     const [stepError, setStepError] = useState('');
@@ -71,9 +74,9 @@ const EditChildPage = () => {
 
                 setFormData(data);
                 setBirthDate(parseBirthDate(data.birthDate));
-                if (data.avatar) {
-                    setPreview(data.avatar.startsWith('/uploads') ? `${data.avatar}` : data.avatar);
-                }
+                const nextAvatar = resolveChildAvatar(data);
+                setPreview(nextAvatar);
+                setSelectedAvatar(String(data.avatar || '').startsWith('/avatars/') ? data.avatar : nextAvatar.startsWith('/avatars/') ? nextAvatar : '');
             } catch {
                 alert('موفق به دریافت اطلاعات کودک نشدیم.');
                 history.push('/my-children');
@@ -97,6 +100,7 @@ const EditChildPage = () => {
         const { name, value, type, checked, files } = e.target;
         if (name === 'avatar' && files && files[0]) {
             setAvatarFile(files[0]);
+            setSelectedAvatar('');
             setPreview(URL.createObjectURL(files[0]));
             return;
         }
@@ -169,7 +173,10 @@ const EditChildPage = () => {
                 return;
             }
 
-            let newAvatarPath = formData.avatar;
+            let newAvatarPath = assignChildAvatar({
+                ...formData,
+                avatar: selectedAvatar || formData.avatar
+            });
             if (avatarFile) {
                 const avatarUploadData = new FormData();
                 avatarUploadData.append('avatar', avatarFile);
@@ -305,6 +312,15 @@ const EditChildPage = () => {
                                     accept="image/*"
                                     capture="user"
                                     className="visually-hidden"
+                                />
+                                <ChildAvatarPicker
+                                    value={selectedAvatar}
+                                    gender={formData.gender}
+                                    onChange={(src) => {
+                                        setAvatarFile(null);
+                                        setSelectedAvatar(src);
+                                        setPreview(src);
+                                    }}
                                 />
                             </div>
 

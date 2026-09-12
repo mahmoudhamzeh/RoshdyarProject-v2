@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="child avatar boy 3">
+  <circle cx="48" cy="48" r="48" fill="#E0F2FE"/>
+  <ellipse cx="48" cy="78" rx="26" ry="14" fill="#0284C7"/>
+  <circle cx="48" cy="46" r="21" fill="#F0C8A0"/>
+  <path d="M28 36c4-12 12-16 20-16s16 4 20 16H28z" fill="#0C4A6E"/>
+  <path d="M30 38h36v6H30z" fill="#0C4A6E"/>
+  <circle cx="40" cy="45" r="2.2" fill="#111827"/>
+  <circle cx="56" cy="45" r="2.2" fill="#111827"/>
+  <path d="M42 53c3 2.6 9 2.6 12 0" fill="none" stroke="#9A3412" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
