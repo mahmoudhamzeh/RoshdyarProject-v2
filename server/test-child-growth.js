@@ -99,6 +99,14 @@ const walkChat = chatGrowthAssistantLocal(
     [{ role: 'user', content: 'هنوز تنهایی راه نمی‌رود' }]
 );
 assert.ok(walkChat.includes('۱۸ ماهگی') || walkChat.includes('طبیعی'));
+assert.ok(!walkChat.includes('گاز نه'));
+
+const lateWalk = analyzeConcernLocal(
+    { name: 'آریا', gender: 'boy', ageInMonths: 28 },
+    'هنوز تنهایی راه نمی‌رود'
+);
+assert.strictEqual(lateWalk.triage_status, 'MONITOR_CLOSELY');
+assert.ok(lateWalk.summary_verdict.includes('پزشک'));
 
 assert.strictEqual(classifyChatIntent('سلام'), 'greeting');
 assert.strictEqual(classifyChatIntent('دندونش دیر دراومده'), 'teeth');
