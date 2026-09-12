@@ -58,15 +58,21 @@ const MainNavbar = () => {
     }, [isMenuOpen]);
 
     useEffect(() => {
-        if (!searchOpen) return undefined;
+        if (!searchOpen && !isMenuOpen) return undefined;
         const onKey = (event) => {
-            if (event.key === 'Escape') setSearchOpen(false);
+            if (event.key !== 'Escape') return;
+            setSearchOpen(false);
+            setIsMenuOpen(false);
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [searchOpen]);
+    }, [searchOpen, isMenuOpen]);
 
     const closeMenu = () => setIsMenuOpen(false);
+    const toggleMenu = () => {
+        setSearchOpen(false);
+        setIsMenuOpen((open) => !open);
+    };
 
     const submitSearch = (e) => {
         e.preventDefault();
@@ -90,32 +96,15 @@ const MainNavbar = () => {
                     </div>
                 </div>
 
-                <div className={`navbar-center ${isMenuOpen ? 'active' : ''}`}>
+                <div className="navbar-center">
                     <div className="navbar-links">
-                        <Link to="/" onClick={closeMenu}>خانه</Link>
-                        <Link to="/about" onClick={closeMenu}>درباره ما</Link>
-                        <Link to="/news" onClick={closeMenu}>مجله سلامت</Link>
-                        <Link to="/shop" onClick={closeMenu}>فروشگاه</Link>
+                        <Link to="/">خانه</Link>
+                        <Link to="/about">درباره ما</Link>
+                        <Link to="/news">مجله سلامت</Link>
+                        <Link to="/shop">فروشگاه</Link>
                         {isAdmin && (
-                            <Link to="/admin" className="admin-link" onClick={closeMenu}>
+                            <Link to="/admin" className="admin-link">
                                 پنل مدیریت
-                            </Link>
-                        )}
-                        {signedIn ? (
-                            <Link
-                                to="/profile"
-                                className="btn btn-profile mobile-only-profile"
-                                onClick={closeMenu}
-                            >
-                                پروفایل من
-                            </Link>
-                        ) : (
-                            <Link
-                                to="/register"
-                                className="btn btn-profile mobile-only-profile"
-                                onClick={closeMenu}
-                            >
-                                ورود
                             </Link>
                         )}
                     </div>
@@ -155,14 +144,62 @@ const MainNavbar = () => {
                     <button
                         className="navbar-toggler"
                         type="button"
-                        onClick={() => setIsMenuOpen((open) => !open)}
-                        aria-label="منو"
+                        onClick={toggleMenu}
+                        aria-label={isMenuOpen ? 'بستن منو' : 'باز کردن منو'}
                         aria-expanded={isMenuOpen}
+                        aria-controls="navbar-mobile-drawer"
                     >
                         {isMenuOpen ? '✕' : '☰'}
                     </button>
                 </div>
             </nav>
+            <aside
+                id="navbar-mobile-drawer"
+                className={`navbar-drawer ${isMenuOpen ? 'is-open' : ''}`}
+                aria-hidden={!isMenuOpen}
+                aria-label="منوی صفحات"
+            >
+                <div className="navbar-drawer-head">
+                    <Link to="/" className="navbar-drawer-brand" onClick={closeMenu}>
+                        <BrandLogo className="navbar-brand-icon" size={34} alt="" />
+                        <span>
+                            <strong>تات کیدز</strong>
+                            <em>TatKids</em>
+                        </span>
+                    </Link>
+                    <button
+                        type="button"
+                        className="navbar-drawer-close"
+                        onClick={closeMenu}
+                        aria-label="بستن منو"
+                    >
+                        ✕
+                    </button>
+                </div>
+                <nav className="navbar-drawer-nav">
+                    <p className="navbar-drawer-label">صفحات</p>
+                    <Link to="/" onClick={closeMenu}>خانه</Link>
+                    <Link to="/about" onClick={closeMenu}>درباره ما</Link>
+                    <Link to="/news" onClick={closeMenu}>مجله سلامت</Link>
+                    <Link to="/shop" onClick={closeMenu}>فروشگاه</Link>
+                    <p className="navbar-drawer-label">حساب</p>
+                    {signedIn ? (
+                        <Link to="/profile" onClick={closeMenu}>پروفایل من</Link>
+                    ) : (
+                        <Link to="/register" onClick={closeMenu}>ورود / ثبت‌نام</Link>
+                    )}
+                    <Link to="/cart" onClick={closeMenu}>
+                        سبد خرید
+                        {cartCount > 0 ? ` (${cartCount.toLocaleString('fa-IR')})` : ''}
+                    </Link>
+                    <Link to="/vendor" onClick={closeMenu}>فروشنده شوید</Link>
+                    {isAdmin && (
+                        <Link to="/admin" className="admin-link" onClick={closeMenu}>
+                            پنل مدیریت
+                        </Link>
+                    )}
+                </nav>
+            </aside>
             {searchOpen && (
                 <div className="navbar-search-overlay" onClick={() => setSearchOpen(false)} role="presentation">
                     <form
@@ -186,7 +223,7 @@ const MainNavbar = () => {
                 </div>
             )}
             {isMenuOpen && <div className="menu-backdrop" onClick={closeMenu} />}
-            <div className="navbar-subbar">
+            <div className={`navbar-subbar${showShopFilter ? '' : ' navbar-subbar--desktop-only'}`}>
                 <nav className="navbar-subbar-links" aria-label="فروشندگان">
                     <Link to="/vendor">فروشنده شوید</Link>
                 </nav>

@@ -7,7 +7,7 @@ const {
     calendarDayKey,
     isCompletedOnDay
 } = require('./child-growth-data');
-const { analyzeConcernLocal, chatGrowthAssistantLocal } = require('./child-growth-ai');
+const { analyzeConcernLocal, chatGrowthAssistantLocal, classifyChatIntent } = require('./child-growth-ai');
 
 const band = getBandForAge(13);
 assert.ok(band && band.activities && band.activities.length >= 3, '12-15 band needs activities');
@@ -87,11 +87,46 @@ const foodChat = chatGrowthAssistantLocal(
 );
 assert.ok(foodChat.includes('لقمه‌های نرم'));
 
+const foodChip = chatGrowthAssistantLocal(
+    { name: 'محمد', gender: 'boy', ageInMonths: 13 },
+    [{ role: 'user', content: 'در این سن چه چیزی بخورد؟' }]
+);
+assert.ok(/غذا|لقمه|شیر/.test(foodChip));
+assert.ok(!foodChip.includes('تا حدود ۱۸ ماهگی راه نرفتن'));
+
 const walkChat = chatGrowthAssistantLocal(
     { name: 'محمد', gender: 'boy', ageInMonths: 13 },
     [{ role: 'user', content: 'هنوز تنهایی راه نمی‌رود' }]
 );
 assert.ok(walkChat.includes('۱۸ ماهگی') || walkChat.includes('طبیعی'));
+
+assert.strictEqual(classifyChatIntent('سلام'), 'greeting');
+assert.strictEqual(classifyChatIntent('دندونش دیر دراومده'), 'teeth');
+assert.strictEqual(classifyChatIntent('تب کرده'), 'fever');
+assert.strictEqual(classifyChatIntent('قد و وزنش مناسب است؟'), 'growth');
+assert.strictEqual(classifyChatIntent('شب‌ها بدخواب است'), 'sleep');
+assert.strictEqual(classifyChatIntent('کد تخفیف فروشگاه چیه'), 'offtopic');
+
+const helloChat = chatGrowthAssistantLocal(
+    { name: 'محمد', gender: 'boy', ageInMonths: 13 },
+    [{ role: 'user', content: 'سلام' }]
+);
+assert.ok(helloChat.includes('دستیار رشد محمد'));
+assert.ok(!helloChat.includes('۱۸ ماهگی راه نرفتن'));
+
+const teethChat = chatGrowthAssistantLocal(
+    { name: 'محمد', gender: 'boy', ageInMonths: 13 },
+    [{ role: 'user', content: 'دندونش دیر دراومده؟' }]
+);
+assert.ok(teethChat.includes('دندان') || teethChat.includes('لثه'));
+assert.ok(!teethChat.includes('راه نرفتن مستقل'));
+
+const feverChat = chatGrowthAssistantLocal(
+    { name: 'سارا', gender: 'girl', ageInMonths: 8 },
+    [{ role: 'user', content: 'تب کرده چیکار کنم' }]
+);
+assert.ok(feverChat.includes('تب') && feverChat.includes('پزشک'));
+assert.ok(!feverChat.includes('راه نرفتن'));
 
 console.log('child growth unit tests passed');
 console.log('day key sample', calendarDayKey(new Date('2026-09-02T08:00:00.000Z')));

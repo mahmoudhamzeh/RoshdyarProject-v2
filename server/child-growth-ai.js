@@ -74,9 +74,11 @@ function analyzeConcernLocal(child, concernText) {
             ? { text: 'نیاز به پیگیری نزدیک', color: 'yellow' }
             : { text: 'روند طبیعی رشد در این بازه سنی', color: 'green' };
 
-    let summary = `برای ${gender} ${months} ماهه، خیلی از تفاوت‌ها هنوز در بازه طبیعی است.`;
+    let summary = `برای ${name} در حدود ${months} ماهگی، اگر نگرانی مشخص‌تری درباره حرکت، حرف زدن، غذا، خواب یا رفتار بنویسید راهنمایی دقیق‌تری می‌دهم.`;
     if (motor && months < 18) {
         summary = `تا حدود ۱۸ ماهگی راه نرفتن مستقل در بسیاری از کودکان دیده می‌شود؛ اگر می‌ایستد یا با کمک جابه‌جا می‌شود معمولاً روند طبیعی است.`;
+    } else if (motor || speech || sleep || food || behavior) {
+        summary = `برای ${gender} ${months} ماهه، خیلی از تفاوت‌ها هنوز در بازه طبیعی است.`;
     }
     if (speech && months < 16) {
         summary = `${summary} در این سن اشاره، آوا و یکی‌دو کلمه معنی‌دار مهم‌تر از جمله کامل است.`;
@@ -183,29 +185,115 @@ function lastUserText(messages) {
     return '';
 }
 
+function withDisclaimer(text) {
+    return `${String(text || '').trim()}\n\nاین راهنما آموزشی است و جای معاینه پزشک را نمی‌گیرد.`;
+}
+
+function defaultFoodAdvice(months) {
+    if (months < 6) return 'در این سن تغذیه اصلی شیر مادر یا شیر خشک مناسب است؛ غذای کمکی معمولاً بعد از حدود ۶ ماهگی و با نظر پزشک شروع می‌شود.';
+    if (months < 12) return 'شیر همچنان پایه است و غذای نرم خانواده (پوره، میوه نرم، گوشت نرم) کم‌کم اضافه می‌شود. نمک و شکر اضافه ندهید.';
+    if (months < 24) return 'لقمه‌های نرم غذای خانواده، تنوع رنگ و بافت، و دو انتخاب کوچک معمولاً بهتر از اجبار جواب می‌دهد.';
+    return 'سه وعده اصلی خانواده با میان‌وعده سالم کافی است. زمان غذا را کوتاه و بدون جنگ تمام کنید.';
+}
+
+function defaultSleepAdvice(months) {
+    if (months < 6) return 'خواب هنوز نامنظم است. به پشت در سطح سفت بخوابانید و پاسخ شب را آرام و کم‌نور نگه دارید.';
+    if (months < 12) return 'روتین کوتاه شب (کتاب، نور کم، بغل آرام) و فاصله ثابت بین چرت‌ها معمولاً کمک می‌کند.';
+    if (months < 24) return 'یک روتین ثابت ۲۰ دقیقه‌ای بهتر از حرف زیاد است. بیداری شب را کوتاه و تکراری پاسخ دهید.';
+    return 'ساعت خواب نسبتاً ثابت، فعالیت روز و پرهیز از صفحه نمایش نزدیک خواب معمولاً مؤثرتر از بحث شبانه است.';
+}
+
+function classifyChatIntent(text) {
+    const raw = String(text || '').trim();
+    if (!raw) return 'empty';
+    const t = raw.replace(/\s+/g, ' ');
+    if (hasAny(t, HARD_RED) || /تب بالا|تب ۴۰|تب 40|تنگی نفس|قطع تنفس/.test(t)) return 'urgent';
+    if (/^(سلام|درود|هی|hello|hi|صبح بخیر|عصر بخیر|وقت بخیر)([\s!؟?.].*)?$/i.test(t)
+        || /سلام خوبی|سلام دستیار|خوبی\??$/.test(t)) {
+        return 'greeting';
+    }
+    if (/ممنون|مرسی|متشکرم|خداحافظ|thanks/.test(t)) return 'thanks';
+    if (/کی هستی|چیکار میکنی|چه کمکی|چطور کمک|چه کاری میتونی/.test(t)) return 'identity';
+    if (/دندان|دندون|لثه/.test(t)) return 'teeth';
+    if (/تب/.test(t)) return 'fever';
+    if (/واکسن|تزریق|ایمن[ -]?سازی/.test(t)) return 'vaccine';
+    if (/پوشک|دستشویی|لگن|توالت|توآلت|پی[ -]?پی|ادرار|مدفوع/.test(t)) return 'potty';
+    if (/(قد و وزن|قدش|وزنش|وزن[ -]?گیری|صدک|نمودار رشد|خیلی چاق|خیلی لاغر)/.test(t)
+        || (/قد/.test(t) && /(وزن|سانتی|سم|کوتاه|بلند)/.test(t) && !/چقدر/.test(t))) {
+        return 'growth';
+    }
+    if (/چی بخور|چه .*خور|بخورد|تغذیه|غذا|اشتها|بدغذا|شیر مادر|شیر خشک|لقمه|صبحانه|ناهار/.test(t)) return 'food';
+    if (/خواب|بیدار|چرت|بدخواب/.test(t)) return 'sleep';
+    if (/قشقرق|لجباز|گاز میگ|کتک|نه میگه|جدایی|جدايي|ترس شب/.test(t)) return 'behavior';
+    if (/بازی|سرگرمی|اسباب[ -]?بازی|فعالیت امروز/.test(t)) return 'play';
+    if (/حرف نمی|کلمه|گفتار|صحبت|اشاره نمی|جیغ میزن/.test(t)) return 'speech';
+    if (/راه نمی|راه رفتن|قدم برنمی|نمی[ \u200c]?ایست|نمی[ \u200c]?شینه|چهار دست|تنهایی راه/.test(t)) return 'motor';
+    if (/نگران|تأخیر|تاخیر|عقب افتاد|رشدش|وضعیت کلی|چطوره رشد/.test(t)) return 'general';
+    if (/قیمت|خرید|سفارش|کد تخفیف|فروشگاه|ارسال/.test(t)) return 'offtopic';
+    return 'general';
+}
+
 function chatGrowthAssistantLocal(child, messages, context) {
     const name = (child && (child.name || child.firstName)) || 'کودک';
     const months = monthsOf(child);
+    const ageLabel = (context && context.bandTitle) || `${months} ماهگی`;
     const ctx = context || {};
     const last = lastUserText(messages);
-    if (!last) {
-        return `سلام، من دستیار رشد ${name} هستم. سنش حدود ${months} ماهگی است. از قد و وزن، غذا، خواب یا نگرانی‌تان بپرسید.`;
+    const intent = classifyChatIntent(last);
+
+    if (intent === 'empty') {
+        return `سلام، من دستیار رشد ${name} هستم. سنش حدود ${ageLabel} است. از قد و وزن، غذا، خواب، دندان، واکسن یا نگرانی‌تان بپرسید.`;
     }
-    if (/چی بخور|تغذیه|غذا|شیر/.test(last) && ctx.nutrition) {
-        return `برای ${name} در ${ctx.bandTitle || `${months} ماهگی`}: ${ctx.nutrition}\n\nاگر آلرژی یا بیماری ثبت شده، هر تغییر غذا را با پزشک هماهنگ کنید.`;
+    if (intent === 'urgent') {
+        return withDisclaimer(`با نشانه‌هایی که نوشتید این موضوع را همین امروز با پزشک کودک یا اورژانس مطرح کنید. برای ${name} در ${ageLabel} صبر کردن درست نیست.`);
     }
-    if (/خواب|بیدار|چرت/.test(last) && ctx.sleep) {
-        return `خواب این سن برای ${name}: ${ctx.sleep}\n\nروتین کوتاه و ثابت شب معمولاً بهتر از حرف زیاد جواب می‌دهد.`;
+    if (intent === 'greeting') {
+        return `سلام. من دستیار رشد ${name} هستم و سنش حدود ${ageLabel} است. بپرسید مثلاً چه بخورد، خوابش چطور باشد، دندون درآوردن، واکسن یا نگرانی حرکتی‌اش.`;
     }
-    if (/قد|وزن|صدک/.test(last)) {
+    if (intent === 'thanks') {
+        return `خواهش می‌کنم. هر وقت درباره رشد ${name} سؤال تازه‌ای داشتید همین‌جا بنویسید.`;
+    }
+    if (intent === 'identity') {
+        return `من دستیار رشد تات‌کیدز برای ${name} هستم. بر اساس سن ${ageLabel} درباره غذا، خواب، حرکت، گفتار و نگرانی‌های رایج راهنمایی آموزشی می‌دهم؛ تشخیص پزشکی نمی‌دهم.`;
+    }
+    if (intent === 'teeth') {
+        return withDisclaimer(`درآوردن دندان زمان ثابتی ندارد و برای ${name} در ${ageLabel} دیر یا زود بودنش به‌تنهایی تأخیر رشد نیست. لثه متورم، بی‌قراری و drooling شایع است. لثه را با پارچه تمیز سرد آرام کنید، دارو را بدون نظر پزشک شروع نکنید و اگر تب بالا، بی‌حالی یا امتناع از مایعات دیدید به پزشک مراجعه کنید.`);
+    }
+    if (intent === 'fever') {
+        return withDisclaimer(`تب را با دماسنج اندازه بگیرید. برای ${name} اگر حال عمومی بد، تنفس سخت، تشنج، جوش غیرعادی یا تب طول‌کشیده دیدید زود به پزشک مراجعه کنید. این چت جای معاینه تب را نمی‌گیرد.`);
+    }
+    if (intent === 'vaccine') {
+        return withDisclaimer(`برنامه واکسن ${name} را از صفحه واکسیناسیون همین سامانه ببینید. تب خفیف یا بی‌قراری بعد تزریق شایع است؛ ورم شدید، تنگی نفس یا حال خیلی بد را فوری به پزشک بگویید.`);
+    }
+    if (intent === 'potty') {
+        return withDisclaimer(`آمادگی دستشویی بیشتر به نشانه کودک بستگی دارد تا یک سن دقیق. برای ${name} در ${ageLabel} اجبار و تنبیه معمولاً نتیجه معکوس دارد. وقتی خودش علاقه نشان داد لگن را معرفی کنید و تصادف را عادی بگیرید.`);
+    }
+    if (intent === 'growth') {
         if (!ctx.heightLabel && !ctx.weightLabel) {
-            return `قد و وزن ${name} هنوز در نمودار رشد ثبت نشده. با ثبت اندازه‌گیری می‌توانم بگویم در محدوده طبیعی هست یا نه. این جمع‌بندی تشخیص پزشکی نیست.`;
+            return withDisclaimer(`قد و وزن ${name} هنوز در نمودار رشد ثبت نشده. یک اندازه‌گیری ثبت کنید تا بگویم آخرین عدد چیست. از یک عدد به‌تنهایی نتیجه پزشکی گرفته نمی‌شود.`);
         }
         const height = ctx.heightLabel || 'قد هنوز ثبت نشده';
         const weight = ctx.weightLabel || 'وزن هنوز ثبت نشده';
-        return `آخرین اندازه‌گیری ${name}: ${height} و ${weight}. از یک عدد به‌تنهایی نتیجه پزشکی گرفته نمی‌شود؛ نمودار کامل را در همین صفحه ببینید.`;
+        return withDisclaimer(`آخرین اندازه‌گیری ${name}: ${height} و ${weight}. روند چند نقطه روی نمودار مهم‌تر از یک عدد است؛ تفسیر نهایی با پزشک کودک است.`);
     }
-    return analysisToChatReply(analyzeConcernLocal(child, last));
+    if (intent === 'food') {
+        const overview = ctx.nutrition || defaultFoodAdvice(months);
+        return withDisclaimer(`برای ${name} در ${ageLabel}: ${overview}\nاگر آلرژی یا بیماری ثبت شده، هر تغییر غذا را با پزشک هماهنگ کنید.`);
+    }
+    if (intent === 'sleep') {
+        const overview = ctx.sleep || defaultSleepAdvice(months);
+        return withDisclaimer(`خواب این سن برای ${name}: ${overview}\nروتین کوتاه و ثابت شب معمولاً بهتر از حرف زیاد جواب می‌دهد.`);
+    }
+    if (intent === 'play') {
+        return withDisclaimer(`برای ${name} در ${ageLabel} بازی کوتاه حضوری بهتر از صفحه نمایش است: چند دقیقه روی زمین، کتاب، صدا درآوردن یا هل دادن اسباب ایمن. فعالیت‌های امروز همین صفحه را هم می‌توانید استفاده کنید.`);
+    }
+    if (intent === 'offtopic') {
+        return `من فقط درباره رشد و مراقبت ${name} جواب می‌دهم. از غذا، خواب، قد و وزن، دندان، واکسن یا نگرانی رشد بپرسید.`;
+    }
+    if (intent === 'motor' || intent === 'speech' || intent === 'behavior') {
+        return analysisToChatReply(analyzeConcernLocal(child, last));
+    }
+    return withDisclaimer(`برای ${name} در حدود ${ageLabel}، رشد هر کودک ریتم خودش را دارد. سؤال را دقیق‌تر بپرسید: غذا، خواب، راه رفتن، حرف زدن، دندان یا قد و وزن. اگر نشانه خطر (تب بالا، تنگی نفس، تشنج، از دست رفتن مهارت) دیدید به پزشک مراجعه کنید.`);
 }
 
 async function chatGrowthAssistant(child, messages, context) {
@@ -232,7 +320,7 @@ async function chatGrowthAssistant(child, messages, context) {
                 messages: [
                     {
                         role: 'system',
-                        content: 'شما دستیار رشد تات‌کیدز هستید. کوتاه، آرام و فارسی جواب بدهید. تشخیص بیماری ندهید. اگر نشانه خطرناک بود به پزشک ارجاع دهید. از سن و وضعیت کودک در پاسخ استفاده کنید.'
+                        content: 'شما دستیار رشد تات‌کیدز هستید. فقط به همان سؤالی که کاربر پرسیده جواب بدهید؛ اگر درباره دندان، تب، واکسن، غذا یا خواب پرسید درباره راه رفتن حرف نزنید. کوتاه، آرام و فارسی بنویسید. از نام و سن کودک استفاده کنید. تشخیص بیماری ندهید. نشانه خطرناک را به پزشک ارجاع دهید. موضوع خارج از رشد کودک را مؤدبانه به رشد، غذا، خواب یا نگرانی برگردانید.'
                     },
                     {
                         role: 'user',
@@ -311,6 +399,7 @@ module.exports = {
     TRIAGE,
     analyzeConcernLocal,
     analyzeConcernWithModel,
+    classifyChatIntent,
     chatGrowthAssistantLocal,
     chatGrowthAssistant
 };
