@@ -5,10 +5,13 @@ import { faArrowRight, faCartPlus, faThumbsDown, faThumbsUp } from '@fortawesome
 import MainNavbar from './MainNavbar';
 import Footer from './Footer';
 import { addToCart, formatPrice } from '../utils/cart';
+import { isLoggedIn, loginUrl } from '../api';
 import { ageBandLabel, displayCommentAuthor, formatRating, stars } from '../utils/shop';
 import ProductImageGallery from './ProductImageGallery';
+import ShopProductCard from './ShopProductCard';
 import './ProductDetailPage.css';
 import './ShopWorld.css';
+import './ShopPage.css';
 
 const API = '';
 const TABS = [
@@ -85,6 +88,10 @@ const ProductDetailPage = () => {
     };
 
     const handleVote = async (commentId, vote) => {
+        if (!isLoggedIn()) {
+            history.push(loginUrl(`/shop/${id}`));
+            return;
+        }
         const current = comments.find((item) => item.id === commentId);
         const nextVote = current && current.myVote === vote ? 0 : vote;
         const res = await fetch(`${API}/api/shop/comments/${commentId}/vote`, {
@@ -147,13 +154,11 @@ const ProductDetailPage = () => {
                                         ))}
                                     </div>
                                 )}
-                                {product.ratingCount > 0 && (
-                                    <p className="shop-rating">
-                                        <strong className="shop-rating-num">{formatRating(product.ratingAvg)}</strong>
-                                        {stars(product.ratingAvg)}
-                                        <span> ({product.ratingCount})</span>
-                                    </p>
-                                )}
+                                <p className="shop-rating">
+                                    <strong className="shop-rating-num">{formatRating(product.ratingAvg || 0)}</strong>
+                                    {stars(product.ratingAvg || 0)}
+                                    <span> ({product.ratingCount || 0} امتیاز)</span>
+                                </p>
                                 <p className="product-detail-price">
                                     {formatPrice(salePrice)}
                                     {compareAt > salePrice && (
@@ -271,6 +276,7 @@ const ProductDetailPage = () => {
                             {tab === 'reviews' && (
                                 <div className="product-tab-panel product-comments">
                                     <h2>نظر کاربران</h2>
+                                    {isLoggedIn() ? (
                                     <form
                                         onSubmit={async (e) => {
                                             e.preventDefault();
@@ -311,6 +317,11 @@ const ProductDetailPage = () => {
                                         />
                                         <button type="submit">ثبت نظر</button>
                                     </form>
+                                    ) : (
+                                        <p>
+                                            <Link to={loginUrl(`/shop/${id}`)}>برای ثبت نظر و امتیاز وارد شوید</Link>
+                                        </p>
+                                    )}
                                     {comments.length === 0 ? (
                                         <p>هنوز نظر تأیید‌شده‌ای ثبت نشده است.</p>
                                     ) : (
@@ -351,6 +362,19 @@ const ProductDetailPage = () => {
                                 </div>
                             )}
                         </section>
+
+                        {(product.related || []).length > 0 && (
+                            <section className="product-related animate-fade-up">
+                                <div className="shop-section-title">
+                                    <h2>کالای مشابه</h2>
+                                </div>
+                                <div className="shop-grid product-related-grid">
+                                    {product.related.map((item, index) => (
+                                        <ShopProductCard key={item.id} product={item} index={index} />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
                     </>
                 )}
             </main>

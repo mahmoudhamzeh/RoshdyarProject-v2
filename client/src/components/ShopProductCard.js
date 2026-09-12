@@ -25,13 +25,11 @@ const ShopProductCard = ({ product, index = 0 }) => (
         <div className="shop-product-body">
             {product.ageBand && <span className="shop-age-badge">{ageBandLabel(product.ageBand)}</span>}
             <h2>{product.name}</h2>
-            {product.ratingCount > 0 && (
-                <div className="shop-rating" aria-label={`${formatRating(product.ratingAvg)} از ۵`}>
-                    <strong className="shop-rating-num">{formatRating(product.ratingAvg)}</strong>
-                    {stars(product.ratingAvg)}
-                    <span> ({product.ratingCount})</span>
-                </div>
-            )}
+            <div className="shop-rating" aria-label={`${formatRating(product.ratingAvg || 0)} از ۵`}>
+                <strong className="shop-rating-num">{formatRating(product.ratingAvg || 0)}</strong>
+                {stars(product.ratingAvg || 0)}
+                <span> ({product.ratingCount || 0})</span>
+            </div>
             <p>{product.description}</p>
             <div className="shop-chip-row">
                 {(product.skills || []).slice(0, 2).map((skill) => (

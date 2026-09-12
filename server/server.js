@@ -1959,13 +1959,36 @@ app.get('/api/shop/products', async (req, res) => {
     res.json(paginateList(await store.products.listActive(filters), req));
 });
 
+async function relatedShopProducts(product, limit = 8) {
+    const seen = new Set([Number(product.id)]);
+    const out = [];
+    const push = (items) => {
+        for (const item of items || []) {
+            if (seen.has(Number(item.id))) continue;
+            seen.add(Number(item.id));
+            out.push(item);
+            if (out.length >= limit) return true;
+        }
+        return false;
+    };
+    if (product.category) {
+        if (push(await store.products.listActive({ category: product.category, sort: 'rating' }))) return out;
+    }
+    if (product.ageBand) {
+        if (push(await store.products.listActive({ age: product.ageBand, sort: 'popular' }))) return out;
+    }
+    push(await store.products.listActive({ sort: 'popular' }));
+    return out;
+}
+
 app.get('/api/shop/products/:id', async (req, res) => {
     const product = await store.products.getById(req.params.id);
     if (!product || product.active === false) {
         return res.status(404).json({ message: 'محصول یافت نشد' });
     }
     const offers = await store.shop.listOffers(product.id);
-    res.json({ ...product, offers });
+    const related = await relatedShopProducts(product);
+    res.json({ ...product, offers, related });
 });
 
 app.get('/api/admin/products', isAdmin, async (req, res) => {

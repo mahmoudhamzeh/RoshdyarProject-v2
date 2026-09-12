@@ -110,6 +110,10 @@ async function run() {
         assert.strictEqual(products.status, 200);
         assert.ok(products.data.length >= 1);
         const product = products.data[0];
+        const productDetail = await request('GET', `/api/shop/products/${product.id}`);
+        assert.strictEqual(productDetail.status, 200);
+        assert.ok(Array.isArray(productDetail.data.related), 'product detail should include similar products');
+        assert.ok(!productDetail.data.related.some((item) => Number(item.id) === Number(product.id)));
         const stockBefore = product.stock;
         assert.ok(product.offerId || product.vendorName, 'catalog product should carry offer/vendor');
 

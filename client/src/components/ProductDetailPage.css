@@ -480,6 +480,14 @@
   padding: 0.75rem 0 0.15rem;
 }
 
+.product-related {
+  margin-top: 2rem;
+}
+
+.product-related-grid {
+  margin-top: 0.75rem;
+}
+
 @media (max-width: 768px) {
   .product-detail {
     grid-template-columns: 1fr;
